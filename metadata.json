@@ -1,0 +1,6 @@
+{
+  "name": "GiniBen & Partners GEOSERVICES LTD",
+  "description": "Precision Beneath the Surface. Integrated geoscience, mineral exploration, environmental and engineering solutions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
