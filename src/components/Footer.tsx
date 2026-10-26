@@ -200,6 +200,7 @@ export const Footer: React.FC<FooterProps> = ({
               <div className="flex items-start gap-2 text-stone-600">
                 <Mail className="w-3.5 h-3.5 text-[#16a34a] shrink-0 mt-0.5" />
                 <div className="space-y-0.5">
+                  <a href="mailto:info@ginibengeoservices.com" className="block text-stone-800 font-semibold hover:text-[#16a34a] transition-colors">info@ginibengeoservices.com</a>
                   <a href="mailto:benukwutevinor@yahoo.com" className="block hover:text-[#16a34a] transition-colors">benukwutevinor@yahoo.com</a>
                   <a href="mailto:gpg1.geoservices@gmail.com" className="block hover:text-[#16a34a] transition-colors">gpg1.geoservices@gmail.com</a>
                 </div>

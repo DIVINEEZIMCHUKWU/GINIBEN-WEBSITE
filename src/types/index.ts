@@ -143,5 +143,6 @@ export interface ProjectVideo {
   isVertical?: boolean;
   orientation?: 'vertical' | 'horizontal';
   showOnHomepage?: boolean;
+  showOnProjects?: boolean;
   showOnGallery?: boolean;
 }

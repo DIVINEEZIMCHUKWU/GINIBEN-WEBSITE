@@ -76,8 +76,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     };
 
     try {
-      // 1. Transmit consultation to FormSubmit for direct delivery to benukwutevinor@yahoo.com and gpg1.geoservices@gmail.com
-      fetch('https://formsubmit.co/ajax/benukwutevinor@yahoo.com', {
+      // 1. Transmit consultation to FormSubmit for direct delivery to info@ginibengeoservices.com (forwarded to benukwutevinor@yahoo.com and gpg1.geoservices@gmail.com)
+      fetch('https://formsubmit.co/ajax/info@ginibengeoservices.com', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         },
         body: JSON.stringify({
           _subject: `New Technical Consultation: ${formData.serviceOfInterest} [${generatedRef}]`,
-          _cc: 'gpg1.geoservices@gmail.com',
+          _cc: 'benukwutevinor@yahoo.com,gpg1.geoservices@gmail.com',
           _template: 'table',
           'Reference Number': generatedRef,
           'Full Name': formData.fullName.trim(),
@@ -223,6 +223,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       Official Email Desks
                     </span>
                     <div className="space-y-0.5 text-xs font-semibold text-stone-800">
+                      <a href="mailto:info@ginibengeoservices.com" className="block text-[#16a34a] hover:underline transition-colors font-bold">
+                        info@ginibengeoservices.com
+                      </a>
                       <a href="mailto:benukwutevinor@yahoo.com" className="block hover:text-[#16a34a] transition-colors">
                         benukwutevinor@yahoo.com
                       </a>

@@ -14,7 +14,7 @@ export const COMPANY_CONFIG: CompanyConfig = {
   linkedinUrl: "https://www.linkedin.com/company/giniben-geoservices/",
   phone: "+234 803 625 1405",
   whatsappNumber: "+234 803 625 1405",
-  email: "benukwutevinor@yahoo.com / gpg1.geoservices@gmail.com",
+  email: "info@ginibengeoservices.com / benukwutevinor@yahoo.com / gpg1.geoservices@gmail.com",
   address: "2 Leck Avenue, Adjacent State Police Headquarters GRA, Enugu, Enugu State, Nigeria",
   otherAddress: "#3 Nnamani Street, Trans Ekulu, Enugu",
   logoUrl: "https://i.ibb.co/YzZgSDd/logo.jpg",
@@ -1693,7 +1693,7 @@ export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
     title: "Founder & Lead Consultant",
     role: "Founder & Lead Consultant",
     credentials: "PhD Applied Geophysics, COMEG, NMGS, IAIA certified",
-    experienceYears: "COMEG Certified Lead Consultant",
+    experienceYears: "25+ years of professional practice",
     affiliations: [
       "Council of Mining Engineers and Geoscientists (COMEG)",
       "Nigerian Mining and Geosciences Society (NMGS)",
@@ -1710,7 +1710,7 @@ export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
     title: "Principal Partner",
     role: "Principal Partner",
     credentials: "Ph.D, Principal Partner, Groundwater & Mineral Resources",
-    experienceYears: "Groundwater & Mineral Resources Partner",
+    experienceYears: "20+ years of professional practice",
     affiliations: [
       "Principal Partner, Applied Geophysics & Groundwater Resources",
       "COMEG Registered Geoscientist"
@@ -1827,33 +1827,4 @@ export const INITIAL_ARTICLES: ArticleItem[] = [
   }
 ];
 
-export const INITIAL_ENQUIRIES: ConsultationEnquiry[] = [
-  {
-    id: "enq-01",
-    referenceNumber: "GB-2026-8492",
-    fullName: "Chief Engr. D. Adeleke",
-    company: "Westland Infrastructure Consortium",
-    email: "d.adeleke@westland-infra.example.com",
-    phone: "+2348030001122",
-    serviceOfInterest: "Geotechnical & Engineering Support",
-    projectLocation: "Ogun Industrial Hub",
-    subject: "Subsurface Investigation for Heavy Bridge Foundation",
-    message: "We require borehole drilling, SPT profiling, and rock quality designation across 8 pier locations along our proposed access corridor.",
-    status: "reviewed",
-    createdAt: "2026-10-21T09:30:00Z"
-  },
-  {
-    id: "enq-02",
-    referenceNumber: "GB-2026-9134",
-    fullName: "Marcus Van Der Bilt",
-    company: "Sahara Mineral Exploration Partners",
-    email: "marcus@saharaminerals.example.com",
-    phone: "+2348123456789",
-    serviceOfInterest: "Mineral Resources & Exploration",
-    projectLocation: "Niger State Concession Area",
-    subject: "2D Resistivity & Induced Polarization Survey",
-    message: "Looking to contract your team for a 14-line kilometer IP and resistivity survey to delineate disseminated sulfide targets on our gold exploration lease.",
-    status: "new",
-    createdAt: "2026-10-23T07:15:00Z"
-  }
-];
+export const INITIAL_ENQUIRIES: ConsultationEnquiry[] = [];

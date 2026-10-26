@@ -1,27 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
-  X, LayoutDashboard, MessageSquare, Briefcase, Image as ImageIcon, 
-  Layers, Users, Settings, Server, Check, Trash2, 
-  Plus, Edit, Eye, EyeOff, ShieldCheck, Database, Copy, ExternalLink, 
-  Film, Lock, KeyRound, Mail, Phone, Globe, CheckCircle2, AlertCircle, RefreshCw 
+  X, LayoutDashboard, MessageSquare, Image as ImageIcon, 
+  Users, Settings, Check, Trash2, Plus, Edit, Eye, EyeOff, 
+  ShieldCheck, Film, Lock, KeyRound, Mail, Phone, 
+  Globe, CheckCircle2, AlertCircle, Home, Upload, Moon, Sun, 
+  Camera, Video, Database
 } from 'lucide-react';
 import { 
-  CompanyConfig, ConsultationEnquiry, ProjectItem, MediaItem, 
-  ServiceItem, TeamMember, ArticleItem, ProjectVideo, GalleryCategory 
+  CompanyConfig, ConsultationEnquiry, MediaItem, 
+  TeamMember, ProjectVideo, GalleryCategory 
 } from '../types';
 
 interface AdminDashboardProps {
   isOpen: boolean;
   onClose: () => void;
+  onGoToHomepage: () => void;
   company: CompanyConfig;
   onUpdateCompany: (updated: CompanyConfig) => void;
   enquiries: ConsultationEnquiry[];
   onUpdateEnquiryStatus: (id: string, newStatus: 'new' | 'reviewed' | 'resolved') => void;
   onDeleteEnquiry: (id: string) => void;
-  projects: ProjectItem[];
-  onAddProject: (project: ProjectItem) => void;
-  onUpdateProject?: (project: ProjectItem) => void;
-  onDeleteProject: (id: string) => void;
+  onClearAllEnquiries?: () => void;
   galleryImages: MediaItem[];
   onAddGalleryImage: (image: MediaItem) => void;
   onUpdateGalleryImage: (image: MediaItem) => void;
@@ -30,24 +29,22 @@ interface AdminDashboardProps {
   onAddVideo: (video: ProjectVideo) => void;
   onUpdateVideo: (video: ProjectVideo) => void;
   onDeleteVideo: (id: string) => void;
-  services: ServiceItem[];
   team: TeamMember[];
-  articles: ArticleItem[];
-  onAddArticle: (article: ArticleItem) => void;
+  onAddTeamMember?: (member: TeamMember) => void;
+  onUpdateTeamMember?: (member: TeamMember) => void;
+  onDeleteTeamMember?: (id: string) => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   isOpen,
   onClose,
+  onGoToHomepage,
   company,
   onUpdateCompany,
   enquiries,
   onUpdateEnquiryStatus,
   onDeleteEnquiry,
-  projects,
-  onAddProject,
-  onUpdateProject,
-  onDeleteProject,
+  onClearAllEnquiries,
   galleryImages,
   onAddGalleryImage,
   onUpdateGalleryImage,
@@ -56,12 +53,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onAddVideo,
   onUpdateVideo,
   onDeleteVideo,
-  services,
-  team
+  team,
+  onAddTeamMember,
+  onUpdateTeamMember,
+  onDeleteTeamMember
 }) => {
   if (!isOpen) return null;
 
-  // Authentication State
+  // Theme State: 'white' (default pure white) vs 'carton' (rich carton brown darkmode)
+  const [adminTheme, setAdminTheme] = useState<'white' | 'carton'>(() => {
+    return (localStorage.getItem('giniben_admin_theme') as 'white' | 'carton') || 'white';
+  });
+
+  const toggleAdminTheme = () => {
+    const nextTheme = adminTheme === 'white' ? 'carton' : 'white';
+    setAdminTheme(nextTheme);
+    localStorage.setItem('giniben_admin_theme', nextTheme);
+  };
+
+  const isCarton = adminTheme === 'carton';
+
+  // Authentication State (master password defaults to Giniben123)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return sessionStorage.getItem('giniben_admin_session') === 'true';
   });
@@ -69,12 +81,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState(false);
 
-  // Active Tab
+  // Active Tab: Focused strictly on necessary management sections
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'images' | 'videos' | 'projects' | 'enquiries' | 'services' | 'team' | 'settings' | 'cpanel'
+    'overview' | 'images' | 'videos' | 'team' | 'enquiries' | 'settings'
   >('overview');
 
-  // Image Filter & Modal State
+  // File Input References for Direct Device/Gallery Uploads
+  const imageFileInputRef = useRef<HTMLInputElement>(null);
+  const videoFileInputRef = useRef<HTMLInputElement>(null);
+  const videoThumbFileInputRef = useRef<HTMLInputElement>(null);
+  const teamPhotoFileInputRef = useRef<HTMLInputElement>(null);
+
+  // -------------------------------------------------------------
+  // IMAGE MODAL & FORM STATE
+  // -------------------------------------------------------------
   const [imagePlacementFilter, setImagePlacementFilter] = useState<'all' | 'homepage' | 'projects' | 'gallery'>('all');
   const [imageSearch, setImageSearch] = useState('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -90,7 +110,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     isHero: false
   });
 
-  // Video Filter & Modal State
+  // -------------------------------------------------------------
+  // VIDEO MODAL & FORM STATE (with showOnProjects option)
+  // -------------------------------------------------------------
   const [videoSearch, setVideoSearch] = useState('');
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState<ProjectVideo | null>(null);
@@ -102,36 +124,54 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     thumbnail: '',
     description: '',
     showOnHomepage: true,
+    showOnProjects: true,
     showOnGallery: true
   });
 
-  // Project Modal State
-  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<ProjectItem | null>(null);
-  const [projectForm, setProjectForm] = useState({
+  // -------------------------------------------------------------
+  // TEAM MEMBER MODAL & FORM STATE
+  // -------------------------------------------------------------
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [editingTeamMember, setEditingTeamMember] = useState<TeamMember | null>(null);
+  const [teamForm, setTeamForm] = useState({
+    name: '',
     title: '',
-    category: 'Hydrogeology & Water',
-    location: '',
-    summary: '',
-    methodology: ''
+    role: '',
+    credentials: '',
+    experienceYears: '',
+    bio: '',
+    image: '',
+    affiliations: ''
   });
 
-  // Settings State: Password Change
+  // -------------------------------------------------------------
+  // SETTINGS STATE: PASSWORD & COORDINATES
+  // -------------------------------------------------------------
   const [currentPass, setCurrentPass] = useState('');
   const [newPass, setNewPass] = useState('');
   const [confirmPass, setConfirmPass] = useState('');
   const [passMessage, setPassMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Settings State: Company Coordinates
   const [phoneInput, setPhoneInput] = useState(company.phone);
   const [whatsappInput, setWhatsappInput] = useState(company.whatsappNumber);
   const [emailInput, setEmailInput] = useState(company.email);
   const [facebookInput, setFacebookInput] = useState(company.facebookUrl);
   const [settingsSaved, setSettingsSaved] = useState(false);
 
-  // Email Test Status
-  const [emailTestStatus, setEmailTestStatus] = useState<string | null>(null);
-  const [copiedSql, setCopiedSql] = useState(false);
+  // -------------------------------------------------------------
+  // FILE READING HELPERS (DEVICE / PHONE GALLERY UPLOAD)
+  // -------------------------------------------------------------
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, onLoaded: (dataUrl: string) => void) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (typeof event.target?.result === 'string') {
+        onLoaded(event.target.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   // -------------------------------------------------------------
   // AUTHENTICATION LOGIC
@@ -183,7 +223,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   // -------------------------------------------------------------
-  // IMAGE CRUD HANDLERS
+  // IMAGE CRUD
   // -------------------------------------------------------------
   const handleOpenAddImage = () => {
     setEditingImage(null);
@@ -255,16 +295,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   // -------------------------------------------------------------
-  // VIDEO CRUD HANDLERS
+  // VIDEO CRUD
   // -------------------------------------------------------------
-  const formatDriveUrl = (inputUrl: string) => {
-    const trimmed = inputUrl.trim();
-    if (trimmed.includes('drive.google.com') && trimmed.includes('/view')) {
-      return trimmed.replace(/\/view(\?.*)?$/, '/preview');
-    }
-    return trimmed;
-  };
-
   const handleOpenAddVideo = () => {
     setEditingVideo(null);
     setVideoForm({
@@ -274,6 +306,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       thumbnail: '',
       description: '',
       showOnHomepage: true,
+      showOnProjects: true,
       showOnGallery: true
     });
     setIsVideoModalOpen(true);
@@ -284,10 +317,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setVideoForm({
       title: vid.title,
       subtitle: vid.subtitle,
-      driveUrl: vid.drivePreviewUrl,
+      driveUrl: vid.driveViewUrl || vid.drivePreviewUrl,
       thumbnail: vid.thumbnail,
       description: vid.description,
       showOnHomepage: vid.showOnHomepage !== false,
+      showOnProjects: vid.showOnProjects !== false,
       showOnGallery: vid.showOnGallery !== false
     });
     setIsVideoModalOpen(true);
@@ -297,37 +331,44 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     e.preventDefault();
     if (!videoForm.title.trim() || !videoForm.driveUrl.trim()) return;
 
-    const formattedPreview = formatDriveUrl(videoForm.driveUrl);
-    const formattedView = formattedPreview.replace('/preview', '/view');
+    let previewUrl = videoForm.driveUrl.trim();
+    if (previewUrl.includes('drive.google.com/file/d/')) {
+      const match = previewUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        previewUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+      }
+    }
 
     if (editingVideo) {
       const updated: ProjectVideo = {
         ...editingVideo,
         title: videoForm.title.trim(),
-        subtitle: videoForm.subtitle.trim() || 'Subsurface Operations Record',
-        driveViewUrl: formattedView,
-        drivePreviewUrl: formattedPreview,
+        subtitle: videoForm.subtitle.trim() || 'Verified Subsurface Fieldwork Operation',
+        driveViewUrl: videoForm.driveUrl.trim(),
+        drivePreviewUrl: previewUrl,
         thumbnail: videoForm.thumbnail.trim() || editingVideo.thumbnail,
-        description: videoForm.description.trim() || editingVideo.description,
-        isVertical: true,
-        orientation: 'vertical',
+        description: videoForm.description.trim(),
         showOnHomepage: videoForm.showOnHomepage,
-        showOnGallery: videoForm.showOnGallery
+        showOnProjects: videoForm.showOnProjects,
+        showOnGallery: videoForm.showOnGallery,
+        isVertical: true,
+        orientation: 'vertical'
       };
       onUpdateVideo(updated);
     } else {
       const newVid: ProjectVideo = {
         id: 'vid-' + Date.now(),
         title: videoForm.title.trim(),
-        subtitle: videoForm.subtitle.trim() || 'Subsurface Operations Record',
-        driveViewUrl: formattedView,
-        drivePreviewUrl: formattedPreview,
-        thumbnail: videoForm.thumbnail.trim() || 'https://i.ibb.co/fdkK6DqF/Whats-App-Image-2026-10-23-at-9-04-53-PM.jpg',
-        description: videoForm.description.trim() || 'Operational fieldwork record documented by GiniBen personnel.',
-        isVertical: true,
-        orientation: 'vertical',
+        subtitle: videoForm.subtitle.trim() || 'Verified Subsurface Fieldwork Operation',
+        driveViewUrl: videoForm.driveUrl.trim(),
+        drivePreviewUrl: previewUrl,
+        thumbnail: videoForm.thumbnail.trim() || galleryImages[0]?.url || 'https://i.ibb.co/fdkK6DqF/Whats-App-Image-2026-10-23-at-9-04-53-PM.jpg',
+        description: videoForm.description.trim() || 'Direct operational capture of field engineering and data acquisition.',
         showOnHomepage: videoForm.showOnHomepage,
-        showOnGallery: videoForm.showOnGallery
+        showOnProjects: videoForm.showOnProjects,
+        showOnGallery: videoForm.showOnGallery,
+        isVertical: true,
+        orientation: 'vertical'
       };
       onAddVideo(newVid);
     }
@@ -337,59 +378,78 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   // -------------------------------------------------------------
-  // PROJECT CRUD HANDLERS
+  // TEAM MEMBER CRUD
   // -------------------------------------------------------------
-  const handleOpenAddProject = () => {
-    setEditingProject(null);
-    setProjectForm({
+  const handleOpenAddTeamMember = () => {
+    setEditingTeamMember(null);
+    setTeamForm({
+      name: '',
       title: '',
-      category: 'Hydrogeology & Water',
-      location: '',
-      summary: '',
-      methodology: ''
+      role: '',
+      credentials: '',
+      experienceYears: '15+ years of professional practice',
+      bio: '',
+      image: '',
+      affiliations: 'COMEG, NMGS'
     });
-    setIsProjectModalOpen(true);
+    setIsTeamModalOpen(true);
   };
 
-  const handleSaveProject = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!projectForm.title.trim()) return;
+  const handleOpenEditTeamMember = (member: TeamMember) => {
+    setEditingTeamMember(member);
+    setTeamForm({
+      name: member.name,
+      title: member.title,
+      role: member.role || member.title,
+      credentials: member.credentials || '',
+      experienceYears: member.experienceYears || '',
+      bio: member.bio,
+      image: member.image,
+      affiliations: member.affiliations ? member.affiliations.join(', ') : ''
+    });
+    setIsTeamModalOpen(true);
+  };
 
-    if (editingProject && onUpdateProject) {
-      const updated: ProjectItem = {
-        ...editingProject,
-        title: projectForm.title.trim(),
-        category: projectForm.category,
-        location: projectForm.location.trim() || 'Nigeria Field Site',
-        summary: projectForm.summary.trim() || 'Integrated field investigation executed by GiniBen personnel.',
-        methodology: projectForm.methodology.trim() || editingProject.methodology
+  const handleSaveTeamMember = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!teamForm.name.trim() || !teamForm.title.trim()) return;
+
+    const parsedAffiliations = teamForm.affiliations
+      ? teamForm.affiliations.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+
+    if (editingTeamMember && onUpdateTeamMember) {
+      const updated: TeamMember = {
+        ...editingTeamMember,
+        name: teamForm.name.trim(),
+        title: teamForm.title.trim(),
+        role: teamForm.role.trim() || teamForm.title.trim(),
+        credentials: teamForm.credentials.trim(),
+        experienceYears: teamForm.experienceYears.trim(),
+        bio: teamForm.bio.trim() || 'Professional geoscience team member delivering high standard technical services.',
+        image: teamForm.image.trim() || editingTeamMember.image,
+        affiliations: parsedAffiliations
       };
-      onUpdateProject(updated);
-    } else {
-      const newProj: ProjectItem = {
-        id: 'prj-' + Date.now(),
-        slug: projectForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        title: projectForm.title.trim(),
-        category: projectForm.category,
-        categoryKey: 'geology',
-        location: projectForm.location.trim() || 'Nigeria Field Site',
-        date: 'Field Assignment',
-        coverImage: galleryImages[0]?.url || 'https://i.ibb.co/mrQLCJTb/Whats-App-Image-2026-10-23-at-6-39-30-PM-1.jpg',
-        summary: projectForm.summary.trim() || 'Integrated field investigation executed by GiniBen personnel.',
-        methodology: projectForm.methodology.trim() || 'Deployment of specialized geophysical profiling and continuous geological logging.',
-        keyDeliverables: [
-          'Geological cross-sections and survey logs',
-          'Technical report signed by COMEG Lead Consultant'
-        ],
-        galleryImages: [galleryImages[0]?.url, galleryImages[1]?.url].filter(Boolean),
-        featured: true,
-        status: 'Published'
+      onUpdateTeamMember(updated);
+    } else if (onAddTeamMember) {
+      const newMember: TeamMember = {
+        id: 'team-' + Date.now(),
+        name: teamForm.name.trim(),
+        title: teamForm.title.trim(),
+        role: teamForm.role.trim() || teamForm.title.trim(),
+        credentials: teamForm.credentials.trim(),
+        experienceYears: teamForm.experienceYears.trim(),
+        bio: teamForm.bio.trim() || 'Professional geoscience team member delivering high standard technical services.',
+        image: teamForm.image.trim() || 'https://i.ibb.co/zHxFmrmt/Whats-App-Image-2026-10-23-at-9-04-34-PM.jpg',
+        isPlaceholder: false,
+        affiliations: parsedAffiliations,
+        order: team.length + 1
       };
-      onAddProject(newProj);
+      onAddTeamMember(newMember);
     }
 
-    setIsProjectModalOpen(false);
-    setEditingProject(null);
+    setIsTeamModalOpen(false);
+    setEditingTeamMember(null);
   };
 
   // -------------------------------------------------------------
@@ -408,33 +468,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setTimeout(() => setSettingsSaved(false), 2500);
   };
 
-  const handleTriggerTestEmail = async () => {
-    setEmailTestStatus('Transmitting test notification...');
-    try {
-      await fetch('https://formsubmit.co/ajax/benukwutevinor@yahoo.com', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          _subject: 'GiniBen Admin Test Notification',
-          _cc: 'gpg1.geoservices@gmail.com',
-          _template: 'table',
-          'Message': 'This is a test notification from GiniBen Admin Console to confirm email delivery.',
-          'Timestamp': new Date().toLocaleString()
-        })
-      });
-      setEmailTestStatus('Test sent! Please check benukwutevinor@yahoo.com and gpg1.geoservices@gmail.com');
-      setTimeout(() => setEmailTestStatus(null), 5000);
-    } catch {
-      setEmailTestStatus('Transmission simulated. Live network delivery requires internet connectivity.');
-      setTimeout(() => setEmailTestStatus(null), 4000);
-    }
-  };
-
   // -------------------------------------------------------------
-  // FILTERED LISTS
+  // FILTERED DATA
   // -------------------------------------------------------------
   const filteredImages = galleryImages.filter((img) => {
     const matchesSearch = img.title.toLowerCase().includes(imageSearch.toLowerCase()) ||
@@ -453,553 +488,513 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
            vid.description.toLowerCase().includes(videoSearch.toLowerCase());
   });
 
-  // =============================================================
-  // 1. LOGIN GATE VIEW (IF NOT AUTHENTICATED)
-  // =============================================================
+  // -------------------------------------------------------------
+  // STYLING CLASSES (White vs Carton Brown Mode)
+  // -------------------------------------------------------------
+  const themeClasses = {
+    modalOverlay: 'fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm',
+    mainShell: isCarton 
+      ? 'w-full max-w-7xl h-[92vh] max-h-[950px] bg-[#221a14] text-[#f4efe8] rounded-2xl shadow-2xl flex flex-col border border-[#523f2f] overflow-hidden'
+      : 'w-full max-w-7xl h-[92vh] max-h-[950px] bg-white text-stone-900 rounded-2xl shadow-2xl flex flex-col border border-stone-200 overflow-hidden',
+    header: isCarton 
+      ? 'flex items-center justify-between px-6 py-4 border-b border-[#523f2f] bg-[#292019]'
+      : 'flex items-center justify-between px-6 py-4 border-b border-stone-200 bg-white',
+    sidebar: isCarton 
+      ? 'w-64 border-r border-[#523f2f] bg-[#2a211a] p-4 flex flex-col justify-between shrink-0'
+      : 'w-64 border-r border-stone-200 bg-[#faf8f5] p-4 flex flex-col justify-between shrink-0',
+    contentArea: isCarton 
+      ? 'flex-1 bg-[#1e1712] p-6 overflow-y-auto'
+      : 'flex-1 bg-white p-6 overflow-y-auto',
+    card: isCarton 
+      ? 'bg-[#2b221a] border border-[#523f2f] rounded-2xl p-5 shadow-sm'
+      : 'bg-white border border-stone-200 rounded-2xl p-5 shadow-xs',
+    input: isCarton 
+      ? 'w-full px-3.5 py-2.5 rounded-xl bg-[#1a1410] border border-[#5a4635] text-white placeholder-stone-400 focus:outline-none focus:border-[#c2a67e] text-sm'
+      : 'w-full px-3.5 py-2.5 rounded-xl bg-white border border-stone-300 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#16a34a] text-sm',
+    label: isCarton 
+      ? 'text-xs font-mono uppercase tracking-wider text-[#d7cbbe] block mb-1 font-bold'
+      : 'text-xs font-mono uppercase tracking-wider text-stone-600 block mb-1 font-bold',
+    navButtonActive: 'bg-[#16a34a] text-white shadow-md',
+    navButtonInactive: isCarton 
+      ? 'text-[#dfd6cb] hover:bg-[#382c22] hover:text-white'
+      : 'text-stone-700 hover:bg-stone-100 hover:text-stone-900',
+    primaryButton: 'px-4 py-2 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer',
+    secondaryButton: isCarton
+      ? 'px-4 py-2 rounded-xl bg-[#3a2e24] hover:bg-[#48392d] text-white text-xs font-bold border border-[#5a4635] transition-all flex items-center gap-1.5 cursor-pointer'
+      : 'px-4 py-2 rounded-xl bg-white hover:bg-stone-50 text-stone-800 text-xs font-bold border border-stone-300 transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer'
+  };
+
+  // -------------------------------------------------------------
+  // RENDER: LOGIN GATE
+  // -------------------------------------------------------------
   if (!isAuthenticated) {
     return (
-      <div 
-        className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 font-sans"
-        role="dialog"
-        aria-modal="true"
-      >
-        <div className="relative w-full max-w-md bg-[#181512] border border-[#c2a67e]/40 rounded-3xl p-6 sm:p-8 shadow-2xl text-stone-100 space-y-6">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white transition-colors cursor-pointer"
-            aria-label="Close Admin Modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
-          <div className="text-center space-y-2">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#0d9488] mx-auto flex items-center justify-center text-white shadow-lg shadow-[#16a34a]/30 mb-3">
-              <ShieldCheck className="w-8 h-8" />
+      <div className={themeClasses.modalOverlay}>
+        <div className={`w-full max-w-md p-8 rounded-3xl shadow-2xl relative ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border border-[#523f2f]' : 'bg-white text-stone-900 border border-stone-200'}`}>
+          <div className="flex items-center justify-between pb-6 border-b border-stone-200/50 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#16a34a]/15 text-[#16a34a] flex items-center justify-center font-bold">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold text-lg leading-tight">Admin Console</h3>
+                <span className="text-[11px] font-mono text-stone-400">GiniBen & Partners Ltd</span>
+              </div>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold font-display text-white tracking-tight">
-              GiniBen Admin Portal
-            </h2>
-            <p className="text-xs text-stone-400 max-w-xs mx-auto">
-              Global Standard Subsurface & Engineering Content Management Console
-            </p>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleAdminTheme}
+                className="p-2 rounded-lg text-stone-400 hover:text-stone-600 transition-colors"
+                title={`Switch to ${isCarton ? 'White Mode' : 'Carton Brown Darkmode'}`}
+              >
+                {isCarton ? <Sun className="w-4 h-4 text-[#c2a67e]" /> : <Moon className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg text-stone-400 hover:text-stone-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-1.5 text-left">
-              <label className="text-xs font-mono text-[#c2a67e] uppercase font-bold tracking-wider block">
-                Enter Master Password
-              </label>
+            <div>
+              <label className={themeClasses.label}>Master Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={passwordInput}
-                  onChange={(e) => {
-                    setPasswordInput(e.target.value);
-                    setAuthError(false);
-                  }}
-                  placeholder="Enter administrator password..."
-                  className="w-full pl-4 pr-11 py-3 rounded-xl bg-black/50 border border-[#c2a67e]/35 text-white placeholder-stone-500 text-sm focus:outline-none focus:border-[#16a34a] focus:ring-1 focus:ring-[#16a34a] transition-all"
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  placeholder="Enter administrator password"
                   autoFocus
+                  className={themeClasses.input}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-white cursor-pointer p-1"
-                  title={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {authError && (
+                <p className="text-xs text-rose-500 font-medium mt-1.5 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" /> Incorrect password. Please try again.
+                </p>
+              )}
             </div>
 
-            {authError && (
-              <div className="p-3 rounded-xl bg-red-950/70 border border-red-500/40 text-red-200 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-                <span>Invalid password. Please enter the authorized password (Default: Giniben123).</span>
-              </div>
-            )}
+            <div className="pt-2">
+              <button
+                type="submit"
+                className="w-full py-3 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Lock className="w-4 h-4" />
+                <span>Authorize & Enter Console</span>
+              </button>
+            </div>
 
-            <button
-              type="submit"
-              className="w-full py-3.5 px-4 rounded-xl bg-[#16a34a] hover:bg-[#15803d] active:scale-95 text-white font-bold text-sm transition-all shadow-md shadow-[#16a34a]/25 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <KeyRound className="w-4 h-4" />
-              <span>Unlock Admin Dashboard</span>
-            </button>
+            <div className="pt-3 border-t border-stone-200/40 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onGoToHomepage();
+                }}
+                className="text-xs font-medium text-stone-500 hover:text-[#16a34a] transition-colors flex items-center justify-center gap-1.5 mx-auto"
+              >
+                <Home className="w-3.5 h-3.5" />
+                <span>Return to Public Website Homepage</span>
+              </button>
+            </div>
           </form>
-
-          <div className="pt-2 border-t border-[#c2a67e]/20 text-[11px] text-stone-400 text-center space-y-1">
-            <p className="text-stone-300 font-mono">Default master password: <span className="text-[#4ade80] font-bold">Giniben123</span></p>
-            <p className="text-stone-500">You can seamlessly change this password anytime in the Settings tab.</p>
-          </div>
         </div>
       </div>
     );
   }
 
-  // =============================================================
-  // 2. MAIN AUTHENTICATED DASHBOARD VIEW
-  // =============================================================
+  // -------------------------------------------------------------
+  // RENDER: AUTHENTICATED ADMIN DASHBOARD
+  // -------------------------------------------------------------
   return (
-    <div 
-      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 font-sans text-stone-100"
-      role="dialog"
-      aria-modal="true"
-    >
-      <div className="relative w-full max-w-7xl h-[92vh] max-h-[950px] bg-[#14120f] border border-[#c2a67e]/35 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+    <div className={themeClasses.modalOverlay}>
+      <div className={themeClasses.mainShell}>
         
         {/* Top Header Bar */}
-        <header className="h-16 px-4 sm:px-6 border-b border-[#c2a67e]/25 bg-[#1a1612] flex items-center justify-between shrink-0">
+        <header className={themeClasses.header}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#16a34a] flex items-center justify-center text-white font-bold shadow-md shadow-[#16a34a]/20 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-[#16a34a] text-white flex items-center justify-center font-bold shadow-xs">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm sm:text-base font-bold text-white leading-tight">
-                  GiniBen Central Management Console
-                </span>
-                <span className="hidden md:inline px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/40 text-[10px] font-mono text-emerald-300 font-semibold">
-                  Global Standard
+                <h2 className="font-display font-bold text-base leading-tight">Admin Management Console</h2>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#16a34a]/15 text-[#16a34a] font-bold">
+                  GLOBAL STANDARD
                 </span>
               </div>
-              <span className="text-[11px] font-mono text-[#c2a67e] block">
-                Authorized COMEG Lead Administrator Session
-              </span>
+              <span className="text-[11px] font-mono text-stone-400">GiniBen & Partners GEOSERVICES LTD</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* GO TO HOMEPAGE BUTTON */}
             <button
-              onClick={handleLogout}
-              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 hover:text-white border border-white/15 text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Lock Admin Session"
+              onClick={() => {
+                onClose();
+                onGoToHomepage();
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#16a34a]/10 hover:bg-[#16a34a]/20 text-[#16a34a] text-xs font-bold transition-all border border-[#16a34a]/30 cursor-pointer"
+              title="Exit Admin and navigate to Homepage"
             >
-              <Lock className="w-3.5 h-3.5 text-[#c2a67e]" />
-              <span className="hidden sm:inline">Lock Session</span>
+              <Home className="w-4 h-4" />
+              <span>Go to Homepage</span>
             </button>
 
+            {/* WHITE / CARTON BROWN DARKMODE TOGGLE */}
+            <button
+              onClick={toggleAdminTheme}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                isCarton 
+                  ? 'bg-[#382b20] text-[#c2a67e] border-[#5a4736] hover:bg-[#463629]' 
+                  : 'bg-stone-100 text-stone-700 border-stone-200 hover:bg-stone-200'
+              }`}
+              title="Toggle between White mode and Carton Brown Darkmode"
+            >
+              {isCarton ? (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-[#c2a67e]" />
+                  <span>White Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-stone-600" />
+                  <span>Carton Brown</span>
+                </>
+              )}
+            </button>
+
+            {/* LOGOUT */}
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors border border-rose-500/20 cursor-pointer"
+              title="Lock Admin Session"
+            >
+              Lock Console
+            </button>
+
+            {/* CLOSE MODAL */}
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 hover:text-white transition-colors cursor-pointer"
-              aria-label="Close Admin Portal"
+              className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+              title="Close Console"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </header>
 
-        {/* Dashboard Split: Sidebar & Main Workspace */}
+        {/* Body Grid: Sidebar + Active Panel */}
         <div className="flex-1 flex overflow-hidden">
           
-          {/* Left Navigation Sidebar */}
-          <aside className="w-52 sm:w-64 border-r border-[#c2a67e]/20 bg-[#161310] p-3 space-y-1 overflow-y-auto shrink-0 text-xs font-medium">
-            <div className="text-[10px] font-mono uppercase text-[#c2a67e] px-3 py-2 font-bold tracking-wider">
-              Management Modules
+          {/* Navigation Sidebar */}
+          <aside className={themeClasses.sidebar}>
+            <nav className="space-y-1">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'overview' ? themeClasses.navButtonActive : themeClasses.navButtonInactive
+                }`}
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span>Overview & Metrics</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('images')}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'images' ? themeClasses.navButtonActive : themeClasses.navButtonInactive
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <ImageIcon className="w-4 h-4" />
+                  <span>Fieldwork Images</span>
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/15 font-bold">
+                  {galleryImages.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('videos')}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'videos' ? themeClasses.navButtonActive : themeClasses.navButtonInactive
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Film className="w-4 h-4" />
+                  <span>Field Videos</span>
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/15 font-bold">
+                  {videos.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('team')}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'team' ? themeClasses.navButtonActive : themeClasses.navButtonInactive
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Users className="w-4 h-4" />
+                  <span>Personnel & Team</span>
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/15 font-bold">
+                  {team.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('enquiries')}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'enquiries' ? themeClasses.navButtonActive : themeClasses.navButtonInactive
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Client Enquiries</span>
+                </div>
+                {enquiries.length > 0 && (
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#16a34a] text-white font-bold">
+                    {enquiries.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'settings' ? themeClasses.navButtonActive : themeClasses.navButtonInactive
+                }`}
+              >
+                <Settings className="w-4 h-4" />
+                <span>Settings & Password</span>
+              </button>
+            </nav>
+
+            {/* Quick Summary Footnote */}
+            <div className={`p-3 rounded-xl border text-[11px] space-y-1 ${isCarton ? 'bg-[#211913] border-[#483729] text-[#c2a67e]' : 'bg-stone-50 border-stone-200 text-stone-600'}`}>
+              <div className="font-bold flex items-center gap-1.5">
+                <Database className="w-3.5 h-3.5 text-[#16a34a]" />
+                <span>MySQL Ready</span>
+              </div>
+              <div className="text-[10px] leading-relaxed">Direct device upload enabled for images and videos.</div>
             </div>
-
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all text-left cursor-pointer ${
-                activeTab === 'overview'
-                  ? 'bg-[#16a34a] text-white font-bold shadow-md shadow-[#16a34a]/25'
-                  : 'text-stone-300 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <LayoutDashboard className="w-4 h-4" />
-              <span>Overview</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('images')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-left cursor-pointer ${
-                activeTab === 'images'
-                  ? 'bg-[#16a34a] text-white font-bold shadow-md shadow-[#16a34a]/25'
-                  : 'text-stone-300 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <ImageIcon className="w-4 h-4" />
-                <span>Photos & Images</span>
-              </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/60 text-[#86efac]">
-                {galleryImages.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('videos')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-left cursor-pointer ${
-                activeTab === 'videos'
-                  ? 'bg-[#16a34a] text-white font-bold shadow-md shadow-[#16a34a]/25'
-                  : 'text-stone-300 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Film className="w-4 h-4" />
-                <span>Field Videos</span>
-              </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/60 text-[#86efac]">
-                {videos.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('projects')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-left cursor-pointer ${
-                activeTab === 'projects'
-                  ? 'bg-[#16a34a] text-white font-bold shadow-md shadow-[#16a34a]/25'
-                  : 'text-stone-300 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Briefcase className="w-4 h-4" />
-                <span>Projects</span>
-              </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/60 text-[#86efac]">
-                {projects.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('enquiries')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-left cursor-pointer ${
-                activeTab === 'enquiries'
-                  ? 'bg-[#16a34a] text-white font-bold shadow-md shadow-[#16a34a]/25'
-                  : 'text-stone-300 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <MessageSquare className="w-4 h-4" />
-                <span>Client Enquiries</span>
-              </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/60 text-[#86efac]">
-                {enquiries.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('services')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-left cursor-pointer ${
-                activeTab === 'services'
-                  ? 'bg-[#16a34a] text-white font-bold shadow-md shadow-[#16a34a]/25'
-                  : 'text-stone-300 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Layers className="w-4 h-4" />
-                <span>Technical Services</span>
-              </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/60 text-stone-400">
-                {services.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('team')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-left cursor-pointer ${
-                activeTab === 'team'
-                  ? 'bg-[#16a34a] text-white font-bold shadow-md shadow-[#16a34a]/25'
-                  : 'text-stone-300 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Users className="w-4 h-4" />
-                <span>Personnel</span>
-              </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/60 text-stone-400">
-                {team.length}
-              </span>
-            </button>
-
-            <div className="pt-3 border-t border-[#c2a67e]/20 text-[10px] font-mono uppercase text-[#c2a67e] px-3 py-1 font-bold tracking-wider">
-              System & Security
-            </div>
-
-            <button
-              onClick={() => setActiveTab('settings')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all text-left cursor-pointer ${
-                activeTab === 'settings'
-                  ? 'bg-[#c2a67e] text-stone-950 font-bold shadow-md shadow-[#c2a67e]/25'
-                  : 'text-stone-300 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              <span>Settings & Password</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('cpanel')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all text-left cursor-pointer ${
-                activeTab === 'cpanel'
-                  ? 'bg-[#c2a67e] text-stone-950 font-bold shadow-md shadow-[#c2a67e]/25'
-                  : 'text-stone-300 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <Server className="w-4 h-4" />
-              <span>Truehost cPanel Guide</span>
-            </button>
           </aside>
 
-          {/* Main Content Body */}
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[#12100d]">
+          {/* Active Tab Panel */}
+          <main className={themeClasses.contentArea}>
             
-            {/* TAB 1: OVERVIEW */}
+            {/* =======================================================
+                TAB 1: OVERVIEW & METRICS
+                ======================================================= */}
             {activeTab === 'overview' && (
-              <div className="space-y-6 max-w-5xl">
+              <div className="space-y-6">
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-white">
-                    Executive Operational Overview
-                  </h3>
-                  <p className="text-xs sm:text-sm text-stone-400 mt-1">
-                    Direct access to media assets, technical records, and corporate parameters.
-                  </p>
+                  <h3 className="font-display font-extrabold text-2xl tracking-tight">System Status & Resource Metrics</h3>
+                  <p className="text-xs text-stone-400 mt-1">Manage public site content, verified field media, personnel profiles, and client inquiries.</p>
                 </div>
 
-                {/* Metrics Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-5 rounded-2xl bg-white/5 border border-[#c2a67e]/25 space-y-2">
-                    <div className="flex items-center justify-between text-[#c2a67e]">
-                      <span className="text-xs font-mono font-bold uppercase">Photos</span>
-                      <ImageIcon className="w-4 h-4" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className={themeClasses.card}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-mono font-bold text-stone-400 uppercase">Fieldwork Photos</span>
+                      <ImageIcon className="w-4 h-4 text-[#16a34a]" />
                     </div>
-                    <div className="text-2xl sm:text-3xl font-extrabold text-white">
-                      {galleryImages.length}
-                    </div>
-                    <p className="text-[11px] text-stone-400">Fieldwork photographic assets</p>
+                    <div className="text-3xl font-bold font-mono">{galleryImages.length}</div>
+                    <div className="text-[11px] text-stone-500 mt-1">Placed on Home, Projects, and Gallery</div>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-white/5 border border-[#c2a67e]/25 space-y-2">
-                    <div className="flex items-center justify-between text-[#16a34a]">
-                      <span className="text-xs font-mono font-bold uppercase">Field Videos</span>
-                      <Film className="w-4 h-4" />
+                  <div className={themeClasses.card}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-mono font-bold text-stone-400 uppercase">Field Recordings</span>
+                      <Film className="w-4 h-4 text-[#16a34a]" />
                     </div>
-                    <div className="text-2xl sm:text-3xl font-extrabold text-white">
-                      {videos.length}
-                    </div>
-                    <p className="text-[11px] text-stone-400">Portrait HD streaming records</p>
+                    <div className="text-3xl font-bold font-mono">{videos.length}</div>
+                    <div className="text-[11px] text-stone-500 mt-1">Mobile portrait video records</div>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-white/5 border border-[#c2a67e]/25 space-y-2">
-                    <div className="flex items-center justify-between text-blue-400">
-                      <span className="text-xs font-mono font-bold uppercase">Projects</span>
-                      <Briefcase className="w-4 h-4" />
+                  <div className={themeClasses.card}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-mono font-bold text-stone-400 uppercase">Personnel Team</span>
+                      <Users className="w-4 h-4 text-[#16a34a]" />
                     </div>
-                    <div className="text-2xl sm:text-3xl font-extrabold text-white">
-                      {projects.length}
-                    </div>
-                    <p className="text-[11px] text-stone-400">Published industrial case studies</p>
+                    <div className="text-3xl font-bold font-mono">{team.length}</div>
+                    <div className="text-[11px] text-stone-500 mt-1">Geoscientists & technical leaders</div>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-white/5 border border-[#c2a67e]/25 space-y-2">
-                    <div className="flex items-center justify-between text-amber-400">
-                      <span className="text-xs font-mono font-bold uppercase">Enquiries</span>
-                      <MessageSquare className="w-4 h-4" />
+                  <div className={themeClasses.card}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-mono font-bold text-stone-400 uppercase">Client Enquiries</span>
+                      <MessageSquare className="w-4 h-4 text-[#16a34a]" />
                     </div>
-                    <div className="text-2xl sm:text-3xl font-extrabold text-white">
-                      {enquiries.length}
-                    </div>
-                    <p className="text-[11px] text-stone-400">Direct client consultations</p>
+                    <div className="text-3xl font-bold font-mono">{enquiries.length}</div>
+                    <div className="text-[11px] text-stone-500 mt-1">Live inquiries received</div>
                   </div>
                 </div>
 
-                {/* Quick Actions Bar */}
-                <div className="p-6 rounded-2xl bg-[#1b1713] border border-[#c2a67e]/30 space-y-4">
-                  <span className="text-xs font-mono text-[#c2a67e] uppercase font-bold tracking-wider block">
-                    Fast Administrative Actions
-                  </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* Quick Shortcuts */}
+                <div className={themeClasses.card}>
+                  <h4 className="font-bold text-sm mb-4">Quick Management Shortcuts</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <button
                       onClick={handleOpenAddImage}
-                      className="p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                      className={themeClasses.secondaryButton}
                     >
                       <Plus className="w-4 h-4 text-[#16a34a]" />
-                      <span>Add New Photo</span>
+                      <span>Upload New Image from Gallery</span>
                     </button>
+
                     <button
                       onClick={handleOpenAddVideo}
-                      className="p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                      className={themeClasses.secondaryButton}
                     >
                       <Plus className="w-4 h-4 text-[#16a34a]" />
-                      <span>Add Field Video</span>
+                      <span>Add / Upload New Field Video</span>
                     </button>
-                    <button
-                      onClick={handleOpenAddProject}
-                      className="p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors"
-                    >
-                      <Plus className="w-4 h-4 text-[#16a34a]" />
-                      <span>Add Case Study</span>
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('settings')}
-                      className="p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors"
-                    >
-                      <KeyRound className="w-4 h-4 text-[#c2a67e]" />
-                      <span>Change Password</span>
-                    </button>
-                  </div>
-                </div>
 
-                {/* System Status Information */}
-                <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3 text-xs text-stone-300">
-                  <div className="flex items-center gap-2 text-[#4ade80] font-mono font-bold uppercase">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Real-Time State Persistence Active</span>
+                    <button
+                      onClick={handleOpenAddTeamMember}
+                      className={themeClasses.secondaryButton}
+                    >
+                      <Plus className="w-4 h-4 text-[#16a34a]" />
+                      <span>Add New Team Member</span>
+                    </button>
                   </div>
-                  <p className="leading-relaxed">
-                    All additions, image placements (Homepage, Project Page, Gallery Page), video records, and password updates are synchronized in browser state and local memory. When deployed to Truehost cPanel, this console connects to your MySQL backend seamlessly.
-                  </p>
                 </div>
               </div>
             )}
 
-            {/* TAB 2: PHOTOS & IMAGES */}
+            {/* =======================================================
+                TAB 2: FIELDWORK IMAGES (With Direct Device Upload)
+                ======================================================= */}
             {activeTab === 'images' && (
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-bold font-display text-white">
-                      Fieldwork Photos & Image Placements
-                    </h3>
-                    <p className="text-xs sm:text-sm text-stone-400 mt-1">
-                      Control where each image appears across the Homepage, Project Page, and Gallery Page.
+                    <h3 className="font-display font-extrabold text-2xl tracking-tight">Fieldwork & Equipment Gallery</h3>
+                    <p className="text-xs text-stone-400 mt-1">
+                      Add, edit, or upload photos directly from your phone/PC gallery with instant placement control.
                     </p>
                   </div>
 
                   <button
                     onClick={handleOpenAddImage}
-                    className="px-4 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer transition-colors shrink-0"
+                    className={themeClasses.primaryButton}
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Add New Image</span>
+                    <span>Upload Image from Gallery</span>
                   </button>
                 </div>
 
-                {/* Filters & Search */}
-                <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-                  {/* Placement Filter Pills */}
-                  <div className="flex flex-wrap gap-2 text-xs font-mono">
+                {/* Filter and Placement Selector */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                  <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/10 border border-stone-200/20 text-xs font-bold">
                     <button
                       onClick={() => setImagePlacementFilter('all')}
-                      className={`px-3 py-1.5 rounded-lg border transition-colors cursor-pointer ${
-                        imagePlacementFilter === 'all'
-                          ? 'bg-[#16a34a] text-white border-[#16a34a]'
-                          : 'bg-white/5 text-stone-300 border-white/10 hover:bg-white/10'
+                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                        imagePlacementFilter === 'all' ? 'bg-[#16a34a] text-white shadow-xs' : 'text-stone-400 hover:text-stone-200'
                       }`}
                     >
-                      All ({galleryImages.length})
+                      All Images ({galleryImages.length})
                     </button>
                     <button
                       onClick={() => setImagePlacementFilter('homepage')}
-                      className={`px-3 py-1.5 rounded-lg border transition-colors cursor-pointer ${
-                        imagePlacementFilter === 'homepage'
-                          ? 'bg-[#16a34a] text-white border-[#16a34a]'
-                          : 'bg-white/5 text-stone-300 border-white/10 hover:bg-white/10'
+                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                        imagePlacementFilter === 'homepage' ? 'bg-[#16a34a] text-white shadow-xs' : 'text-stone-400 hover:text-stone-200'
                       }`}
                     >
-                      Homepage ({galleryImages.filter((i) => i.showOnHomepage !== false).length})
+                      Homepage Gallery
                     </button>
                     <button
                       onClick={() => setImagePlacementFilter('projects')}
-                      className={`px-3 py-1.5 rounded-lg border transition-colors cursor-pointer ${
-                        imagePlacementFilter === 'projects'
-                          ? 'bg-[#16a34a] text-white border-[#16a34a]'
-                          : 'bg-white/5 text-stone-300 border-white/10 hover:bg-white/10'
+                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                        imagePlacementFilter === 'projects' ? 'bg-[#16a34a] text-white shadow-xs' : 'text-stone-400 hover:text-stone-200'
                       }`}
                     >
-                      Project Page ({galleryImages.filter((i) => i.showOnProjects !== false).length})
+                      Projects Page
                     </button>
                     <button
                       onClick={() => setImagePlacementFilter('gallery')}
-                      className={`px-3 py-1.5 rounded-lg border transition-colors cursor-pointer ${
-                        imagePlacementFilter === 'gallery'
-                          ? 'bg-[#16a34a] text-white border-[#16a34a]'
-                          : 'bg-white/5 text-stone-300 border-white/10 hover:bg-white/10'
+                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                        imagePlacementFilter === 'gallery' ? 'bg-[#16a34a] text-white shadow-xs' : 'text-stone-400 hover:text-stone-200'
                       }`}
                     >
-                      Gallery Page ({galleryImages.filter((i) => i.showOnGallery !== false).length})
+                      Gallery Page
                     </button>
                   </div>
 
-                  {/* Search Bar */}
                   <input
                     type="text"
                     value={imageSearch}
                     onChange={(e) => setImageSearch(e.target.value)}
-                    placeholder="Search photos by title or caption..."
-                    className="px-3.5 py-1.5 rounded-lg bg-black/40 border border-white/15 text-white text-xs placeholder-stone-500 focus:outline-none focus:border-[#16a34a] w-full md:w-64"
+                    placeholder="Search images by title or caption..."
+                    className={`max-w-xs ${themeClasses.input}`}
                   />
                 </div>
 
                 {/* Images Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {filteredImages.map((img) => (
-                    <div 
+                    <div
                       key={img.id}
-                      className="rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-[#c2a67e]/40 transition-all flex flex-col justify-between"
+                      className={`group relative rounded-2xl overflow-hidden border transition-all ${
+                        isCarton ? 'bg-[#2b221a] border-[#523f2f]' : 'bg-white border-stone-200'
+                      }`}
                     >
-                      <div>
-                        <div className="relative aspect-video bg-black overflow-hidden">
-                          <img
-                            src={img.url}
-                            alt={img.title}
-                            className="w-full h-full object-cover"
-                            referrerPolicy="no-referrer"
-                          />
-                          <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-black/75 text-[#c2a67e]">
-                            {img.category}
-                          </span>
-                        </div>
-
-                        <div className="p-3.5 space-y-2">
-                          <h4 className="text-xs font-bold text-white line-clamp-1 leading-snug">
-                            {img.title}
-                          </h4>
-                          <p className="text-[11px] text-stone-400 line-clamp-2 leading-relaxed">
-                            {img.caption}
-                          </p>
-
-                          {/* Placements Badges */}
-                          <div className="pt-2 flex flex-wrap gap-1">
-                            {img.showOnHomepage !== false && (
-                              <span className="px-1.5 py-0.5 rounded text-[8.5px] font-mono bg-amber-950/80 text-amber-300 border border-amber-500/30">
-                                Homepage
-                              </span>
-                            )}
-                            {img.showOnProjects !== false && (
-                              <span className="px-1.5 py-0.5 rounded text-[8.5px] font-mono bg-blue-950/80 text-blue-300 border border-blue-500/30">
-                                Projects
-                              </span>
-                            )}
-                            {img.showOnGallery !== false && (
-                              <span className="px-1.5 py-0.5 rounded text-[8.5px] font-mono bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">
-                                Gallery
-                              </span>
-                            )}
-                          </div>
+                      <div className="aspect-square w-full overflow-hidden bg-black relative">
+                        <img
+                          src={img.url}
+                          alt={img.alt || img.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                          {img.showOnHomepage !== false && (
+                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#16a34a] text-white font-bold">
+                              Home
+                            </span>
+                          )}
+                          {img.showOnProjects !== false && (
+                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-600 text-white font-bold">
+                              Project
+                            </span>
+                          )}
                         </div>
                       </div>
 
-                      {/* Card Actions */}
-                      <div className="p-3 pt-0 border-t border-white/5 flex items-center justify-between text-xs font-mono">
-                        <button
-                          onClick={() => handleOpenEditImage(img)}
-                          className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-stone-200 flex items-center gap-1.5 transition-colors cursor-pointer"
-                        >
-                          <Edit className="w-3.5 h-3.5 text-[#4ade80]" />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (window.confirm(`Are you sure you want to delete "${img.title}"?`)) {
-                              onDeleteGalleryImage(img.id);
-                            }
-                          }}
-                          className="p-1.5 rounded-lg hover:bg-red-950/60 text-red-400 transition-colors cursor-pointer"
-                          title="Delete image"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                      <div className="p-3.5">
+                        <span className="text-[9px] font-mono text-[#c2a67e] font-bold uppercase">{img.category}</span>
+                        <h4 className="font-bold text-xs line-clamp-1 mt-0.5">{img.title}</h4>
+                        <p className="text-[11px] text-stone-400 line-clamp-2 mt-1 leading-snug">{img.caption}</p>
+
+                        <div className="flex items-center justify-between pt-3 mt-3 border-t border-stone-200/20">
+                          <button
+                            onClick={() => handleOpenEditImage(img)}
+                            className="text-xs font-semibold text-[#16a34a] hover:underline flex items-center gap-1 cursor-pointer"
+                          >
+                            <Edit className="w-3.5 h-3.5" /> Edit
+                          </button>
+                          <button
+                            onClick={() => onDeleteGalleryImage(img.id)}
+                            className="text-xs font-semibold text-rose-500 hover:underline flex items-center gap-1 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1007,117 +1002,105 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             )}
 
-            {/* TAB 3: FIELD VIDEOS */}
+            {/* =======================================================
+                TAB 3: FIELD VIDEOS (With Project Page Toggle & Direct Upload)
+                ======================================================= */}
             {activeTab === 'videos' && (
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-bold font-display text-white">
-                      Field Videos Archive ({videos.length} Records)
-                    </h3>
-                    <p className="text-xs sm:text-sm text-stone-400 mt-1">
-                      Manage portrait field records for the Homepage drilling section and Dedicated Gallery.
+                    <h3 className="font-display font-extrabold text-2xl tracking-tight">Verified Field Video Records</h3>
+                    <p className="text-xs text-stone-400 mt-1">
+                      Manage portrait drilling & exploration videos. Toggle visibility across Homepage, Projects Page, and Gallery.
                     </p>
                   </div>
 
                   <button
                     onClick={handleOpenAddVideo}
-                    className="px-4 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer transition-colors shrink-0"
+                    className={themeClasses.primaryButton}
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Add New Video</span>
+                    <span>Upload Video / Link Video</span>
                   </button>
                 </div>
 
-                {/* Video Search Bar */}
-                <input
-                  type="text"
-                  value={videoSearch}
-                  onChange={(e) => setVideoSearch(e.target.value)}
-                  placeholder="Search field videos by title, subtitle, or description..."
-                  className="px-3.5 py-2 rounded-lg bg-black/40 border border-white/15 text-white text-xs placeholder-stone-500 focus:outline-none focus:border-[#16a34a] w-full max-w-md"
-                />
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-mono text-stone-400">Total Records: {filteredVideos.length}</span>
+                  <input
+                    type="text"
+                    value={videoSearch}
+                    onChange={(e) => setVideoSearch(e.target.value)}
+                    placeholder="Search videos by title or caption..."
+                    className={`max-w-xs ${themeClasses.input}`}
+                  />
+                </div>
 
-                {/* Videos Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {filteredVideos.map((vid, idx) => (
-                    <div 
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {filteredVideos.map((vid) => (
+                    <div
                       key={vid.id}
-                      className="rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-[#c2a67e]/40 transition-all flex flex-col justify-between"
+                      className={`rounded-2xl border overflow-hidden transition-all ${
+                        isCarton ? 'bg-[#2b221a] border-[#523f2f]' : 'bg-white border-stone-200'
+                      }`}
                     >
-                      <div>
-                        <div className="relative aspect-[3/4] bg-black overflow-hidden">
-                          <img
-                            src={vid.thumbnail}
-                            alt={vid.title}
-                            className="w-full h-full object-cover"
-                            referrerPolicy="no-referrer"
-                          />
-                          <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#16a34a] text-white">
-                            Record 0{idx + 1}
-                          </span>
-                          <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-black/75 text-[#86efac]">
-                            Portrait HD
-                          </span>
+                      <div className="relative aspect-[3/4] bg-black overflow-hidden group">
+                        <img
+                          src={vid.thumbnail}
+                          alt={vid.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                        
+                        <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1">
+                          {vid.showOnHomepage !== false && (
+                            <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-[#16a34a] text-white font-bold">
+                              Homepage
+                            </span>
+                          )}
+                          {vid.showOnProjects !== false && (
+                            <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-blue-600 text-white font-bold">
+                              Projects Page
+                            </span>
+                          )}
+                          {vid.showOnGallery !== false && (
+                            <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-600 text-white font-bold">
+                              Gallery
+                            </span>
+                          )}
                         </div>
 
-                        <div className="p-3.5 space-y-2">
-                          <h4 className="text-xs font-bold text-white line-clamp-1 leading-snug">
-                            {vid.title}
-                          </h4>
-                          <p className="text-[10.5px] text-[#c2a67e] font-mono line-clamp-1">
-                            {vid.subtitle}
-                          </p>
-                          <p className="text-[11px] text-stone-400 line-clamp-2 leading-relaxed">
-                            {vid.description}
-                          </p>
-
-                          {/* Placements */}
-                          <div className="pt-2 flex flex-wrap gap-1">
-                            {vid.showOnHomepage !== false && (
-                              <span className="px-1.5 py-0.5 rounded text-[8.5px] font-mono bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">
-                                Homepage Section
-                              </span>
-                            )}
-                            {vid.showOnGallery !== false && (
-                              <span className="px-1.5 py-0.5 rounded text-[8.5px] font-mono bg-blue-950/80 text-blue-300 border border-blue-500/30">
-                                Dedicated Gallery
-                              </span>
-                            )}
-                          </div>
+                        <div className="absolute bottom-3 left-3 right-3 text-white">
+                          <span className="text-[9px] font-mono text-[#c2a67e] uppercase font-bold block">{vid.subtitle}</span>
+                          <h4 className="font-bold text-sm leading-snug line-clamp-1">{vid.title}</h4>
                         </div>
                       </div>
 
-                      {/* Card Actions */}
-                      <div className="p-3 pt-0 border-t border-white/5 flex items-center justify-between text-xs font-mono">
-                        <div className="flex items-center gap-1.5">
+                      <div className="p-4 space-y-3">
+                        <p className="text-xs text-stone-400 line-clamp-2 leading-relaxed">{vid.description}</p>
+                        
+                        <div className="flex items-center justify-between pt-2 border-t border-stone-200/20 text-xs">
                           <button
                             onClick={() => setPreviewingVideo(vid)}
-                            className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-stone-200 transition-colors cursor-pointer"
-                            title="Watch Video Preview"
+                            className="font-bold text-stone-300 hover:text-white flex items-center gap-1 cursor-pointer"
                           >
-                            <Eye className="w-3.5 h-3.5 text-[#4ade80]" />
+                            <Eye className="w-3.5 h-3.5 text-[#16a34a]" /> Preview
                           </button>
-                          <button
-                            onClick={() => handleOpenEditVideo(vid)}
-                            className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-stone-200 flex items-center gap-1 transition-colors cursor-pointer"
-                          >
-                            <Edit className="w-3.5 h-3.5 text-[#4ade80]" />
-                            <span>Edit</span>
-                          </button>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => handleOpenEditVideo(vid)}
+                              className="font-bold text-[#16a34a] hover:underline flex items-center gap-1 cursor-pointer"
+                            >
+                              <Edit className="w-3.5 h-3.5" /> Edit
+                            </button>
+                            <button
+                              onClick={() => onDeleteVideo(vid.id)}
+                              className="font-bold text-rose-500 hover:underline flex items-center gap-1 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" /> Delete
+                            </button>
+                          </div>
                         </div>
-
-                        <button
-                          onClick={() => {
-                            if (window.confirm(`Are you sure you want to delete video "${vid.title}"?`)) {
-                              onDeleteVideo(vid.id);
-                            }
-                          }}
-                          className="p-1.5 rounded-lg hover:bg-red-950/60 text-red-400 transition-colors cursor-pointer"
-                          title="Delete video"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
                       </div>
                     </div>
                   ))}
@@ -1125,59 +1108,73 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             )}
 
-            {/* TAB 4: PROJECTS */}
-            {activeTab === 'projects' && (
+            {/* =======================================================
+                TAB 4: PERSONNEL & TEAM (Add/Edit Team Member with Photo Upload)
+                ======================================================= */}
+            {activeTab === 'team' && (
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-bold font-display text-white">
-                      Field Projects & Case Studies ({projects.length})
-                    </h3>
-                    <p className="text-xs sm:text-sm text-stone-400 mt-1">
-                      Manage published exploration surveys, rotary boreholes, and regulatory documentation.
+                    <h3 className="font-display font-extrabold text-2xl tracking-tight">Personnel & Technical Team</h3>
+                    <p className="text-xs text-stone-400 mt-1">
+                      Manage company leadership, consultants, geologists, and geophysicists shown on About and Homepage.
                     </p>
                   </div>
 
                   <button
-                    onClick={handleOpenAddProject}
-                    className="px-4 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer transition-colors shrink-0"
+                    onClick={handleOpenAddTeamMember}
+                    className={themeClasses.primaryButton}
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Post Project</span>
+                    <span>Add New Team Member</span>
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {projects.map((proj) => (
-                    <div 
-                      key={proj.id}
-                      className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3 flex flex-col justify-between"
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {team.map((member) => (
+                    <div
+                      key={member.id}
+                      className={`p-5 rounded-2xl border transition-all ${
+                        isCarton ? 'bg-[#2b221a] border-[#523f2f]' : 'bg-white border-stone-200'
+                      }`}
                     >
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs font-mono">
-                          <span className="text-[#16a34a] font-bold">{proj.category}</span>
-                          <span className="text-stone-400">{proj.location}</span>
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden bg-black shrink-0 border border-stone-200/20">
+                          <img
+                            src={member.image}
+                            alt={member.name}
+                            className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
                         </div>
-                        <h4 className="text-base font-bold text-white leading-snug">
-                          {proj.title}
-                        </h4>
-                        <p className="text-xs text-stone-400 leading-relaxed line-clamp-2">
-                          {proj.summary}
-                        </p>
+                        <div className="overflow-hidden">
+                          <h4 className="font-bold text-sm leading-tight text-stone-100 line-clamp-1">{member.name}</h4>
+                          <span className="text-xs text-[#16a34a] font-semibold block truncate mt-0.5">{member.title}</span>
+                          <span className="text-[11px] font-mono text-stone-400 block truncate mt-0.5">{member.experienceYears}</span>
+                        </div>
                       </div>
 
-                      <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
-                        <span className="text-[#c2a67e]">{proj.status}</span>
+                      <div className="mt-4 pt-3 border-t border-stone-200/20 space-y-2">
+                        <p className="text-xs text-stone-400 line-clamp-3 leading-relaxed">{member.bio}</p>
+                        {member.credentials && (
+                          <div className="text-[10px] font-mono text-[#c2a67e] truncate font-bold">
+                            {member.credentials}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-4 mt-4 border-t border-stone-200/20 text-xs">
                         <button
-                          onClick={() => {
-                            if (window.confirm(`Delete project "${proj.title}"?`)) {
-                              onDeleteProject(proj.id);
-                            }
-                          }}
-                          className="p-1.5 rounded-lg hover:bg-red-950/60 text-red-400 transition-colors cursor-pointer"
-                          title="Delete project"
+                          onClick={() => handleOpenEditTeamMember(member)}
+                          className="font-bold text-[#16a34a] hover:underline flex items-center gap-1 cursor-pointer"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Edit className="w-3.5 h-3.5" /> Edit Member
+                        </button>
+                        <button
+                          onClick={() => onDeleteTeamMember && onDeleteTeamMember(member.id)}
+                          className="font-bold text-rose-500 hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
                         </button>
                       </div>
                     </div>
@@ -1186,368 +1183,261 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             )}
 
-            {/* TAB 5: CLIENT ENQUIRIES */}
+            {/* =======================================================
+                TAB 5: CLIENT ENQUIRIES (No Mock Data, Empty State by Default)
+                ======================================================= */}
             {activeTab === 'enquiries' && (
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-white">
-                    Client Consultations & Field Enquiries ({enquiries.length})
-                  </h3>
-                  <p className="text-xs sm:text-sm text-stone-400 mt-1">
-                    Direct inquiries submitted through the website consultation desk.
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  {enquiries.length === 0 ? (
-                    <div className="p-8 rounded-2xl bg-white/5 text-center text-stone-400 text-xs">
-                      No client consultations recorded yet.
-                    </div>
-                  ) : (
-                    enquiries.map((enq) => (
-                      <div 
-                        key={enq.id}
-                        className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-2.5">
-                          <div>
-                            <span className="text-sm font-bold text-white block">{enq.fullName}</span>
-                            <span className="text-xs text-stone-400">{enq.email} {enq.phone && `• ${enq.phone}`}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <select
-                              value={enq.status}
-                              onChange={(e) => onUpdateEnquiryStatus(enq.id, e.target.value as any)}
-                              className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/20 text-xs text-white"
-                            >
-                              <option value="new">New</option>
-                              <option value="reviewed">Reviewed</option>
-                              <option value="resolved">Resolved</option>
-                            </select>
-                            <button
-                              onClick={() => onDeleteEnquiry(enq.id)}
-                              className="p-1.5 rounded-lg hover:bg-red-950 text-red-400 cursor-pointer"
-                              title="Delete enquiry"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="text-xs text-stone-300 space-y-1">
-                          <p><strong className="text-[#c2a67e]">Service:</strong> {enq.serviceOfInterest}</p>
-                          {enq.projectLocation && <p><strong className="text-[#c2a67e]">Location:</strong> {enq.projectLocation}</p>}
-                          <p className="pt-1 text-stone-300 whitespace-pre-wrap">{enq.message}</p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* TAB 6: SERVICES */}
-            {activeTab === 'services' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-white">
-                    Technical Service Disciplines ({services.length})
-                  </h3>
-                  <p className="text-xs sm:text-sm text-stone-400 mt-1">
-                    Core practice areas certified under COMEG & NMGS regulatory standards.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {services.map((srv) => (
-                    <div key={srv.id} className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-                      <div className="text-xs font-mono text-[#16a34a] font-bold">Code: {srv.numericCode}</div>
-                      <h4 className="text-sm font-bold text-white">{srv.title}</h4>
-                      <p className="text-xs text-stone-400 leading-relaxed line-clamp-2">{srv.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* TAB 7: TEAM */}
-            {activeTab === 'team' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-white">
-                    Key Technical Personnel & Partners ({team.length})
-                  </h3>
-                  <p className="text-xs sm:text-sm text-stone-400 mt-1">
-                    COMEG registered geoscientists and exploration personnel.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {team.map((mem) => (
-                    <div key={mem.id} className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
-                      <img 
-                        src={mem.image} 
-                        alt={mem.name} 
-                        className="w-14 h-14 rounded-xl object-cover shrink-0 border border-white/10" 
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="space-y-0.5 overflow-hidden">
-                        <h4 className="text-xs font-bold text-white truncate">{mem.name}</h4>
-                        <p className="text-[11px] text-[#c2a67e] truncate">{mem.title}</p>
-                        <p className="text-[10px] text-stone-400 truncate">{mem.experienceYears}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* TAB 8: SETTINGS & PASSWORD */}
-            {activeTab === 'settings' && (
-              <div className="space-y-8 max-w-4xl">
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-white">
-                    Administration Settings & Security
-                  </h3>
-                  <p className="text-xs sm:text-sm text-stone-400 mt-1">
-                    Manage master passwords, corporate email routing, and contact details.
-                  </p>
-                </div>
-
-                {/* CARD 1: CHANGE MASTER PASSWORD */}
-                <div className="p-6 rounded-3xl bg-[#1a1612] border border-[#c2a67e]/40 shadow-xl space-y-5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-[#c2a67e] flex items-center justify-center text-stone-950 font-bold">
-                      <KeyRound className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-base font-bold text-white">Change Master Admin Password</h4>
-                      <p className="text-xs text-stone-400">Seamlessly update your password anytime.</p>
-                    </div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="font-display font-extrabold text-2xl tracking-tight">Client Inquiries & Consultation Requests</h3>
+                    <p className="text-xs text-stone-400 mt-1">
+                      Direct inquiries submitted through the website consultation form appear here in real time.
+                    </p>
                   </div>
 
-                  <form onSubmit={handleChangePassword} className="space-y-4 max-w-lg">
-                    <div className="space-y-1">
-                      <label className="text-xs font-mono text-[#c2a67e] uppercase font-bold block">
-                        Current Password
-                      </label>
-                      <input
-                        type="password"
-                        value={currentPass}
-                        onChange={(e) => setCurrentPass(e.target.value)}
-                        placeholder="Enter current password (Default: Giniben123)"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/20 text-white text-xs placeholder-stone-500 focus:outline-none focus:border-[#16a34a]"
-                        required
-                      />
-                    </div>
+                  {enquiries.length > 0 && onClearAllEnquiries && (
+                    <button
+                      onClick={onClearAllEnquiries}
+                      className="px-3 py-1.5 rounded-xl border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Clear All Enquiries</span>
+                    </button>
+                  )}
+                </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-xs font-mono text-[#c2a67e] uppercase font-bold block">
-                          New Password
-                        </label>
+                {enquiries.length === 0 ? (
+                  <div className={`p-12 text-center rounded-3xl border ${isCarton ? 'bg-[#2b221a] border-[#523f2f]' : 'bg-white border-stone-200'}`}>
+                    <div className="w-14 h-14 rounded-2xl bg-[#16a34a]/15 text-[#16a34a] flex items-center justify-center mx-auto mb-4">
+                      <MessageSquare className="w-7 h-7" />
+                    </div>
+                    <h4 className="font-bold text-lg">No Client Enquiries Yet</h4>
+                    <p className="text-xs text-stone-400 max-w-md mx-auto mt-2 leading-relaxed">
+                      All new consultation requests submitted from the Contact page or quick forms will immediately show up here with full client details, service requirements, and reference codes.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {enquiries.map((enq) => (
+                      <div
+                        key={enq.id}
+                        className={`p-5 rounded-2xl border space-y-3 ${
+                          isCarton ? 'bg-[#2b221a] border-[#523f2f]' : 'bg-white border-stone-200'
+                        }`}
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold text-[#16a34a] px-2 py-0.5 rounded bg-[#16a34a]/15">
+                              {enq.referenceNumber}
+                            </span>
+                            <span className="font-bold text-sm">{enq.fullName}</span>
+                            {enq.company && <span className="text-xs text-stone-400">({enq.company})</span>}
+                          </div>
+                          <span className="text-[11px] font-mono text-stone-400">
+                            {new Date(enq.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                          <div><span className="text-stone-400">Email:</span> <a href={`mailto:${enq.email}`} className="text-[#16a34a] font-semibold">{enq.email}</a></div>
+                          <div><span className="text-stone-400">Phone:</span> <span className="font-semibold">{enq.phone || 'None'}</span></div>
+                          <div><span className="text-stone-400">Service:</span> <span className="font-semibold">{enq.serviceOfInterest}</span></div>
+                        </div>
+
+                        <div className={`p-3 rounded-xl text-xs leading-relaxed ${isCarton ? 'bg-[#1f1712]' : 'bg-[#faf8f5]'}`}>
+                          <div className="font-bold text-stone-300 mb-1">{enq.subject}</div>
+                          <p className="text-stone-400">{enq.message}</p>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-stone-200/20 text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="text-stone-400 text-[11px]">Status:</span>
+                            <button
+                              onClick={() => onUpdateEnquiryStatus(enq.id, 'reviewed')}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                enq.status === 'reviewed' ? 'bg-[#16a34a] text-white' : 'border border-stone-400 text-stone-400 hover:text-white'
+                              }`}
+                            >
+                              Reviewed
+                            </button>
+                            <button
+                              onClick={() => onUpdateEnquiryStatus(enq.id, 'resolved')}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                enq.status === 'resolved' ? 'bg-blue-600 text-white' : 'border border-stone-400 text-stone-400 hover:text-white'
+                              }`}
+                            >
+                              Resolved
+                            </button>
+                          </div>
+
+                          <button
+                            onClick={() => onDeleteEnquiry(enq.id)}
+                            className="text-xs font-bold text-rose-500 hover:underline flex items-center gap-1 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* =======================================================
+                TAB 6: SETTINGS & PASSWORD (Clean, No cPanel Fluff)
+                ======================================================= */}
+            {activeTab === 'settings' && (
+              <div className="space-y-6 max-w-4xl">
+                <div>
+                  <h3 className="font-display font-extrabold text-2xl tracking-tight">System Settings & Password Control</h3>
+                  <p className="text-xs text-stone-400 mt-1">
+                    Manage administrative credentials and update official company contact coordinates.
+                  </p>
+                </div>
+
+                {/* Password Change Card */}
+                <div className={themeClasses.card}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <KeyRound className="w-4 h-4 text-[#16a34a]" />
+                    <h4 className="font-bold text-sm">Change Admin Password</h4>
+                  </div>
+
+                  <form onSubmit={handleChangePassword} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className={themeClasses.label}>Current Password</label>
+                        <input
+                          type="password"
+                          value={currentPass}
+                          onChange={(e) => setCurrentPass(e.target.value)}
+                          placeholder="Current password"
+                          className={themeClasses.input}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className={themeClasses.label}>New Password</label>
                         <input
                           type="password"
                           value={newPass}
                           onChange={(e) => setNewPass(e.target.value)}
-                          placeholder="Min 6 characters"
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/20 text-white text-xs placeholder-stone-500 focus:outline-none focus:border-[#16a34a]"
+                          placeholder="New password (min 6 chars)"
+                          className={themeClasses.input}
                           required
                         />
                       </div>
-
-                      <div className="space-y-1">
-                        <label className="text-xs font-mono text-[#c2a67e] uppercase font-bold block">
-                          Confirm New Password
-                        </label>
+                      <div>
+                        <label className={themeClasses.label}>Confirm New Password</label>
                         <input
                           type="password"
                           value={confirmPass}
                           onChange={(e) => setConfirmPass(e.target.value)}
-                          placeholder="Re-enter new password"
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/20 text-white text-xs placeholder-stone-500 focus:outline-none focus:border-[#16a34a]"
+                          placeholder="Confirm new password"
+                          className={themeClasses.input}
                           required
                         />
                       </div>
                     </div>
 
                     {passMessage && (
-                      <div className={`p-3 rounded-xl text-xs flex items-center gap-2 border ${
-                        passMessage.type === 'success'
-                          ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-200'
-                          : 'bg-red-950/80 border-red-500/40 text-red-200'
+                      <div className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
+                        passMessage.type === 'success' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'
                       }`}>
-                        {passMessage.type === 'success' ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        ) : (
-                          <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-                        )}
+                        {passMessage.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
                         <span>{passMessage.text}</span>
                       </div>
                     )}
 
                     <button
                       type="submit"
-                      className="px-5 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer transition-colors"
+                      className={themeClasses.primaryButton}
                     >
-                      <Check className="w-4 h-4" />
-                      <span>Save New Password</span>
+                      <Lock className="w-4 h-4" />
+                      <span>Update Administrator Password</span>
                     </button>
                   </form>
                 </div>
 
-                {/* CARD 2: CORPORATE EMAIL ROUTING GUIDE */}
-                <div className="p-6 rounded-3xl bg-[#1a1612] border border-[#c2a67e]/40 shadow-xl space-y-5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-[#16a34a] flex items-center justify-center text-white font-bold">
-                      <Mail className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-base font-bold text-white">Email Receiving & Forwarding Configuration</h4>
-                      <p className="text-xs text-stone-400">
-                        How inquiries reach benukwutevinor@yahoo.com and gpg1.geoservices@gmail.com.
-                      </p>
-                    </div>
+                {/* Company Coordinates Card */}
+                <div className={themeClasses.card}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Globe className="w-4 h-4 text-[#16a34a]" />
+                    <h4 className="font-bold text-sm">Official Company Coordinates</h4>
                   </div>
 
-                  <div className="space-y-4 text-xs text-stone-300">
-                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-                      <span className="font-bold text-[#4ade80] block text-sm">
-                        Method 1: FormSubmit (Pre-Configured & Recommended)
-                      </span>
-                      <p className="leading-relaxed">
-                        The website consultation form is pre-wired to transmit directly to <strong>benukwutevinor@yahoo.com</strong> with CC to <strong>gpg1.geoservices@gmail.com</strong>.
-                      </p>
-                      <ul className="list-disc pl-5 space-y-1 text-stone-400">
-                        <li>The very first time a client submits a form, FormSubmit sends an activation link to your Yahoo/Gmail inbox.</li>
-                        <li>Simply click the single <strong>&quot;Activate Form&quot;</strong> button in that email once.</li>
-                        <li>After that one-click activation, every single submission will land directly in your email inbox automatically!</li>
-                      </ul>
-                      <div className="pt-2">
-                        <button
-                          onClick={handleTriggerTestEmail}
-                          className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-[11px] flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <RefreshCw className="w-3.5 h-3.5 text-[#4ade80]" />
-                          <span>Send Test Notification Now</span>
-                        </button>
-                        {emailTestStatus && (
-                          <p className="text-[11px] text-[#86efac] font-mono mt-1.5">{emailTestStatus}</p>
-                        )}
+                  <form onSubmit={handleSaveCompanySettings} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className={themeClasses.label}>Direct Telephone Number</label>
+                        <input
+                          type="text"
+                          value={phoneInput}
+                          onChange={(e) => setPhoneInput(e.target.value)}
+                          className={themeClasses.input}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={themeClasses.label}>WhatsApp Business Line</label>
+                        <input
+                          type="text"
+                          value={whatsappInput}
+                          onChange={(e) => setWhatsappInput(e.target.value)}
+                          className={themeClasses.input}
+                        />
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <label className={themeClasses.label}>Corporate Inquiries & Forwarding Email</label>
+                        <input
+                          type="text"
+                          value={emailInput}
+                          onChange={(e) => setEmailInput(e.target.value)}
+                          className={themeClasses.input}
+                        />
+                        <span className="text-[11px] text-stone-400 mt-1 block">
+                          Official corporate address: info@ginibengeoservices.com (forwarding to benukwutevinor@yahoo.com and gpg1.geoservices@gmail.com)
+                        </span>
+                      </div>
+
+                      <div>
+                        <label className={themeClasses.label}>Facebook Page URL</label>
+                        <input
+                          type="text"
+                          value={facebookInput}
+                          onChange={(e) => setFacebookInput(e.target.value)}
+                          className={themeClasses.input}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={themeClasses.label}>LinkedIn Profile URL</label>
+                        <input
+                          type="text"
+                          value={company.linkedinUrl}
+                          readOnly
+                          className={`${themeClasses.input} opacity-70`}
+                        />
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-                      <span className="font-bold text-[#c2a67e] block text-sm">
-                        Method 2: Truehost cPanel Forwarders (Domain Email)
-                      </span>
-                      <p className="leading-relaxed">
-                        If you prefer custom domain addresses like <em>consultation@ginibeng.com</em>:
-                      </p>
-                      <ol className="list-decimal pl-5 space-y-1 text-stone-400">
-                        <li>Log into your Truehost cPanel account.</li>
-                        <li>Click on <strong>Forwarders</strong> under the Email section.</li>
-                        <li>Click <strong>Add Forwarder</strong>.</li>
-                        <li>Set address to forward (e.g. <code>info</code>) and forward to <code>benukwutevinor@yahoo.com</code>.</li>
-                        <li>Add a second forwarder to <code>gpg1.geoservices@gmail.com</code>.</li>
-                      </ol>
-                    </div>
-                  </div>
-                </div>
-
-                {/* CARD 3: EDIT COMPANY COORDINATES */}
-                <div className="p-6 rounded-3xl bg-[#1a1612] border border-[#c2a67e]/40 shadow-xl space-y-5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-[#c2a67e] flex items-center justify-center text-stone-950 font-bold">
-                      <Phone className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-base font-bold text-white">Company Public Coordinates</h4>
-                      <p className="text-xs text-stone-400">Update phone, WhatsApp, and social media handles.</p>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleSaveCompanySettings} className="space-y-4 max-w-lg">
-                    <div className="space-y-1">
-                      <label className="text-xs font-mono text-[#c2a67e] uppercase font-bold block">Phone Number</label>
-                      <input
-                        type="text"
-                        value={phoneInput}
-                        onChange={(e) => setPhoneInput(e.target.value)}
-                        className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/20 text-white text-xs"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-xs font-mono text-[#c2a67e] uppercase font-bold block">WhatsApp Number</label>
-                      <input
-                        type="text"
-                        value={whatsappInput}
-                        onChange={(e) => setWhatsappInput(e.target.value)}
-                        className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/20 text-white text-xs"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-xs font-mono text-[#c2a67e] uppercase font-bold block">Primary Email</label>
-                      <input
-                        type="email"
-                        value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/20 text-white text-xs"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-xs font-mono text-[#c2a67e] uppercase font-bold block">Facebook Page URL</label>
-                      <input
-                        type="text"
-                        value={facebookInput}
-                        onChange={(e) => setFacebookInput(e.target.value)}
-                        className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/20 text-white text-xs"
-                      />
-                    </div>
-
                     {settingsSaved && (
-                      <div className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-xs flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span>Company settings updated successfully!</span>
+                      <div className="p-3 rounded-xl bg-emerald-500/15 text-emerald-400 text-xs font-semibold flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Coordinates updated and saved across all public pages!</span>
                       </div>
                     )}
 
                     <button
                       type="submit"
-                      className="px-5 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer transition-colors"
+                      className={themeClasses.primaryButton}
                     >
                       <Check className="w-4 h-4" />
-                      <span>Save Company Details</span>
+                      <span>Save Company Coordinates</span>
                     </button>
                   </form>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 9: TRUEHOST CPANEL GUIDE */}
-            {activeTab === 'cpanel' && (
-              <div className="space-y-6 max-w-4xl text-xs text-stone-300">
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-white">
-                    Truehost cPanel & Production Deployment
-                  </h3>
-                  <p className="text-stone-400 mt-1">
-                    Complete turnkey documentation for uploading to your Truehost server.
-                  </p>
-                </div>
-
-                <div className="p-6 rounded-3xl bg-[#1a1612] border border-[#c2a67e]/35 space-y-4">
-                  <h4 className="text-base font-bold text-white">Step-by-Step Truehost Deployment</h4>
-                  <ol className="list-decimal pl-5 space-y-2 leading-relaxed">
-                    <li>Run <code>npm run build</code> to produce the production-ready static assets in the <code>dist/</code> folder.</li>
-                    <li>Log into your Truehost cPanel account at <code>cpanel.yourdomain.com</code>.</li>
-                    <li>Open <strong>File Manager</strong> and navigate into <code>public_html/</code>.</li>
-                    <li>Upload all files from the <code>dist/</code> directory directly into <code>public_html/</code>.</li>
-                    <li>Ensure your <code>.htaccess</code> is present to handle single-page routing without 404s.</li>
-                  </ol>
                 </div>
               </div>
             )}
@@ -1558,135 +1448,157 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       </div>
 
       {/* =========================================================
-          MODAL A: ADD / EDIT PHOTO WITH PLACEMENT LUXURY
+          MODAL: ADD / EDIT IMAGE (With Gallery File Upload Button)
           ========================================================= */}
       {isImageModalOpen && (
-        <div 
-          className="fixed inset-0 z-60 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 font-sans"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="relative w-full max-w-lg bg-[#181512] border border-[#c2a67e]/40 rounded-3xl p-6 sm:p-7 shadow-2xl text-stone-100 space-y-5 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#c2a67e]/20 pb-3">
-              <h3 className="text-lg font-bold font-display text-white">
-                {editingImage ? 'Edit Photo & Placements' : 'Add New Fieldwork Photo'}
-              </h3>
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/75 backdrop-blur-sm">
+          <div className={`w-full max-w-lg p-6 rounded-3xl shadow-2xl relative border ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
+            <div className="flex items-center justify-between pb-4 border-b border-stone-200/20 mb-4">
+              <h4 className="font-bold text-base flex items-center gap-2">
+                <Camera className="w-5 h-5 text-[#16a34a]" />
+                <span>{editingImage ? 'Edit Fieldwork Photograph' : 'Upload Fieldwork Image'}</span>
+              </h4>
               <button
                 onClick={() => setIsImageModalOpen(false)}
-                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white cursor-pointer"
+                className="p-1 rounded-lg text-stone-400 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveImage} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-mono text-[#c2a67e] font-bold block uppercase">Photo Title *</label>
+            {/* Hidden device file input */}
+            <input
+              type="file"
+              ref={imageFileInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleFileChange(e, (dataUrl) => setImageForm((prev) => ({ ...prev, url: dataUrl })))}
+            />
+
+            <form onSubmit={handleSaveImage} className="space-y-4">
+              <div>
+                <label className={themeClasses.label}>Image Title / Equipment Name</label>
                 <input
                   type="text"
                   value={imageForm.title}
                   onChange={(e) => setImageForm({ ...imageForm, title: e.target.value })}
-                  placeholder="e.g. Diamond Core Sample Extraction"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/20 text-white"
+                  placeholder="e.g. CAT Excavator Exploration Trenching"
+                  className={themeClasses.input}
                   required
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-mono text-[#c2a67e] font-bold block uppercase">Image URL *</label>
+              {/* Direct Gallery Upload Button + URL fallback */}
+              <div>
+                <label className={themeClasses.label}>Photo Source (Gallery Upload or URL)</label>
+                <div className="flex items-center gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => imageFileInputRef.current?.click()}
+                    className="flex-1 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Direct from Device Gallery</span>
+                  </button>
+                </div>
                 <input
-                  type="url"
+                  type="text"
                   value={imageForm.url}
                   onChange={(e) => setImageForm({ ...imageForm, url: e.target.value })}
-                  placeholder="Direct image URL (e.g. https://i.ibb.co/...)"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/20 text-white"
+                  placeholder="Or paste external image URL (https://...)"
+                  className={themeClasses.input}
                   required
                 />
-                {imageForm.url && (
-                  <div className="mt-2 aspect-video rounded-xl overflow-hidden bg-black border border-white/10">
-                    <img src={imageForm.url} alt="Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  </div>
-                )}
               </div>
 
-              <div className="space-y-1">
-                <label className="font-mono text-[#c2a67e] font-bold block uppercase">Caption / Description</label>
+              {/* Live Preview */}
+              {imageForm.url && (
+                <div className="aspect-video w-full rounded-xl overflow-hidden bg-black border border-stone-200/30">
+                  <img
+                    src={imageForm.url}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className={themeClasses.label}>Caption & Operational Details</label>
                 <textarea
                   value={imageForm.caption}
                   onChange={(e) => setImageForm({ ...imageForm, caption: e.target.value })}
+                  placeholder="Detail field location, methodology, or equipment purpose..."
                   rows={2}
-                  placeholder="Detailed geological or operational caption..."
-                  className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/20 text-white"
+                  className={themeClasses.input}
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-mono text-[#c2a67e] font-bold block uppercase">Category</label>
+              <div>
+                <label className={themeClasses.label}>Field Discipline Category</label>
                 <select
                   value={imageForm.category}
-                  onChange={(e) => setImageForm({ ...imageForm, category: e.target.value as any })}
-                  className="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/20 text-white"
+                  onChange={(e) => setImageForm({ ...imageForm, category: e.target.value as GalleryCategory })}
+                  className={themeClasses.input}
                 >
-                  <option value="geology">Geological Fieldwork</option>
-                  <option value="geophysics">Geophysical Profiling</option>
-                  <option value="groundwater">Groundwater & VES</option>
-                  <option value="drilling">Drilling & Core Logging</option>
-                  <option value="instruments">Instruments & Sensors</option>
-                  <option value="environmental">Environmental Studies</option>
-                  <option value="team">Field Personnel</option>
+                  <option value="geology">Geology & Exploration</option>
+                  <option value="geophysics">Geophysics & Resistivity</option>
+                  <option value="groundwater">Groundwater & Hydrogeology</option>
+                  <option value="drilling">Drilling Operations</option>
+                  <option value="environmental">Environmental Compliance</option>
+                  <option value="instruments">Field Instrumentation</option>
                 </select>
               </div>
 
-              {/* LUXURY PLACEMENT CHECKBOXES */}
-              <div className="p-4 rounded-2xl bg-black/60 border border-[#c2a67e]/30 space-y-2.5">
-                <span className="font-mono text-[#c2a67e] font-bold block uppercase text-[11px]">
-                  Where Should This Image Appear? (Select all that apply)
-                </span>
-                
-                <label className="flex items-center gap-2.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={imageForm.showOnHomepage}
-                    onChange={(e) => setImageForm({ ...imageForm, showOnHomepage: e.target.checked })}
-                    className="w-4 h-4 rounded text-[#16a34a] focus:ring-0"
-                  />
-                  <span>Show on <strong>HOMEPAGE</strong> (Hero Showcase & Dual Track Slider)</span>
-                </label>
+              {/* Display Placement Checkboxes */}
+              <div>
+                <label className={themeClasses.label}>Display Placements Across Website</label>
+                <div className="space-y-2 pt-1">
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={imageForm.showOnHomepage}
+                      onChange={(e) => setImageForm({ ...imageForm, showOnHomepage: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#16a34a] focus:ring-[#16a34a]"
+                    />
+                    <span>Show on Homepage (Fieldwork & Equipment Section)</span>
+                  </label>
 
-                <label className="flex items-center gap-2.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={imageForm.showOnProjects}
-                    onChange={(e) => setImageForm({ ...imageForm, showOnProjects: e.target.checked })}
-                    className="w-4 h-4 rounded text-[#16a34a] focus:ring-0"
-                  />
-                  <span>Show on <strong>PROJECT Page</strong> (Project Field Records)</span>
-                </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={imageForm.showOnProjects}
+                      onChange={(e) => setImageForm({ ...imageForm, showOnProjects: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#16a34a] focus:ring-[#16a34a]"
+                    />
+                    <span>Show on Projects Page Photographic Records</span>
+                  </label>
 
-                <label className="flex items-center gap-2.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={imageForm.showOnGallery}
-                    onChange={(e) => setImageForm({ ...imageForm, showOnGallery: e.target.checked })}
-                    className="w-4 h-4 rounded text-[#16a34a] focus:ring-0"
-                  />
-                  <span>Show on <strong>GALLERY Page</strong> (Dedicated Fieldwork Archive)</span>
-                </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={imageForm.showOnGallery}
+                      onChange={(e) => setImageForm({ ...imageForm, showOnGallery: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#16a34a] focus:ring-[#16a34a]"
+                    />
+                    <span>Show on Dedicated Gallery Page</span>
+                  </label>
+                </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200/20">
                 <button
                   type="button"
                   onClick={() => setIsImageModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-white/10 text-stone-300 hover:text-white"
+                  className={themeClasses.secondaryButton}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold"
+                  className={themeClasses.primaryButton}
                 >
-                  {editingImage ? 'Save Changes' : 'Add Image'}
+                  <Check className="w-4 h-4" />
+                  <span>{editingImage ? 'Save Changes' : 'Upload & Publish Image'}</span>
                 </button>
               </div>
             </form>
@@ -1695,128 +1607,170 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       )}
 
       {/* =========================================================
-          MODAL B: ADD / EDIT FIELD VIDEO
+          MODAL: ADD / EDIT VIDEO (With Projects Page Option & Direct Upload)
           ========================================================= */}
       {isVideoModalOpen && (
-        <div 
-          className="fixed inset-0 z-60 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 font-sans"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="relative w-full max-w-lg bg-[#181512] border border-[#c2a67e]/40 rounded-3xl p-6 sm:p-7 shadow-2xl text-stone-100 space-y-5 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#c2a67e]/20 pb-3">
-              <h3 className="text-lg font-bold font-display text-white">
-                {editingVideo ? 'Edit Field Video' : 'Add New Field Video'}
-              </h3>
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/75 backdrop-blur-sm">
+          <div className={`w-full max-w-lg p-6 rounded-3xl shadow-2xl relative border ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
+            <div className="flex items-center justify-between pb-4 border-b border-stone-200/20 mb-4">
+              <h4 className="font-bold text-base flex items-center gap-2">
+                <Video className="w-5 h-5 text-[#16a34a]" />
+                <span>{editingVideo ? 'Edit Field Video Record' : 'Upload Field Video'}</span>
+              </h4>
               <button
                 onClick={() => setIsVideoModalOpen(false)}
-                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white cursor-pointer"
+                className="p-1 rounded-lg text-stone-400 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveVideo} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-mono text-[#c2a67e] font-bold block uppercase">Video Title *</label>
+            {/* Hidden inputs for video file & thumbnail */}
+            <input
+              type="file"
+              ref={videoFileInputRef}
+              accept="video/*"
+              className="hidden"
+              onChange={(e) => handleFileChange(e, (dataUrl) => setVideoForm((prev) => ({ ...prev, driveUrl: dataUrl })))}
+            />
+            <input
+              type="file"
+              ref={videoThumbFileInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleFileChange(e, (dataUrl) => setVideoForm((prev) => ({ ...prev, thumbnail: dataUrl })))}
+            />
+
+            <form onSubmit={handleSaveVideo} className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+              <div>
+                <label className={themeClasses.label}>Video Title</label>
                 <input
                   type="text"
                   value={videoForm.title}
                   onChange={(e) => setVideoForm({ ...videoForm, title: e.target.value })}
-                  placeholder="e.g. Diamond Rotary Borehole Advance"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/20 text-white"
+                  placeholder="e.g. Rotary Borehole Mast Drilling Operations"
+                  className={themeClasses.input}
                   required
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-mono text-[#c2a67e] font-bold block uppercase">Subtitle / Specification</label>
+              <div>
+                <label className={themeClasses.label}>Technical Subtitle</label>
                 <input
                   type="text"
                   value={videoForm.subtitle}
                   onChange={(e) => setVideoForm({ ...videoForm, subtitle: e.target.value })}
                   placeholder="e.g. Deep Aquifer Siting & Continuous Mast Rotation"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/20 text-white"
+                  className={themeClasses.input}
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-mono text-[#c2a67e] font-bold block uppercase">Google Drive Share Link or Preview URL *</label>
+              {/* Video File / Link */}
+              <div>
+                <label className={themeClasses.label}>Video Source (Gallery Upload or Drive/Direct URL)</label>
+                <div className="flex items-center gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => videoFileInputRef.current?.click()}
+                    className="flex-1 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Video from Device Gallery</span>
+                  </button>
+                </div>
                 <input
-                  type="url"
+                  type="text"
                   value={videoForm.driveUrl}
                   onChange={(e) => setVideoForm({ ...videoForm, driveUrl: e.target.value })}
-                  placeholder="https://drive.google.com/file/d/.../view or /preview"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/20 text-white"
+                  placeholder="Or paste Google Drive view / preview link / mp4 URL"
+                  className={themeClasses.input}
                   required
                 />
-                <span className="text-[10px] text-stone-400 font-mono block">
-                  Paste standard share link; system auto-converts to clean streaming format.
-                </span>
               </div>
 
-              <div className="space-y-1">
-                <label className="font-mono text-[#c2a67e] font-bold block uppercase">Thumbnail Image URL</label>
+              {/* Thumbnail Image */}
+              <div>
+                <label className={themeClasses.label}>Cover Thumbnail (Gallery Upload or URL)</label>
+                <div className="flex items-center gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => videoThumbFileInputRef.current?.click()}
+                    className="flex-1 py-2 rounded-xl bg-stone-700 hover:bg-stone-600 text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Thumbnail from Gallery</span>
+                  </button>
+                </div>
                 <input
-                  type="url"
+                  type="text"
                   value={videoForm.thumbnail}
                   onChange={(e) => setVideoForm({ ...videoForm, thumbnail: e.target.value })}
-                  placeholder="https://i.ibb.co/..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/20 text-white"
+                  placeholder="Thumbnail Image URL (https://...)"
+                  className={themeClasses.input}
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-mono text-[#c2a67e] font-bold block uppercase">Detailed Operational Description</label>
+              <div>
+                <label className={themeClasses.label}>Video Description & Operational Context</label>
                 <textarea
                   value={videoForm.description}
                   onChange={(e) => setVideoForm({ ...videoForm, description: e.target.value })}
-                  rows={3}
-                  placeholder="Accurate technical description of what happens in the video..."
-                  className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/20 text-white"
+                  placeholder="Describe the operation, depth, drilling speed, or geophysical parameters..."
+                  rows={2}
+                  className={themeClasses.input}
                 />
               </div>
 
-              {/* Video Placement Options */}
-              <div className="p-4 rounded-2xl bg-black/60 border border-[#c2a67e]/30 space-y-2.5">
-                <span className="font-mono text-[#c2a67e] font-bold block uppercase text-[11px]">
-                  Video Display Placement
-                </span>
-                
-                <label className="flex items-center gap-2.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={videoForm.showOnHomepage}
-                    onChange={(e) => setVideoForm({ ...videoForm, showOnHomepage: e.target.checked })}
-                    className="w-4 h-4 rounded text-[#16a34a] focus:ring-0"
-                  />
-                  <span>Show in Homepage <strong>&quot;Drilling Operations & Subsurface Data Acquisition&quot;</strong></span>
-                </label>
+              {/* Page Placement Checkboxes Including PROJECT PAGE */}
+              <div>
+                <label className={themeClasses.label}>Where Should This Video Display?</label>
+                <div className="space-y-2 pt-1">
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={videoForm.showOnHomepage}
+                      onChange={(e) => setVideoForm({ ...videoForm, showOnHomepage: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#16a34a] focus:ring-[#16a34a]"
+                    />
+                    <span>Show on Homepage Video Stage</span>
+                  </label>
 
-                <label className="flex items-center gap-2.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={videoForm.showOnGallery}
-                    onChange={(e) => setVideoForm({ ...videoForm, showOnGallery: e.target.checked })}
-                    className="w-4 h-4 rounded text-[#16a34a] focus:ring-0"
-                  />
-                  <span>Show in Dedicated <strong>Video Gallery</strong></span>
-                </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={videoForm.showOnProjects}
+                      onChange={(e) => setVideoForm({ ...videoForm, showOnProjects: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#16a34a] focus:ring-[#16a34a]"
+                    />
+                    <span>Show on Projects Page Video Stage</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={videoForm.showOnGallery}
+                      onChange={(e) => setVideoForm({ ...videoForm, showOnGallery: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#16a34a] focus:ring-[#16a34a]"
+                    />
+                    <span>Show on Dedicated Video Gallery Page</span>
+                  </label>
+                </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200/20">
                 <button
                   type="button"
                   onClick={() => setIsVideoModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-white/10 text-stone-300 hover:text-white"
+                  className={themeClasses.secondaryButton}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold"
+                  className={themeClasses.primaryButton}
                 >
-                  {editingVideo ? 'Save Changes' : 'Add Video'}
+                  <Check className="w-4 h-4" />
+                  <span>{editingVideo ? 'Save Video Changes' : 'Publish Field Video'}</span>
                 </button>
               </div>
             </form>
@@ -1825,145 +1779,197 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       )}
 
       {/* =========================================================
-          MODAL C: IN-DASHBOARD PORTRAIT VIDEO PLAYER PREVIEW
+          MODAL: ADD / EDIT TEAM MEMBER (With Gallery Photo Upload)
           ========================================================= */}
-      {previewingVideo && (
-        <div 
-          className="fixed inset-0 z-70 bg-black/95 backdrop-blur-md flex flex-col justify-center items-center p-4 font-sans"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="w-full max-w-[420px] flex items-center justify-between text-white mb-2">
-            <span className="text-xs font-bold font-mono text-[#86efac] truncate">
-              [Preview] {previewingVideo.title}
-            </span>
-            <button
-              onClick={() => setPreviewingVideo(null)}
-              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="relative w-full max-w-[400px] aspect-[9/16] sm:aspect-[3/4] bg-black rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
-            <iframe
-              src={previewingVideo.drivePreviewUrl}
-              title={previewingVideo.title}
-              className="w-full h-full border-0 block"
-              style={{
-                height: 'calc(100% + 48px)',
-                marginTop: '-48px',
-                width: '100%'
-              }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-            {/* Top-right shield to block pop-out arrow */}
-            <div 
-              className="absolute top-0 right-0 w-16 h-12 z-30 bg-black pointer-events-auto"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-            />
-          </div>
-
-          <p className="text-xs text-stone-300 mt-2 max-w-[400px] text-center line-clamp-2">
-            {previewingVideo.subtitle}
-          </p>
-        </div>
-      )}
-
-      {/* =========================================================
-          MODAL D: ADD / EDIT PROJECT
-          ========================================================= */}
-      {isProjectModalOpen && (
-        <div 
-          className="fixed inset-0 z-60 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 font-sans"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="relative w-full max-w-lg bg-[#181512] border border-[#c2a67e]/40 rounded-3xl p-6 sm:p-7 shadow-2xl text-stone-100 space-y-5">
-            <div className="flex items-center justify-between border-b border-[#c2a67e]/20 pb-3">
-              <h3 className="text-lg font-bold font-display text-white">
-                {editingProject ? 'Edit Project' : 'Post New Field Case Study'}
-              </h3>
+      {isTeamModalOpen && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/75 backdrop-blur-sm">
+          <div className={`w-full max-w-lg p-6 rounded-3xl shadow-2xl relative border ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
+            <div className="flex items-center justify-between pb-4 border-b border-stone-200/20 mb-4">
+              <h4 className="font-bold text-base flex items-center gap-2">
+                <Users className="w-5 h-5 text-[#16a34a]" />
+                <span>{editingTeamMember ? 'Edit Team Member' : 'Add New Team Member'}</span>
+              </h4>
               <button
-                onClick={() => setIsProjectModalOpen(false)}
-                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white cursor-pointer"
+                onClick={() => setIsTeamModalOpen(false)}
+                className="p-1 rounded-lg text-stone-400 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveProject} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-mono text-[#c2a67e] font-bold block uppercase">Project Title *</label>
+            {/* Hidden input for team member photo */}
+            <input
+              type="file"
+              ref={teamPhotoFileInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleFileChange(e, (dataUrl) => setTeamForm((prev) => ({ ...prev, image: dataUrl })))}
+            />
+
+            <form onSubmit={handleSaveTeamMember} className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+              <div>
+                <label className={themeClasses.label}>Full Name & Academic Honors</label>
                 <input
                   type="text"
-                  value={projectForm.title}
-                  onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })}
-                  placeholder="e.g. Deep Rotary Aquifer Siting for Industrial Facility"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/20 text-white"
+                  value={teamForm.name}
+                  onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
+                  placeholder="e.g. Dr. Benjamin Ukwuteyinor, PhD"
+                  className={themeClasses.input}
                   required
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-mono text-[#c2a67e] font-bold block uppercase">Category</label>
-                  <select
-                    value={projectForm.category}
-                    onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/20 text-white"
-                  >
-                    <option value="Hydrogeology & Water">Hydrogeology & Water</option>
-                    <option value="Mineral Exploration">Mineral Exploration</option>
-                    <option value="Geophysical Profiling">Geophysical Profiling</option>
-                    <option value="Geotechnical Engineering">Geotechnical Engineering</option>
-                    <option value="Environmental ESIA">Environmental ESIA</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-mono text-[#c2a67e] font-bold block uppercase">Location</label>
+                <div>
+                  <label className={themeClasses.label}>Title / Designation</label>
                   <input
                     type="text"
-                    value={projectForm.location}
-                    onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })}
-                    placeholder="e.g. Enugu State, Nigeria"
-                    className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/20 text-white"
+                    value={teamForm.title}
+                    onChange={(e) => setTeamForm({ ...teamForm, title: e.target.value })}
+                    placeholder="e.g. Lead Hydrogeologist"
+                    className={themeClasses.input}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className={themeClasses.label}>Experience / Practice</label>
+                  <input
+                    type="text"
+                    value={teamForm.experienceYears}
+                    onChange={(e) => setTeamForm({ ...teamForm, experienceYears: e.target.value })}
+                    placeholder="e.g. 25+ years of professional practice"
+                    className={themeClasses.input}
                   />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="font-mono text-[#c2a67e] font-bold block uppercase">Summary</label>
-                <textarea
-                  value={projectForm.summary}
-                  onChange={(e) => setProjectForm({ ...projectForm, summary: e.target.value })}
-                  rows={2}
-                  placeholder="High-level project objective and outcome..."
-                  className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/20 text-white"
+              <div>
+                <label className={themeClasses.label}>Professional Credentials</label>
+                <input
+                  type="text"
+                  value={teamForm.credentials}
+                  onChange={(e) => setTeamForm({ ...teamForm, credentials: e.target.value })}
+                  placeholder="e.g. PhD Applied Geophysics, COMEG Registered"
+                  className={themeClasses.input}
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+              {/* Photo Upload from Gallery */}
+              <div>
+                <label className={themeClasses.label}>Profile Photograph (Gallery Upload or URL)</label>
+                <div className="flex items-center gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => teamPhotoFileInputRef.current?.click()}
+                    className="flex-1 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Photo from Device Gallery</span>
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={teamForm.image}
+                  onChange={(e) => setTeamForm({ ...teamForm, image: e.target.value })}
+                  placeholder="Or paste photo image URL (https://...)"
+                  className={themeClasses.input}
+                />
+              </div>
+
+              {/* Live Photo Preview */}
+              {teamForm.image && (
+                <div className="flex items-center gap-3 p-2 rounded-xl bg-black/20 border border-stone-200/20">
+                  <img
+                    src={teamForm.image}
+                    alt="Preview"
+                    className="w-12 h-12 rounded-xl object-cover"
+                  />
+                  <span className="text-xs text-stone-300">Photo preview loaded successfully</span>
+                </div>
+              )}
+
+              <div>
+                <label className={themeClasses.label}>Professional Affiliations (Comma-separated)</label>
+                <input
+                  type="text"
+                  value={teamForm.affiliations}
+                  onChange={(e) => setTeamForm({ ...teamForm, affiliations: e.target.value })}
+                  placeholder="e.g. COMEG, NMGS, IAIA"
+                  className={themeClasses.input}
+                />
+              </div>
+
+              <div>
+                <label className={themeClasses.label}>Professional Bio & Background</label>
+                <textarea
+                  value={teamForm.bio}
+                  onChange={(e) => setTeamForm({ ...teamForm, bio: e.target.value })}
+                  placeholder="Summary of experience, technical focus, and achievements..."
+                  rows={3}
+                  className={themeClasses.input}
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200/20">
                 <button
                   type="button"
-                  onClick={() => setIsProjectModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-white/10 text-stone-300 hover:text-white"
+                  onClick={() => setIsTeamModalOpen(false)}
+                  className={themeClasses.secondaryButton}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold"
+                  className={themeClasses.primaryButton}
                 >
-                  Save Project
+                  <Check className="w-4 h-4" />
+                  <span>{editingTeamMember ? 'Save Member' : 'Add Team Member'}</span>
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+          MODAL: VIDEO INLINE PREVIEW
+          ========================================================= */}
+      {previewingVideo && (
+        <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+          <div className="w-full max-w-sm rounded-3xl overflow-hidden bg-black border border-stone-800 shadow-2xl relative flex flex-col">
+            <div className="flex items-center justify-between p-3.5 bg-stone-900 border-b border-stone-800">
+              <span className="font-bold text-xs text-white truncate pr-2">{previewingVideo.title}</span>
+              <button
+                onClick={() => setPreviewingVideo(null)}
+                className="p-1 rounded-lg text-stone-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="aspect-[9/16] w-full bg-black">
+              {previewingVideo.driveViewUrl && previewingVideo.driveViewUrl.startsWith('data:video') ? (
+                <video
+                  src={previewingVideo.driveViewUrl}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <iframe
+                  src={previewingVideo.drivePreviewUrl}
+                  title={previewingVideo.title}
+                  className="w-full h-full border-0"
+                  allow="autoplay; encrypted-media; fullscreen"
+                />
+              )}
+            </div>
+
+            <div className="p-3 bg-stone-900 text-stone-300 text-xs">
+              <span className="text-[10px] font-mono text-[#c2a67e] block">{previewingVideo.subtitle}</span>
+              <p className="line-clamp-2 mt-1 text-[11px]">{previewingVideo.description}</p>
+            </div>
           </div>
         </div>
       )}

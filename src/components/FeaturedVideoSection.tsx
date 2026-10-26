@@ -65,7 +65,7 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({
             <Film className="w-3.5 h-3.5 text-[#16a34a]" />
             <span>Field Video Archive</span>
             <span aria-hidden="true" className="text-stone-300">/</span>
-            <span>{videos.length} Verified Drilling Records</span>
+            <span>Verified Drilling Records</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-extrabold text-stone-900 tracking-tight leading-tight [text-wrap:balance]">

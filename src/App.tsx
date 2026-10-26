@@ -28,8 +28,15 @@ import { FloatingContact } from './components/FloatingContact';
 import { AdminDashboard } from './components/AdminDashboard';
 import { PrivacyModal } from './components/PrivacyModal';
 import { LightboxModal } from './components/LightboxModal';
-import { MediaItem, ConsultationEnquiry, ProjectItem, ArticleItem, CompanyConfig, ProjectVideo } from './types';
+import { MediaItem, ConsultationEnquiry, ProjectItem, ArticleItem, CompanyConfig, ProjectVideo, TeamMember } from './types';
 import { ArrowRight, ChevronRight, Layers, MessageSquare, Camera, Maximize2 } from 'lucide-react';
+import { 
+  getImagesFromApi, saveImageToApi, deleteImageFromApi,
+  getVideosFromApi, saveVideoToApi, deleteVideoFromApi,
+  getTeamFromApi, saveTeamMemberToApi, deleteTeamMemberFromApi,
+  getEnquiriesFromApi, updateEnquiryStatusInApi, deleteEnquiryFromApi, clearAllEnquiriesInApi,
+  getSettingsFromApi, saveSettingsToApi
+} from './services/apiService';
 
 export default function App() {
   // State initialization with persistence fallback
@@ -81,6 +88,19 @@ export default function App() {
     return ALL_PROJECT_VIDEOS;
   });
 
+  const [team, setTeam] = useState<TeamMember[]>(() => {
+    const saved = localStorage.getItem('giniben_team_members_v2');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {}
+    }
+    return INITIAL_TEAM_MEMBERS;
+  });
+
   // Dedicated Page Routing: 'home' | 'about' | 'services' | 'projects' | 'gallery' | 'contact'
   const [currentPage, setCurrentPage] = useState<string>(() => {
     const hash = window.location.hash.replace('#', '').toLowerCase();
@@ -111,6 +131,7 @@ export default function App() {
   const heroImages = galleryImages.filter((img) => img.showOnHomepage !== false && img.isHero).slice(0, 15);
   const homepageImages = galleryImages.filter((img) => img.showOnHomepage !== false);
   const homepageVideos = projectVideos.filter((v) => v.showOnHomepage !== false);
+  const projectPageVideos = projectVideos.filter((v) => v.showOnProjects !== false);
   const projectPageImages = galleryImages.filter((img) => img.showOnProjects !== false && img.category !== 'instruments');
   const galleryPageImages = galleryImages.filter((img) => img.showOnGallery !== false);
   const galleryPageVideos = projectVideos.filter((v) => v.showOnGallery !== false);
@@ -131,10 +152,32 @@ export default function App() {
     handleNavigate('contact');
   };
 
-  // State handlers with persistent sync
+  // Initial load from Truehost cPanel MySQL Backend (with graceful localStorage fallback)
+  useEffect(() => {
+    getImagesFromApi().then((imgs) => {
+      if (imgs && imgs.length > 0) setGalleryImages(imgs);
+    });
+    getVideosFromApi().then((vids) => {
+      if (vids && vids.length > 0) setProjectVideos(vids);
+    });
+    getTeamFromApi().then((tm) => {
+      if (tm && tm.length > 0) setTeam(tm);
+    });
+    getEnquiriesFromApi().then((enqs) => {
+      if (enqs) setEnquiries(enqs);
+    });
+    getSettingsFromApi().then((sets) => {
+      if (sets && typeof sets === 'object') {
+        setCompany((prev) => ({ ...prev, ...sets }));
+      }
+    });
+  }, []);
+
+  // State handlers with persistent sync (localStorage + MySQL Backend)
   const handleUpdateCompany = (updated: CompanyConfig) => {
     setCompany(updated);
     localStorage.setItem('giniben_company_config', JSON.stringify(updated));
+    saveSettingsToApi(updated as any);
   };
 
   const handleNewEnquiryCreated = (newEnq: ConsultationEnquiry) => {
@@ -149,12 +192,14 @@ export default function App() {
     );
     setEnquiries(updated);
     localStorage.setItem('giniben_enquiries', JSON.stringify(updated));
+    updateEnquiryStatusInApi(id, newStatus);
   };
 
   const handleDeleteEnquiry = (id: string) => {
     const updated = enquiries.filter((enq) => enq.id !== id);
     setEnquiries(updated);
     localStorage.setItem('giniben_enquiries', JSON.stringify(updated));
+    deleteEnquiryFromApi(id);
   };
 
   const handleAddProject = (newProj: ProjectItem) => {
@@ -173,42 +218,75 @@ export default function App() {
     const updated = [newImg, ...galleryImages];
     setGalleryImages(updated);
     localStorage.setItem('giniben_gallery_images_v4', JSON.stringify(updated));
+    saveImageToApi(newImg);
   };
 
   const handleUpdateGalleryImage = (updatedImg: MediaItem) => {
     const updated = galleryImages.map((img) => img.id === updatedImg.id ? updatedImg : img);
     setGalleryImages(updated);
     localStorage.setItem('giniben_gallery_images_v4', JSON.stringify(updated));
+    saveImageToApi(updatedImg);
   };
 
   const handleDeleteGalleryImage = (id: string) => {
     const updated = galleryImages.filter((img) => img.id !== id);
     setGalleryImages(updated);
     localStorage.setItem('giniben_gallery_images_v4', JSON.stringify(updated));
+    deleteImageFromApi(id);
   };
 
   const handleAddVideo = (newVid: ProjectVideo) => {
     const updated = [newVid, ...projectVideos];
     setProjectVideos(updated);
     localStorage.setItem('giniben_project_videos_v4', JSON.stringify(updated));
+    saveVideoToApi(newVid);
   };
 
   const handleUpdateVideo = (updatedVid: ProjectVideo) => {
     const updated = projectVideos.map((v) => v.id === updatedVid.id ? updatedVid : v);
     setProjectVideos(updated);
     localStorage.setItem('giniben_project_videos_v4', JSON.stringify(updated));
+    saveVideoToApi(updatedVid);
   };
 
   const handleDeleteVideo = (id: string) => {
     const updated = projectVideos.filter((v) => v.id !== id);
     setProjectVideos(updated);
     localStorage.setItem('giniben_project_videos_v4', JSON.stringify(updated));
+    deleteVideoFromApi(id);
   };
 
   const handleAddArticle = (newArt: ArticleItem) => {
     const updated = [newArt, ...articles];
     setArticles(updated);
     localStorage.setItem('giniben_articles', JSON.stringify(updated));
+  };
+
+  const handleAddTeamMember = (newMember: TeamMember) => {
+    const updated = [...team, newMember];
+    setTeam(updated);
+    localStorage.setItem('giniben_team_members_v2', JSON.stringify(updated));
+    saveTeamMemberToApi(newMember);
+  };
+
+  const handleUpdateTeamMember = (updatedMember: TeamMember) => {
+    const updated = team.map((m) => m.id === updatedMember.id ? updatedMember : m);
+    setTeam(updated);
+    localStorage.setItem('giniben_team_members_v2', JSON.stringify(updated));
+    saveTeamMemberToApi(updatedMember);
+  };
+
+  const handleDeleteTeamMember = (id: string) => {
+    const updated = team.filter((m) => m.id !== id);
+    setTeam(updated);
+    localStorage.setItem('giniben_team_members_v2', JSON.stringify(updated));
+    deleteTeamMemberFromApi(id);
+  };
+
+  const handleClearAllEnquiries = () => {
+    setEnquiries([]);
+    localStorage.setItem('giniben_enquiries', JSON.stringify([]));
+    clearAllEnquiriesInApi();
   };
 
   return (
@@ -327,7 +405,7 @@ export default function App() {
             />
 
             {/* 8. Team Members on Homepage (With user's requested 4 members and photos) */}
-            <TeamSection team={INITIAL_TEAM_MEMBERS} />
+            <TeamSection team={team} />
 
             {/* 9. Founder's Message from Dr. Benjamin Ukwuteyinor, PhD */}
             <FoundersMessage />
@@ -362,7 +440,7 @@ export default function App() {
 
                 {/* Responsive 24-Card Photographic Showcase */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                  {galleryImages.slice(0, 24).map((img) => (
+                  {homepageImages.slice(0, 24).map((img) => (
                     <div
                       key={img.id}
                       onClick={() => setSelectedLightboxImage(img)}
@@ -476,7 +554,7 @@ export default function App() {
 
             {/* Technical Team & Leadership (The 4 verified members with user photos) */}
             <TeamSection
-              team={INITIAL_TEAM_MEMBERS}
+              team={team}
             />
           </div>
         )}
@@ -533,10 +611,12 @@ export default function App() {
               </div>
             </div>
 
-            {/* Featured Drilling Video (In-Place Playback, No External Redirect) */}
-            <FeaturedVideoSection
-              videos={homepageVideos}
-            />
+            {/* Featured Drilling Video (In-Place Playback, Configured for Projects Page) */}
+            {projectPageVideos.length > 0 && (
+              <FeaturedVideoSection
+                videos={projectPageVideos}
+              />
+            )}
 
             {/* Tabular Recent Projects Component */}
             <RecentProjectsTable 
@@ -554,7 +634,7 @@ export default function App() {
             {/* Complete Photographic Fieldwork Gallery & Subtitles (Also on Projects Page, Excluding Instruments Images) */}
             <GallerySection
               images={projectPageImages}
-              videos={homepageVideos}
+              videos={projectPageVideos}
               selectedLightboxImage={selectedLightboxImage}
               onCloseLightbox={() => setSelectedLightboxImage(null)}
               onOpenLightbox={(img) => setSelectedLightboxImage(img)}
@@ -647,18 +727,17 @@ export default function App() {
       {/* Persistent Floating WhatsApp & Phone Buttons */}
       <FloatingContact company={company} />
 
-      {/* Full Admin Dashboard & cPanel Hub */}
+      {/* Full Admin Dashboard */}
       <AdminDashboard
         isOpen={isAdminOpen}
         onClose={() => setIsAdminOpen(false)}
+        onGoToHomepage={() => handleNavigate('home')}
         company={company}
         onUpdateCompany={handleUpdateCompany}
         enquiries={enquiries}
         onUpdateEnquiryStatus={handleUpdateEnquiryStatus}
         onDeleteEnquiry={handleDeleteEnquiry}
-        projects={projects}
-        onAddProject={handleAddProject}
-        onDeleteProject={handleDeleteProject}
+        onClearAllEnquiries={handleClearAllEnquiries}
         galleryImages={galleryImages}
         onAddGalleryImage={handleAddGalleryImage}
         onUpdateGalleryImage={handleUpdateGalleryImage}
@@ -667,10 +746,10 @@ export default function App() {
         onAddVideo={handleAddVideo}
         onUpdateVideo={handleUpdateVideo}
         onDeleteVideo={handleDeleteVideo}
-        services={INITIAL_SERVICES}
-        team={INITIAL_TEAM_MEMBERS}
-        articles={articles}
-        onAddArticle={handleAddArticle}
+        team={team}
+        onAddTeamMember={handleAddTeamMember}
+        onUpdateTeamMember={handleUpdateTeamMember}
+        onDeleteTeamMember={handleDeleteTeamMember}
       />
 
       {/* Privacy Policy Modal */}
