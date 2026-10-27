@@ -496,7 +496,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // -------------------------------------------------------------
   // STYLING CLASSES (White vs Carton Brown Mode)
   // -------------------------------------------------------------
+  // -------------------------------------------------------------
+  // STYLING CLASSES (White vs Carton Brown Mode)
+  // -------------------------------------------------------------
   const themeClasses = {
+<<<<<<< HEAD
     modalOverlay: 'fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm',
     mainShell: isCarton 
       ? 'w-full max-w-7xl h-[calc(100dvh-1.5rem)] sm:h-[92vh] max-h-[950px] bg-[#221a14] text-[#f4efe8] rounded-xl sm:rounded-2xl shadow-2xl flex flex-col border border-[#523f2f] overflow-hidden'
@@ -510,23 +514,46 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     contentArea: isCarton 
       ? 'min-w-0 min-h-0 flex-1 bg-[#1e1712] p-3 overflow-y-auto overscroll-contain sm:p-6'
       : 'min-w-0 min-h-0 flex-1 bg-white p-3 overflow-y-auto overscroll-contain sm:p-6',
+=======
+    modalOverlay: 'fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/80 backdrop-blur-sm overflow-hidden',
+    mainShell: isCarton 
+      ? 'w-full md:max-w-7xl h-full md:h-[92vh] md:max-h-[950px] bg-[#221a14] text-[#f4efe8] rounded-none md:rounded-2xl shadow-2xl flex flex-col border-0 md:border md:border-[#523f2f] overflow-hidden'
+      : 'w-full md:max-w-7xl h-full md:h-[92vh] md:max-h-[950px] bg-white text-stone-900 rounded-none md:rounded-2xl shadow-2xl flex flex-col border-0 md:border md:border-stone-200 overflow-hidden',
+    header: isCarton 
+      ? 'flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3.5 border-b border-[#523f2f] bg-[#292019] shrink-0'
+      : 'flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3.5 border-b border-stone-200 bg-white shrink-0',
+    sidebar: isCarton 
+      ? 'hidden md:flex w-60 lg:w-64 border-r border-[#523f2f] bg-[#2a211a] p-4 flex-col justify-between shrink-0'
+      : 'hidden md:flex w-60 lg:w-64 border-r border-stone-200 bg-[#faf8f5] p-4 flex-col justify-between shrink-0',
+    contentArea: isCarton 
+      ? 'flex-1 bg-[#1e1712] p-3 sm:p-5 md:p-6 overflow-y-auto overscroll-contain'
+      : 'flex-1 bg-white p-3 sm:p-5 md:p-6 overflow-y-auto overscroll-contain',
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
     card: isCarton 
-      ? 'bg-[#2b221a] border border-[#523f2f] rounded-2xl p-5 shadow-sm'
-      : 'bg-white border border-stone-200 rounded-2xl p-5 shadow-xs',
+      ? 'bg-[#2b221a] border border-[#523f2f] rounded-2xl p-3.5 sm:p-5 shadow-sm'
+      : 'bg-white border border-stone-200 rounded-2xl p-3.5 sm:p-5 shadow-xs',
     input: isCarton 
+<<<<<<< HEAD
       ? 'w-full px-3.5 py-2.5 rounded-xl bg-[#1a1410] border border-[#5a4635] text-white placeholder-stone-400 focus:outline-none focus:border-[#c2a67e] text-base sm:text-sm'
       : 'w-full px-3.5 py-2.5 rounded-xl bg-white border border-stone-300 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#16a34a] text-base sm:text-sm',
+=======
+      ? 'w-full px-3.5 py-2.5 rounded-xl bg-[#1a1410] border border-[#5a4635] text-white placeholder-stone-400 focus:outline-none focus:border-[#c2a67e] text-base sm:text-sm min-h-[42px] transition-colors'
+      : 'w-full px-3.5 py-2.5 rounded-xl bg-white border border-stone-300 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#16a34a] text-base sm:text-sm min-h-[42px] transition-colors',
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
     label: isCarton 
-      ? 'text-xs font-mono uppercase tracking-wider text-[#d7cbbe] block mb-1 font-bold'
-      : 'text-xs font-mono uppercase tracking-wider text-stone-600 block mb-1 font-bold',
-    navButtonActive: 'bg-[#16a34a] text-white shadow-md',
+      ? 'text-xs font-mono uppercase tracking-wider text-[#d7cbbe] block mb-1.5 font-bold'
+      : 'text-xs font-mono uppercase tracking-wider text-stone-600 block mb-1.5 font-bold',
+    navButtonActive: 'bg-[#16a34a] text-white shadow-md ring-2 ring-[#16a34a]/30',
     navButtonInactive: isCarton 
       ? 'text-[#dfd6cb] hover:bg-[#382c22] hover:text-white'
       : 'text-stone-700 hover:bg-stone-100 hover:text-stone-900',
-    primaryButton: 'px-4 py-2 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer',
+    mobileNavInactive: isCarton
+      ? 'bg-[#2c231b] hover:bg-[#382c22] text-[#dfd6cb] border border-[#4d3a2b]'
+      : 'bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200',
+    primaryButton: 'px-3.5 sm:px-4 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] active:scale-[0.98] text-white text-xs sm:text-sm font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation min-h-[40px]',
     secondaryButton: isCarton
-      ? 'px-4 py-2 rounded-xl bg-[#3a2e24] hover:bg-[#48392d] text-white text-xs font-bold border border-[#5a4635] transition-all flex items-center gap-1.5 cursor-pointer'
-      : 'px-4 py-2 rounded-xl bg-white hover:bg-stone-50 text-stone-800 text-xs font-bold border border-stone-300 transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer'
+      ? 'px-3.5 sm:px-4 py-2.5 rounded-xl bg-[#3a2e24] hover:bg-[#48392d] active:scale-[0.98] text-white text-xs sm:text-sm font-bold border border-[#5a4635] transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation min-h-[40px]'
+      : 'px-3.5 sm:px-4 py-2.5 rounded-xl bg-white hover:bg-stone-50 active:scale-[0.98] text-stone-800 text-xs sm:text-sm font-bold border border-stone-300 transition-all shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation min-h-[40px]'
   };
 
   // -------------------------------------------------------------
@@ -534,20 +561,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // -------------------------------------------------------------
   if (!isAuthenticated) {
     return (
+<<<<<<< HEAD
       <div className={themeClasses.modalOverlay}>
         <div className={`w-full max-w-md max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-5 sm:p-8 rounded-3xl shadow-2xl relative ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border border-[#523f2f]' : 'bg-white text-stone-900 border border-stone-200'}`}>
           <div className="flex items-center justify-between pb-6 border-b border-stone-200/50 mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#16a34a]/15 text-[#16a34a] flex items-center justify-center font-bold">
                 <ShieldCheck className="w-6 h-6" />
+=======
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
+        <div className={`w-full max-w-md p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl relative my-auto ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border border-[#523f2f]' : 'bg-white text-stone-900 border border-stone-200'}`}>
+          <div className="flex items-center justify-between pb-4 sm:pb-6 border-b border-stone-200/50 mb-4 sm:mb-6">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#16a34a]/15 text-[#16a34a] flex items-center justify-center font-bold">
+                <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
               </div>
               <div>
-                <h3 className="font-display font-bold text-lg leading-tight">Admin Console</h3>
-                <span className="text-[11px] font-mono text-stone-400">GiniBen & Partners Ltd</span>
+                <h3 className="font-display font-bold text-base sm:text-lg leading-tight">Admin Console</h3>
+                <span className="text-[10px] sm:text-[11px] font-mono text-stone-400">GiniBen & Partners Ltd</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={toggleAdminTheme}
                 className="p-2 rounded-lg text-stone-400 hover:text-stone-600 transition-colors"
@@ -629,6 +665,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         
         {/* Top Header Bar */}
         <header className={themeClasses.header}>
+<<<<<<< HEAD
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <div className="w-9 h-9 rounded-xl bg-[#16a34a] text-white flex items-center justify-center font-bold shadow-xs">
               <ShieldCheck className="w-5 h-5" />
@@ -645,38 +682,57 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center justify-start gap-2 sm:justify-end sm:gap-2.5">
+=======
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#16a34a] text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h2 className="font-display font-bold text-sm sm:text-base leading-tight truncate">Admin Console</h2>
+                <span className="hidden sm:inline-block text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#16a34a]/15 text-[#16a34a] font-bold">
+                  PORTAL
+                </span>
+              </div>
+              <span className="text-[10px] sm:text-[11px] font-mono text-stone-400 block truncate">GiniBen & Partners Ltd</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
             {/* GO TO HOMEPAGE BUTTON */}
             <button
               onClick={() => {
                 onClose();
                 onGoToHomepage();
               }}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#16a34a]/10 hover:bg-[#16a34a]/20 text-[#16a34a] text-xs font-bold transition-all border border-[#16a34a]/30 cursor-pointer"
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-[#16a34a]/10 hover:bg-[#16a34a]/20 text-[#16a34a] text-xs font-bold transition-all border border-[#16a34a]/30 cursor-pointer"
               title="Exit Admin and navigate to Homepage"
             >
-              <Home className="w-4 h-4" />
-              <span>Go to Homepage</span>
+              <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Go to Homepage</span>
+              <span className="sm:hidden text-[11px]">Home</span>
             </button>
 
             {/* WHITE / CARTON BROWN DARKMODE TOGGLE */}
             <button
               onClick={toggleAdminTheme}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+              className={`p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer flex items-center gap-1.5 ${
                 isCarton 
                   ? 'bg-[#382b20] text-[#c2a67e] border-[#5a4736] hover:bg-[#463629]' 
                   : 'bg-stone-100 text-stone-700 border-stone-200 hover:bg-stone-200'
               }`}
-              title="Toggle between White mode and Carton Brown Darkmode"
+              title={`Switch to ${isCarton ? 'White Mode' : 'Carton Brown Darkmode'}`}
             >
               {isCarton ? (
                 <>
                   <Sun className="w-3.5 h-3.5 text-[#c2a67e]" />
-                  <span>White Mode</span>
+                  <span className="hidden md:inline">White Mode</span>
                 </>
               ) : (
                 <>
                   <Moon className="w-3.5 h-3.5 text-stone-600" />
-                  <span>Carton Brown</span>
+                  <span className="hidden md:inline">Carton Brown</span>
                 </>
               )}
             </button>
@@ -684,10 +740,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {/* LOGOUT */}
             <button
               onClick={handleLogout}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors border border-rose-500/20 cursor-pointer"
+              className="px-2 sm:px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors border border-rose-500/20 cursor-pointer flex items-center gap-1"
               title="Lock Admin Session"
             >
-              Lock Console
+              <Lock className="w-3.5 h-3.5 sm:hidden" />
+              <span className="hidden sm:inline">Lock Console</span>
             </button>
 
             {/* CLOSE MODAL */}
@@ -696,15 +753,87 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
               title="Close Console"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </header>
 
+        {/* Dedicated Mobile Horizontal Tab Bar (Visible on mobile/tablet screens < md) */}
+        <div className={`md:hidden flex items-center gap-2 overflow-x-auto scrollbar-none touch-pan-x px-3 py-2.5 border-b shrink-0 ${
+          isCarton ? 'bg-[#251d16] border-[#523f2f]' : 'bg-[#faf8f5] border-stone-200'
+        }`}>
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer active:scale-95 touch-manipulation ${
+              activeTab === 'overview' ? themeClasses.navButtonActive : themeClasses.mobileNavInactive
+            }`}
+          >
+            <LayoutDashboard className="w-4 h-4 shrink-0" />
+            <span>Overview</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('images')}
+            className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer active:scale-95 touch-manipulation ${
+              activeTab === 'images' ? themeClasses.navButtonActive : themeClasses.mobileNavInactive
+            }`}
+          >
+            <ImageIcon className="w-4 h-4 shrink-0" />
+            <span>Images ({galleryImages.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('videos')}
+            className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer active:scale-95 touch-manipulation ${
+              activeTab === 'videos' ? themeClasses.navButtonActive : themeClasses.mobileNavInactive
+            }`}
+          >
+            <Film className="w-4 h-4 shrink-0" />
+            <span>Videos ({videos.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('team')}
+            className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer active:scale-95 touch-manipulation ${
+              activeTab === 'team' ? themeClasses.navButtonActive : themeClasses.mobileNavInactive
+            }`}
+          >
+            <Users className="w-4 h-4 shrink-0" />
+            <span>Team ({team.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('enquiries')}
+            className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer active:scale-95 touch-manipulation ${
+              activeTab === 'enquiries' ? themeClasses.navButtonActive : themeClasses.mobileNavInactive
+            }`}
+          >
+            <MessageSquare className="w-4 h-4 shrink-0" />
+            <span>Enquiries</span>
+            {enquiries.length > 0 && (
+              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full font-bold ${
+                activeTab === 'enquiries' ? 'bg-white text-[#16a34a]' : 'bg-[#16a34a] text-white'
+              }`}>
+                {enquiries.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer active:scale-95 touch-manipulation ${
+              activeTab === 'settings' ? themeClasses.navButtonActive : themeClasses.mobileNavInactive
+            }`}
+          >
+            <Settings className="w-4 h-4 shrink-0" />
+            <span>Settings</span>
+          </button>
+        </div>
+
         {/* Body Grid: Sidebar + Active Panel */}
         <div className="min-h-0 flex-1 flex flex-col overflow-hidden sm:flex-row">
           
-          {/* Navigation Sidebar */}
+          {/* Navigation Sidebar (Desktop screens >= md) */}
           <aside className={themeClasses.sidebar}>
             <nav className="flex gap-1 overflow-x-auto no-scrollbar sm:block sm:space-y-1">
               <button
@@ -809,57 +938,61 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 <div>
+<<<<<<< HEAD
                   <h3 className="font-display font-extrabold text-xl tracking-tight sm:text-2xl">System Status & Resource Metrics</h3>
+=======
+                  <h3 className="font-display font-extrabold text-xl sm:text-2xl tracking-tight">System Status & Resource Metrics</h3>
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                   <p className="text-xs text-stone-400 mt-1">Manage public site content, verified field media, personnel profiles, and client inquiries.</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
                   <div className={themeClasses.card}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-mono font-bold text-stone-400 uppercase">Fieldwork Photos</span>
-                      <ImageIcon className="w-4 h-4 text-[#16a34a]" />
+                    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                      <span className="text-[10px] sm:text-xs font-mono font-bold text-stone-400 uppercase">Field Photos</span>
+                      <ImageIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#16a34a]" />
                     </div>
-                    <div className="text-3xl font-bold font-mono">{galleryImages.length}</div>
-                    <div className="text-[11px] text-stone-500 mt-1">Placed on Home, Projects, and Gallery</div>
+                    <div className="text-2xl sm:text-3xl font-bold font-mono">{galleryImages.length}</div>
+                    <div className="text-[10px] sm:text-[11px] text-stone-500 mt-1 line-clamp-1">Home, Projects, Gallery</div>
                   </div>
 
                   <div className={themeClasses.card}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-mono font-bold text-stone-400 uppercase">Field Recordings</span>
-                      <Film className="w-4 h-4 text-[#16a34a]" />
+                    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                      <span className="text-[10px] sm:text-xs font-mono font-bold text-stone-400 uppercase">Field Videos</span>
+                      <Film className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#16a34a]" />
                     </div>
-                    <div className="text-3xl font-bold font-mono">{videos.length}</div>
-                    <div className="text-[11px] text-stone-500 mt-1">Mobile portrait video records</div>
+                    <div className="text-2xl sm:text-3xl font-bold font-mono">{videos.length}</div>
+                    <div className="text-[10px] sm:text-[11px] text-stone-500 mt-1 line-clamp-1">Mobile portrait videos</div>
                   </div>
 
                   <div className={themeClasses.card}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-mono font-bold text-stone-400 uppercase">Personnel Team</span>
-                      <Users className="w-4 h-4 text-[#16a34a]" />
+                    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                      <span className="text-[10px] sm:text-xs font-mono font-bold text-stone-400 uppercase">Team Members</span>
+                      <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#16a34a]" />
                     </div>
-                    <div className="text-3xl font-bold font-mono">{team.length}</div>
-                    <div className="text-[11px] text-stone-500 mt-1">Geoscientists & technical leaders</div>
+                    <div className="text-2xl sm:text-3xl font-bold font-mono">{team.length}</div>
+                    <div className="text-[10px] sm:text-[11px] text-stone-500 mt-1 line-clamp-1">Geoscientists & leaders</div>
                   </div>
 
                   <div className={themeClasses.card}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-mono font-bold text-stone-400 uppercase">Client Enquiries</span>
-                      <MessageSquare className="w-4 h-4 text-[#16a34a]" />
+                    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                      <span className="text-[10px] sm:text-xs font-mono font-bold text-stone-400 uppercase">Enquiries</span>
+                      <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#16a34a]" />
                     </div>
-                    <div className="text-3xl font-bold font-mono">{enquiries.length}</div>
-                    <div className="text-[11px] text-stone-500 mt-1">Live inquiries received</div>
+                    <div className="text-2xl sm:text-3xl font-bold font-mono">{enquiries.length}</div>
+                    <div className="text-[10px] sm:text-[11px] text-stone-500 mt-1 line-clamp-1">Client submissions</div>
                   </div>
                 </div>
 
                 {/* Quick Shortcuts */}
                 <div className={themeClasses.card}>
-                  <h4 className="font-bold text-sm mb-4">Quick Management Shortcuts</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <h4 className="font-bold text-xs sm:text-sm mb-3 sm:mb-4">Quick Management Shortcuts</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
                     <button
                       onClick={handleOpenAddImage}
                       className={themeClasses.secondaryButton}
                     >
-                      <Plus className="w-4 h-4 text-[#16a34a]" />
+                      <Plus className="w-4 h-4 text-[#16a34a] shrink-0" />
                       <span>Upload New Image from Gallery</span>
                     </button>
 
@@ -867,7 +1000,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       onClick={handleOpenAddVideo}
                       className={themeClasses.secondaryButton}
                     >
-                      <Plus className="w-4 h-4 text-[#16a34a]" />
+                      <Plus className="w-4 h-4 text-[#16a34a] shrink-0" />
                       <span>Add / Upload New Field Video</span>
                     </button>
 
@@ -875,7 +1008,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       onClick={handleOpenAddTeamMember}
                       className={themeClasses.secondaryButton}
                     >
-                      <Plus className="w-4 h-4 text-[#16a34a]" />
+                      <Plus className="w-4 h-4 text-[#16a34a] shrink-0" />
                       <span>Add New Team Member</span>
                     </button>
                   </div>
@@ -887,10 +1020,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 TAB 2: FIELDWORK IMAGES (With Direct Device Upload)
                 ======================================================= */}
             {activeTab === 'images' && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <div>
+<<<<<<< HEAD
                     <h3 className="font-display font-extrabold text-xl tracking-tight sm:text-2xl">Fieldwork & Equipment Gallery</h3>
+=======
+                    <h3 className="font-display font-extrabold text-xl sm:text-2xl tracking-tight">Fieldwork & Equipment Gallery</h3>
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                     <p className="text-xs text-stone-400 mt-1">
                       Add, edit, or upload photos directly from your phone/PC gallery with instant placement control.
                     </p>
@@ -898,7 +1035,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                   <button
                     onClick={handleOpenAddImage}
-                    className={themeClasses.primaryButton}
+                    className={`w-full sm:w-auto ${themeClasses.primaryButton}`}
                   >
                     <Plus className="w-4 h-4" />
                     <span>Upload Image from Gallery</span>
@@ -906,39 +1043,44 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
 
                 {/* Filter and Placement Selector */}
+<<<<<<< HEAD
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                   <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-black/10 border border-stone-200/20 text-xs font-bold">
+=======
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                  <div className="flex items-center gap-1 p-1 rounded-xl bg-black/10 border border-stone-200/20 text-xs font-bold overflow-x-auto no-scrollbar max-w-full">
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                     <button
                       onClick={() => setImagePlacementFilter('all')}
-                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                         imagePlacementFilter === 'all' ? 'bg-[#16a34a] text-white shadow-xs' : 'text-stone-400 hover:text-stone-200'
                       }`}
                     >
-                      All Images ({galleryImages.length})
+                      All ({galleryImages.length})
                     </button>
                     <button
                       onClick={() => setImagePlacementFilter('homepage')}
-                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                         imagePlacementFilter === 'homepage' ? 'bg-[#16a34a] text-white shadow-xs' : 'text-stone-400 hover:text-stone-200'
                       }`}
                     >
-                      Homepage Gallery
+                      Homepage
                     </button>
                     <button
                       onClick={() => setImagePlacementFilter('projects')}
-                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                         imagePlacementFilter === 'projects' ? 'bg-[#16a34a] text-white shadow-xs' : 'text-stone-400 hover:text-stone-200'
                       }`}
                     >
-                      Projects Page
+                      Projects
                     </button>
                     <button
                       onClick={() => setImagePlacementFilter('gallery')}
-                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                         imagePlacementFilter === 'gallery' ? 'bg-[#16a34a] text-white shadow-xs' : 'text-stone-400 hover:text-stone-200'
                       }`}
                     >
-                      Gallery Page
+                      Gallery
                     </button>
                   </div>
 
@@ -946,58 +1088,71 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="text"
                     value={imageSearch}
                     onChange={(e) => setImageSearch(e.target.value)}
-                    placeholder="Search images by title or caption..."
-                    className={`max-w-xs ${themeClasses.input}`}
+                    placeholder="Search images by title..."
+                    className={`w-full sm:max-w-xs ${themeClasses.input}`}
                   />
                 </div>
 
+<<<<<<< HEAD
                 {/* Images Grid */}
                 <div className="grid grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+=======
+                {/* Images Grid - 2 columns on mobile, 3 on md, 4 on lg */}
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                   {filteredImages.map((img) => (
                     <div
                       key={img.id}
-                      className={`group relative rounded-2xl overflow-hidden border transition-all ${
-                        isCarton ? 'bg-[#2b221a] border-[#523f2f]' : 'bg-white border-stone-200'
+                      className={`group relative rounded-xl sm:rounded-2xl overflow-hidden border transition-all flex flex-col justify-between ${
+                        isCarton ? 'bg-[#2b221a] border-[#523f2f]' : 'bg-white border-stone-200 shadow-xs'
                       }`}
                     >
-                      <div className="aspect-square w-full overflow-hidden bg-black relative">
-                        <img
-                          src={img.url}
-                          alt={img.alt || img.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          referrerPolicy="no-referrer"
-                        />
-                        <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                          {img.showOnHomepage !== false && (
-                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#16a34a] text-white font-bold">
-                              Home
-                            </span>
-                          )}
-                          {img.showOnProjects !== false && (
-                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-600 text-white font-bold">
-                              Project
-                            </span>
-                          )}
+                      <div>
+                        <div className="aspect-square w-full overflow-hidden bg-black relative">
+                          <img
+                            src={img.url}
+                            alt={img.alt || img.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute top-1.5 left-1.5 flex flex-wrap gap-1">
+                            {img.showOnHomepage !== false && (
+                              <span className="text-[8px] sm:text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#16a34a] text-white font-bold">
+                                Home
+                              </span>
+                            )}
+                            {img.showOnProjects !== false && (
+                              <span className="text-[8px] sm:text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-600 text-white font-bold">
+                                Project
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="p-2 sm:p-3.5">
+                          <span className="text-[8px] sm:text-[9px] font-mono text-[#c2a67e] font-bold uppercase">{img.category}</span>
+                          <h4 className="font-bold text-[11px] sm:text-xs line-clamp-1 mt-0.5">{img.title}</h4>
+                          <p className="text-[10px] sm:text-[11px] text-stone-400 line-clamp-1 sm:line-clamp-2 mt-0.5 leading-snug">{img.caption}</p>
                         </div>
                       </div>
 
-                      <div className="p-3.5">
-                        <span className="text-[9px] font-mono text-[#c2a67e] font-bold uppercase">{img.category}</span>
-                        <h4 className="font-bold text-xs line-clamp-1 mt-0.5">{img.title}</h4>
-                        <p className="text-[11px] text-stone-400 line-clamp-2 mt-1 leading-snug">{img.caption}</p>
-
-                        <div className="flex items-center justify-between pt-3 mt-3 border-t border-stone-200/20">
+                      <div className="p-2 sm:p-3.5 pt-0">
+                        <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-stone-200/20 text-xs">
                           <button
                             onClick={() => handleOpenEditImage(img)}
-                            className="text-xs font-semibold text-[#16a34a] hover:underline flex items-center gap-1 cursor-pointer"
+                            className="py-1.5 px-2 rounded-lg bg-[#16a34a]/10 hover:bg-[#16a34a]/20 text-[#16a34a] font-bold flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation text-[11px]"
+                            title="Edit Image Details"
                           >
-                            <Edit className="w-3.5 h-3.5" /> Edit
+                            <Edit className="w-3 h-3" />
+                            <span>Edit</span>
                           </button>
                           <button
                             onClick={() => onDeleteGalleryImage(img.id)}
-                            className="text-xs font-semibold text-rose-500 hover:underline flex items-center gap-1 cursor-pointer"
+                            className="py-1.5 px-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 font-bold flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation text-[11px]"
+                            title="Delete Image"
                           >
-                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                            <Trash2 className="w-3 h-3" />
+                            <span>Del</span>
                           </button>
                         </div>
                       </div>
@@ -1011,10 +1166,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 TAB 3: FIELD VIDEOS (With Project Page Toggle & Direct Upload)
                 ======================================================= */}
             {activeTab === 'videos' && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <div>
+<<<<<<< HEAD
                     <h3 className="font-display font-extrabold text-xl tracking-tight sm:text-2xl">Verified Field Video Records</h3>
+=======
+                    <h3 className="font-display font-extrabold text-xl sm:text-2xl tracking-tight">Verified Field Video Records</h3>
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                     <p className="text-xs text-stone-400 mt-1">
                       Manage portrait drilling & exploration videos. Toggle visibility across Homepage, Projects Page, and Gallery.
                     </p>
@@ -1022,25 +1181,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                   <button
                     onClick={handleOpenAddVideo}
-                    className={themeClasses.primaryButton}
+                    className={`w-full sm:w-auto ${themeClasses.primaryButton}`}
                   >
                     <Plus className="w-4 h-4" />
                     <span>Upload Video / Link Video</span>
                   </button>
                 </div>
 
+<<<<<<< HEAD
                 <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
+=======
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                   <span className="text-xs font-mono text-stone-400">Total Records: {filteredVideos.length}</span>
                   <input
                     type="text"
                     value={videoSearch}
                     onChange={(e) => setVideoSearch(e.target.value)}
-                    placeholder="Search videos by title or caption..."
-                    className={`max-w-xs ${themeClasses.input}`}
+                    placeholder="Search videos by title..."
+                    className={`w-full sm:max-w-xs ${themeClasses.input}`}
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
                   {filteredVideos.map((vid) => (
                     <div
                       key={vid.id}
@@ -1081,28 +1244,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </div>
                       </div>
 
-                      <div className="p-4 space-y-3">
+                      <div className="p-3.5 sm:p-4 space-y-3">
                         <p className="text-xs text-stone-400 line-clamp-2 leading-relaxed">{vid.description}</p>
                         
-                        <div className="flex items-center justify-between pt-2 border-t border-stone-200/20 text-xs">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2.5 border-t border-stone-200/20 text-xs">
                           <button
                             onClick={() => setPreviewingVideo(vid)}
-                            className="font-bold text-stone-300 hover:text-white flex items-center gap-1 cursor-pointer"
+                            className="min-h-[36px] py-1.5 px-3 rounded-lg bg-stone-500/10 hover:bg-stone-500/20 text-stone-300 hover:text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 touch-manipulation"
                           >
-                            <Eye className="w-3.5 h-3.5 text-[#16a34a]" /> Preview
+                            <Eye className="w-3.5 h-3.5 text-[#16a34a]" />
+                            <span>Preview Video</span>
                           </button>
-                          <div className="flex items-center gap-3">
+                          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
                             <button
                               onClick={() => handleOpenEditVideo(vid)}
-                              className="font-bold text-[#16a34a] hover:underline flex items-center gap-1 cursor-pointer"
+                              className="min-h-[36px] py-1.5 px-3 rounded-lg bg-[#16a34a]/10 hover:bg-[#16a34a]/20 text-[#16a34a] font-bold flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation"
                             >
-                              <Edit className="w-3.5 h-3.5" /> Edit
+                              <Edit className="w-3.5 h-3.5" />
+                              <span>Edit</span>
                             </button>
                             <button
                               onClick={() => onDeleteVideo(vid.id)}
-                              className="font-bold text-rose-500 hover:underline flex items-center gap-1 cursor-pointer"
+                              className="min-h-[36px] py-1.5 px-3 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 font-bold flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation"
                             >
-                              <Trash2 className="w-3.5 h-3.5" /> Delete
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Delete</span>
                             </button>
                           </div>
                         </div>
@@ -1117,10 +1283,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 TAB 4: PERSONNEL & TEAM (Add/Edit Team Member with Photo Upload)
                 ======================================================= */}
             {activeTab === 'team' && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <div>
+<<<<<<< HEAD
                     <h3 className="font-display font-extrabold text-xl tracking-tight sm:text-2xl">Personnel & Technical Team</h3>
+=======
+                    <h3 className="font-display font-extrabold text-xl sm:text-2xl tracking-tight">Personnel & Technical Team</h3>
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                     <p className="text-xs text-stone-400 mt-1">
                       Manage company leadership, consultants, geologists, and geophysicists shown on About and Homepage.
                     </p>
@@ -1128,23 +1298,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                   <button
                     onClick={handleOpenAddTeamMember}
-                    className={themeClasses.primaryButton}
+                    className={`w-full sm:w-auto ${themeClasses.primaryButton}`}
                   >
                     <Plus className="w-4 h-4" />
                     <span>Add New Team Member</span>
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
                   {team.map((member) => (
                     <div
                       key={member.id}
-                      className={`p-5 rounded-2xl border transition-all ${
+                      className={`p-4 sm:p-5 rounded-2xl border transition-all ${
                         isCarton ? 'bg-[#2b221a] border-[#523f2f]' : 'bg-white border-stone-200'
                       }`}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-2xl overflow-hidden bg-black shrink-0 border border-stone-200/20">
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-black shrink-0 border border-stone-200/20">
                           <img
                             src={member.image}
                             alt={member.name}
@@ -1152,14 +1322,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             referrerPolicy="no-referrer"
                           />
                         </div>
-                        <div className="overflow-hidden">
+                        <div className="overflow-hidden min-w-0">
                           <h4 className="font-bold text-sm leading-tight text-stone-100 line-clamp-1">{member.name}</h4>
                           <span className="text-xs text-[#16a34a] font-semibold block truncate mt-0.5">{member.title}</span>
                           <span className="text-[11px] font-mono text-stone-400 block truncate mt-0.5">{member.experienceYears}</span>
                         </div>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-stone-200/20 space-y-2">
+                      <div className="mt-3 sm:mt-4 pt-3 border-t border-stone-200/20 space-y-2">
                         <p className="text-xs text-stone-400 line-clamp-3 leading-relaxed">{member.bio}</p>
                         {member.credentials && (
                           <div className="text-[10px] font-mono text-[#c2a67e] truncate font-bold">
@@ -1168,18 +1338,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         )}
                       </div>
 
-                      <div className="flex items-center justify-between pt-4 mt-4 border-t border-stone-200/20 text-xs">
+                      <div className="grid grid-cols-2 gap-2 pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-stone-200/20 text-xs">
                         <button
                           onClick={() => handleOpenEditTeamMember(member)}
-                          className="font-bold text-[#16a34a] hover:underline flex items-center gap-1 cursor-pointer"
+                          className="min-h-[36px] py-1.5 px-2.5 rounded-lg bg-[#16a34a]/10 hover:bg-[#16a34a]/20 text-[#16a34a] font-bold flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation"
                         >
-                          <Edit className="w-3.5 h-3.5" /> Edit Member
+                          <Edit className="w-3.5 h-3.5" />
+                          <span>Edit Member</span>
                         </button>
                         <button
                           onClick={() => onDeleteTeamMember && onDeleteTeamMember(member.id)}
-                          className="font-bold text-rose-500 hover:underline flex items-center gap-1 cursor-pointer"
+                          className="min-h-[36px] py-1.5 px-2.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 font-bold flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation"
                         >
-                          <Trash2 className="w-3.5 h-3.5" /> Delete
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete</span>
                         </button>
                       </div>
                     </div>
@@ -1192,10 +1364,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 TAB 5: CLIENT ENQUIRIES (No Mock Data, Empty State by Default)
                 ======================================================= */}
             {activeTab === 'enquiries' && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <div>
+<<<<<<< HEAD
                     <h3 className="font-display font-extrabold text-xl tracking-tight sm:text-2xl">Client Inquiries & Consultation Requests</h3>
+=======
+                    <h3 className="font-display font-extrabold text-xl sm:text-2xl tracking-tight">Client Inquiries & Consultation Requests</h3>
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                     <p className="text-xs text-stone-400 mt-1">
                       Direct inquiries submitted through the website consultation form appear here in real time.
                     </p>
@@ -1204,7 +1380,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   {enquiries.length > 0 && onClearAllEnquiries && (
                     <button
                       onClick={onClearAllEnquiries}
-                      className="px-3 py-1.5 rounded-xl border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                      className="w-full sm:w-auto px-3 py-1.5 rounded-xl border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Clear All Enquiries</span>
@@ -1255,32 +1431,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           <p className="text-stone-400">{enq.message}</p>
                         </div>
 
-                        <div className="flex items-center justify-between pt-2 border-t border-stone-200/20 text-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="text-stone-400 text-[11px]">Status:</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2.5 border-t border-stone-200/20 text-xs">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-stone-400 text-[11px] font-bold">Status:</span>
                             <button
                               onClick={() => onUpdateEnquiryStatus(enq.id, 'reviewed')}
-                              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                                enq.status === 'reviewed' ? 'bg-[#16a34a] text-white' : 'border border-stone-400 text-stone-400 hover:text-white'
+                              className={`min-h-[34px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 touch-manipulation flex items-center gap-1 ${
+                                enq.status === 'reviewed' ? 'bg-[#16a34a] text-white shadow-xs' : 'border border-stone-400/50 text-stone-400 hover:text-white'
                               }`}
                             >
-                              Reviewed
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Reviewed</span>
                             </button>
                             <button
                               onClick={() => onUpdateEnquiryStatus(enq.id, 'resolved')}
-                              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                                enq.status === 'resolved' ? 'bg-blue-600 text-white' : 'border border-stone-400 text-stone-400 hover:text-white'
+                              className={`min-h-[34px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 touch-manipulation flex items-center gap-1 ${
+                                enq.status === 'resolved' ? 'bg-blue-600 text-white shadow-xs' : 'border border-stone-400/50 text-stone-400 hover:text-white'
                               }`}
                             >
-                              Resolved
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Resolved</span>
                             </button>
                           </div>
 
                           <button
                             onClick={() => onDeleteEnquiry(enq.id)}
-                            className="text-xs font-bold text-rose-500 hover:underline flex items-center gap-1 cursor-pointer"
+                            className="min-h-[34px] px-3 py-1 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-500/10 border border-rose-500/20 flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation self-start sm:self-auto"
                           >
-                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete Enquiry</span>
                           </button>
                         </div>
                       </div>
@@ -1357,7 +1536,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                     <button
                       type="submit"
-                      className={themeClasses.primaryButton}
+                      className={`w-full sm:w-auto ${themeClasses.primaryButton}`}
                     >
                       <Lock className="w-4 h-4" />
                       <span>Update Administrator Password</span>
@@ -1437,7 +1616,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                     <button
                       type="submit"
-                      className={themeClasses.primaryButton}
+                      className={`w-full sm:w-auto ${themeClasses.primaryButton}`}
                     >
                       <Check className="w-4 h-4" />
                       <span>Save Company Coordinates</span>
@@ -1456,16 +1635,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           MODAL: ADD / EDIT IMAGE (With Gallery File Upload Button)
           ========================================================= */}
       {isImageModalOpen && (
+<<<<<<< HEAD
         <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/75 backdrop-blur-sm">
           <div className={`w-full max-w-lg max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-4 sm:p-6 rounded-3xl shadow-2xl relative border ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
             <div className="flex items-center justify-between pb-4 border-b border-stone-200/20 mb-4">
               <h4 className="font-bold text-base flex items-center gap-2">
                 <Camera className="w-5 h-5 text-[#16a34a]" />
                 <span>{editingImage ? 'Edit Fieldwork Photograph' : 'Upload Fieldwork Image'}</span>
+=======
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-2.5 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className={`w-full max-w-lg max-h-[92dvh] overflow-y-auto p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl relative border my-auto flex flex-col ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
+            <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-stone-200/20 mb-3 sm:mb-4 shrink-0">
+              <h4 className="font-bold text-sm sm:text-base flex items-center gap-2">
+                <Camera className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#16a34a] shrink-0" />
+                <span className="truncate">{editingImage ? 'Edit Fieldwork Photograph' : 'Upload Fieldwork Image'}</span>
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
               </h4>
               <button
+                type="button"
                 onClick={() => setIsImageModalOpen(false)}
-                className="p-1 rounded-lg text-stone-400 hover:text-white"
+                className="p-1.5 rounded-lg text-stone-400 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="Close image modal"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1480,7 +1670,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               onChange={(e) => handleFileChange(e, (dataUrl) => setImageForm((prev) => ({ ...prev, url: dataUrl })))}
             />
 
-            <form onSubmit={handleSaveImage} className="space-y-4">
+            <form onSubmit={handleSaveImage} className="space-y-3.5 sm:space-y-4">
               <div>
                 <label className={themeClasses.label}>Image Title / Equipment Name</label>
                 <input
@@ -1500,9 +1690,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <button
                     type="button"
                     onClick={() => imageFileInputRef.current?.click()}
-                    className="flex-1 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98] transition-all"
                   >
-                    <Upload className="w-4 h-4" />
+                    <Upload className="w-4 h-4 shrink-0" />
                     <span>Upload Direct from Device Gallery</span>
                   </button>
                 </div>
@@ -1558,7 +1748,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div>
                 <label className={themeClasses.label}>Display Placements Across Website</label>
                 <div className="space-y-2 pt-1">
-                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={imageForm.showOnHomepage}
@@ -1568,7 +1758,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <span>Show on Homepage (Fieldwork & Equipment Section)</span>
                   </label>
 
-                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={imageForm.showOnProjects}
@@ -1578,7 +1768,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <span>Show on Projects Page Photographic Records</span>
                   </label>
 
-                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={imageForm.showOnGallery}
@@ -1590,17 +1780,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200/20">
+              <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-stone-200/20 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsImageModalOpen(false)}
-                  className={themeClasses.secondaryButton}
+                  className={`w-full sm:w-auto ${themeClasses.secondaryButton}`}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className={themeClasses.primaryButton}
+                  className={`w-full sm:w-auto ${themeClasses.primaryButton}`}
                 >
                   <Check className="w-4 h-4" />
                   <span>{editingImage ? 'Save Changes' : 'Upload & Publish Image'}</span>
@@ -1615,16 +1805,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           MODAL: ADD / EDIT VIDEO (With Projects Page Option & Direct Upload)
           ========================================================= */}
       {isVideoModalOpen && (
+<<<<<<< HEAD
         <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/75 backdrop-blur-sm">
           <div className={`w-full max-w-lg max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-4 sm:p-6 rounded-3xl shadow-2xl relative border ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
             <div className="flex items-center justify-between pb-4 border-b border-stone-200/20 mb-4">
               <h4 className="font-bold text-base flex items-center gap-2">
                 <Video className="w-5 h-5 text-[#16a34a]" />
                 <span>{editingVideo ? 'Edit Field Video Record' : 'Upload Field Video'}</span>
+=======
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-2.5 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className={`w-full max-w-lg max-h-[92dvh] overflow-y-auto p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl relative border my-auto flex flex-col ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
+            <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-stone-200/20 mb-3 sm:mb-4 shrink-0">
+              <h4 className="font-bold text-sm sm:text-base flex items-center gap-2">
+                <Video className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#16a34a] shrink-0" />
+                <span className="truncate">{editingVideo ? 'Edit Field Video Record' : 'Upload Field Video'}</span>
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
               </h4>
               <button
+                type="button"
                 onClick={() => setIsVideoModalOpen(false)}
-                className="p-1 rounded-lg text-stone-400 hover:text-white"
+                className="p-1.5 rounded-lg text-stone-400 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="Close video modal"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1646,7 +1847,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               onChange={(e) => handleFileChange(e, (dataUrl) => setVideoForm((prev) => ({ ...prev, thumbnail: dataUrl })))}
             />
 
+<<<<<<< HEAD
             <form onSubmit={handleSaveVideo} className="space-y-4 max-h-[calc(100dvh-9rem)] overflow-y-auto pr-1 sm:max-h-[75vh]">
+=======
+            <form onSubmit={handleSaveVideo} className="space-y-3.5 sm:space-y-4">
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
               <div>
                 <label className={themeClasses.label}>Video Title</label>
                 <input
@@ -1677,9 +1882,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <button
                     type="button"
                     onClick={() => videoFileInputRef.current?.click()}
-                    className="flex-1 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98] transition-all"
                   >
-                    <Upload className="w-4 h-4" />
+                    <Upload className="w-4 h-4 shrink-0" />
                     <span>Upload Video from Device Gallery</span>
                   </button>
                 </div>
@@ -1700,9 +1905,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <button
                     type="button"
                     onClick={() => videoThumbFileInputRef.current?.click()}
-                    className="flex-1 py-2 rounded-xl bg-stone-700 hover:bg-stone-600 text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
+                    className="flex-1 py-2 px-3 rounded-xl bg-stone-700 hover:bg-stone-600 text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98] transition-all"
                   >
-                    <Upload className="w-4 h-4" />
+                    <Upload className="w-4 h-4 shrink-0" />
                     <span>Upload Thumbnail from Gallery</span>
                   </button>
                 </div>
@@ -1730,7 +1935,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div>
                 <label className={themeClasses.label}>Where Should This Video Display?</label>
                 <div className="space-y-2 pt-1">
-                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={videoForm.showOnHomepage}
@@ -1740,7 +1945,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <span>Show on Homepage Video Stage</span>
                   </label>
 
-                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={videoForm.showOnProjects}
@@ -1750,7 +1955,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <span>Show on Projects Page Video Stage</span>
                   </label>
 
-                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={videoForm.showOnGallery}
@@ -1762,17 +1967,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200/20">
+              <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-stone-200/20 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsVideoModalOpen(false)}
-                  className={themeClasses.secondaryButton}
+                  className={`w-full sm:w-auto ${themeClasses.secondaryButton}`}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className={themeClasses.primaryButton}
+                  className={`w-full sm:w-auto ${themeClasses.primaryButton}`}
                 >
                   <Check className="w-4 h-4" />
                   <span>{editingVideo ? 'Save Video Changes' : 'Publish Field Video'}</span>
@@ -1787,16 +1992,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           MODAL: ADD / EDIT TEAM MEMBER (With Gallery Photo Upload)
           ========================================================= */}
       {isTeamModalOpen && (
+<<<<<<< HEAD
         <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/75 backdrop-blur-sm">
           <div className={`w-full max-w-lg max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-4 sm:p-6 rounded-3xl shadow-2xl relative border ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
             <div className="flex items-center justify-between pb-4 border-b border-stone-200/20 mb-4">
               <h4 className="font-bold text-base flex items-center gap-2">
                 <Users className="w-5 h-5 text-[#16a34a]" />
                 <span>{editingTeamMember ? 'Edit Team Member' : 'Add New Team Member'}</span>
+=======
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-2.5 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className={`w-full max-w-lg max-h-[92dvh] overflow-y-auto p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl relative border my-auto flex flex-col ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
+            <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-stone-200/20 mb-3 sm:mb-4 shrink-0">
+              <h4 className="font-bold text-sm sm:text-base flex items-center gap-2">
+                <Users className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#16a34a] shrink-0" />
+                <span className="truncate">{editingTeamMember ? 'Edit Team Member' : 'Add New Team Member'}</span>
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
               </h4>
               <button
+                type="button"
                 onClick={() => setIsTeamModalOpen(false)}
-                className="p-1 rounded-lg text-stone-400 hover:text-white"
+                className="p-1.5 rounded-lg text-stone-400 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="Close team member modal"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1811,7 +2027,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               onChange={(e) => handleFileChange(e, (dataUrl) => setTeamForm((prev) => ({ ...prev, image: dataUrl })))}
             />
 
+<<<<<<< HEAD
             <form onSubmit={handleSaveTeamMember} className="space-y-4 max-h-[calc(100dvh-9rem)] overflow-y-auto pr-1 sm:max-h-[75vh]">
+=======
+            <form onSubmit={handleSaveTeamMember} className="space-y-3.5 sm:space-y-4">
+>>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
               <div>
                 <label className={themeClasses.label}>Full Name & Academic Honors</label>
                 <input
@@ -1843,7 +2063,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="text"
                     value={teamForm.experienceYears}
                     onChange={(e) => setTeamForm({ ...teamForm, experienceYears: e.target.value })}
-                    placeholder="e.g. 25+ years of professional practice"
+                    placeholder="e.g. 25+ years of practice"
                     className={themeClasses.input}
                   />
                 </div>
@@ -1867,9 +2087,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <button
                     type="button"
                     onClick={() => teamPhotoFileInputRef.current?.click()}
-                    className="flex-1 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98] transition-all"
                   >
-                    <Upload className="w-4 h-4" />
+                    <Upload className="w-4 h-4 shrink-0" />
                     <span>Upload Photo from Device Gallery</span>
                   </button>
                 </div>
@@ -1888,7 +2108,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <img
                     src={teamForm.image}
                     alt="Preview"
-                    className="w-12 h-12 rounded-xl object-cover"
+                    className="w-12 h-12 rounded-xl object-cover shrink-0"
                   />
                   <span className="text-xs text-stone-300">Photo preview loaded successfully</span>
                 </div>
@@ -1916,17 +2136,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200/20">
+              <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-stone-200/20 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsTeamModalOpen(false)}
-                  className={themeClasses.secondaryButton}
+                  className={`w-full sm:w-auto ${themeClasses.secondaryButton}`}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className={themeClasses.primaryButton}
+                  className={`w-full sm:w-auto ${themeClasses.primaryButton}`}
                 >
                   <Check className="w-4 h-4" />
                   <span>{editingTeamMember ? 'Save Member' : 'Add Team Member'}</span>
@@ -1941,19 +2161,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           MODAL: VIDEO INLINE PREVIEW
           ========================================================= */}
       {previewingVideo && (
-        <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="w-full max-w-sm rounded-3xl overflow-hidden bg-black border border-stone-800 shadow-2xl relative flex flex-col">
-            <div className="flex items-center justify-between p-3.5 bg-stone-900 border-b border-stone-800">
+        <div className="fixed inset-0 z-70 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+          <div className="w-full max-w-sm sm:max-w-md max-h-[92dvh] rounded-2xl sm:rounded-3xl overflow-hidden bg-black border border-stone-800 shadow-2xl relative flex flex-col my-auto">
+            <div className="flex items-center justify-between p-3.5 bg-stone-900 border-b border-stone-800 shrink-0">
               <span className="font-bold text-xs text-white truncate pr-2">{previewingVideo.title}</span>
               <button
+                type="button"
                 onClick={() => setPreviewingVideo(null)}
                 className="p-1 rounded-lg text-stone-400 hover:text-white"
+                aria-label="Close video preview"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="aspect-[9/16] w-full bg-black">
+            <div className="aspect-[9/16] w-full bg-black max-h-[60dvh]">
               {previewingVideo.driveViewUrl && previewingVideo.driveViewUrl.startsWith('data:video') ? (
                 <video
                   src={previewingVideo.driveViewUrl}
@@ -1971,8 +2193,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               )}
             </div>
 
-            <div className="p-3 bg-stone-900 text-stone-300 text-xs">
-              <span className="text-[10px] font-mono text-[#c2a67e] block">{previewingVideo.subtitle}</span>
+            <div className="p-3 bg-stone-900 text-stone-300 text-xs shrink-0">
+              <span className="text-[10px] font-mono text-[#c2a67e] block truncate">{previewingVideo.subtitle}</span>
               <p className="line-clamp-2 mt-1 text-[11px]">{previewingVideo.description}</p>
             </div>
           </div>
