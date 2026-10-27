@@ -773,7 +773,6 @@ export default function App() {
         company={company}
         onNavigate={handleNavigate}
         onOpenPrivacyModal={() => setIsPrivacyOpen(true)}
-        onOpenAdmin={handleOpenAdmin}
       />
 
       {/* Persistent Floating WhatsApp & Phone Buttons */}
