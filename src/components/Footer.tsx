@@ -1,19 +1,17 @@
 import React from 'react';
-import { ArrowUp, Facebook, Linkedin, Phone, MessageSquare, ShieldCheck, Globe, Mail, MapPin, Lock } from 'lucide-react';
+import { ArrowUp, Facebook, Linkedin, Phone, MessageSquare, ShieldCheck, Globe, Mail, MapPin } from 'lucide-react';
 import { CompanyConfig } from '../types';
 
 interface FooterProps {
   company: CompanyConfig;
   onNavigate: (sectionId: string) => void;
   onOpenPrivacyModal: () => void;
-  onOpenAdmin?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   company,
   onNavigate,
-  onOpenPrivacyModal,
-  onOpenAdmin
+  onOpenPrivacyModal
 }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -248,18 +246,6 @@ export const Footer: React.FC<FooterProps> = ({
             >
               Privacy Policy & Terms
             </button>
-
-            {onOpenAdmin && (
-              <button
-                onClick={onOpenAdmin}
-                className="flex items-center gap-1.5 text-stone-500 hover:text-stone-900 transition-colors cursor-pointer"
-                title="Staff & Administrator Portal"
-                aria-label="Open Admin Dashboard"
-              >
-                <Lock className="w-3.5 h-3.5 text-[#16a34a]" />
-                <span>Admin Portal</span>
-              </button>
-            )}
 
             <button
               onClick={scrollToTop}
