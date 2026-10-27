@@ -108,24 +108,73 @@ export default function App() {
     return validPages.includes(hash) ? hash : 'home';
   });
 
-  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
+  // Direct Admin Dashboard access: detect /admin or #admin on load
+  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
+    const hash = window.location.hash.toLowerCase().replace('#', '');
+    return path === '/admin' || path.endsWith('/admin') || hash === 'admin';
+  });
+
   const [isPrivacyOpen, setIsPrivacyOpen] = useState<boolean>(false);
   const [preselectedService, setPreselectedService] = useState<string | undefined>(undefined);
   const [selectedLightboxImage, setSelectedLightboxImage] = useState<MediaItem | null>(null);
 
-  // Sync route on hashchange (browser forward/back)
+  // Sync routes on hashchange and popstate (browser back/forward & direct URL changes)
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleRouteSync = () => {
+      const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
       const hash = window.location.hash.replace('#', '').toLowerCase();
+
+      // Check if Admin Dashboard route is requested
+      if (path === '/admin' || path.endsWith('/admin') || hash === 'admin') {
+        setIsAdminOpen(true);
+        return;
+      }
+
       const validPages = ['home', 'about', 'services', 'projects', 'gallery', 'contact'];
       if (validPages.includes(hash)) {
         setCurrentPage(hash);
+        setIsAdminOpen(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+
+    window.addEventListener('hashchange', handleRouteSync);
+    window.addEventListener('popstate', handleRouteSync);
+    return () => {
+      window.removeEventListener('hashchange', handleRouteSync);
+      window.removeEventListener('popstate', handleRouteSync);
+    };
   }, []);
+
+  // Admin Open / Close URL Handlers
+  const handleOpenAdmin = () => {
+    if (window.location.pathname !== '/admin') {
+      window.history.pushState(null, '', '/admin');
+    }
+    setIsAdminOpen(true);
+  };
+
+  const handleCloseAdmin = () => {
+    setIsAdminOpen(false);
+    if (window.location.pathname.toLowerCase().includes('admin')) {
+      window.history.pushState(null, '', '/');
+    }
+    if (window.location.hash.toLowerCase().includes('admin')) {
+      window.history.pushState(null, '', '/');
+    }
+  };
+
+  const handleGoToHomepageFromAdmin = () => {
+    setIsAdminOpen(false);
+    if (window.location.pathname.toLowerCase().includes('admin')) {
+      window.history.pushState(null, '', '/');
+    }
+    setCurrentPage('home');
+    window.location.hash = 'home';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Curated lists based on placement luxury configured by Admin
   const heroImages = galleryImages.filter((img) => img.showOnHomepage !== false && img.isHero).slice(0, 15);
@@ -142,6 +191,9 @@ export default function App() {
     setCurrentPage(targetPage);
     window.location.hash = targetPage;
     setIsAdminOpen(false);
+    if (window.location.pathname.toLowerCase().includes('admin')) {
+      window.history.pushState(null, '', '/');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -298,7 +350,7 @@ export default function App() {
         currentPage={currentPage}
         onNavigate={handleNavigate}
         onOpenConsultation={() => handleOpenConsultation()}
-        onOpenAdmin={() => setIsAdminOpen(true)}
+        onOpenAdmin={handleOpenAdmin}
         isAdminOpen={isAdminOpen}
       />
 
@@ -721,7 +773,7 @@ export default function App() {
         company={company}
         onNavigate={handleNavigate}
         onOpenPrivacyModal={() => setIsPrivacyOpen(true)}
-        onOpenAdmin={() => setIsAdminOpen(true)}
+        onOpenAdmin={handleOpenAdmin}
       />
 
       {/* Persistent Floating WhatsApp & Phone Buttons */}
@@ -730,8 +782,8 @@ export default function App() {
       {/* Full Admin Dashboard */}
       <AdminDashboard
         isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
-        onGoToHomepage={() => handleNavigate('home')}
+        onClose={handleCloseAdmin}
+        onGoToHomepage={handleGoToHomepageFromAdmin}
         company={company}
         onUpdateCompany={handleUpdateCompany}
         enquiries={enquiries}

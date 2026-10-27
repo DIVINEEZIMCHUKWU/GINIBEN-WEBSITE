@@ -18,7 +18,8 @@ ServerSignature Off
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "SAMEORIGIN"
     Header set X-XSS-Protection "1; mode=block"
-    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    # Never leak referer to external image hosts (prevents ImgBB 503 hotlink rate-limiting)
+    Header set Referrer-Policy "no-referrer"
 </IfModule>
 
 # 3. Protect sensitive files
@@ -36,6 +37,9 @@ ServerSignature Off
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
+
+    # Explicitly route /admin to index.html for direct Admin Dashboard access
+    RewriteRule ^admin/?$ index.html [L,QSA]
 
     # Route all other frontend navigation requests to index.html for React SPA
     RewriteRule ^ index.html [L]

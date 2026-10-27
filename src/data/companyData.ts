@@ -875,7 +875,7 @@ export const INITIAL_GALLERY_IMAGES: MediaItem[] = [
   },
   {
     id: "img-60",
-    url: "https://i.ibb.co/RTmCygjN/Whats-App-Image-2026-10-23-at-9-22-59-PM.jpg",
+    url: "https://i.ibb.co/G45M6D4f/Whats-App-Image-2026-10-23-at-9-22-51-PM-1.jpg",
     title: "Differential GPS Concession Boundary Verification",
     caption: "High-precision GNSS receiver deployed over legal survey monument to calibrate mineral concession limits.",
     category: "geology",

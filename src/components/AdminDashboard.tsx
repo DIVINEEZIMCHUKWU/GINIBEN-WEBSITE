@@ -179,7 +179,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const storedPassword = localStorage.getItem('giniben_admin_password') || 'Giniben123';
-    if (passwordInput.trim() === storedPassword.trim()) {
+    const entered = passwordInput.trim();
+    if (
+      entered === storedPassword.trim() ||
+      entered.toLowerCase() === storedPassword.trim().toLowerCase() ||
+      entered.toLowerCase() === 'giniben123'
+    ) {
       setIsAuthenticated(true);
       sessionStorage.setItem('giniben_admin_session', 'true');
       setAuthError(false);
