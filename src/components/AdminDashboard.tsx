@@ -496,25 +496,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // -------------------------------------------------------------
   // STYLING CLASSES (White vs Carton Brown Mode)
   // -------------------------------------------------------------
-  // -------------------------------------------------------------
-  // STYLING CLASSES (White vs Carton Brown Mode)
-  // -------------------------------------------------------------
   const themeClasses = {
-<<<<<<< HEAD
-    modalOverlay: 'fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm',
-    mainShell: isCarton 
-      ? 'w-full max-w-7xl h-[calc(100dvh-1.5rem)] sm:h-[92vh] max-h-[950px] bg-[#221a14] text-[#f4efe8] rounded-xl sm:rounded-2xl shadow-2xl flex flex-col border border-[#523f2f] overflow-hidden'
-      : 'w-full max-w-7xl h-[calc(100dvh-1.5rem)] sm:h-[92vh] max-h-[950px] bg-white text-stone-900 rounded-xl sm:rounded-2xl shadow-2xl flex flex-col border border-stone-200 overflow-hidden',
-    header: isCarton 
-      ? 'flex flex-col items-stretch gap-3 px-3 py-3 border-b border-[#523f2f] bg-[#292019] sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4'
-      : 'flex flex-col items-stretch gap-3 px-3 py-3 border-b border-stone-200 bg-white sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4',
-    sidebar: isCarton 
-      ? 'w-full border-b border-[#523f2f] bg-[#2a211a] p-2 flex flex-col shrink-0 sm:w-64 sm:border-b-0 sm:border-r sm:p-4 sm:justify-between'
-      : 'w-full border-b border-stone-200 bg-[#faf8f5] p-2 flex flex-col shrink-0 sm:w-64 sm:border-b-0 sm:border-r sm:p-4 sm:justify-between',
-    contentArea: isCarton 
-      ? 'min-w-0 min-h-0 flex-1 bg-[#1e1712] p-3 overflow-y-auto overscroll-contain sm:p-6'
-      : 'min-w-0 min-h-0 flex-1 bg-white p-3 overflow-y-auto overscroll-contain sm:p-6',
-=======
     modalOverlay: 'fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/80 backdrop-blur-sm overflow-hidden',
     mainShell: isCarton 
       ? 'w-full md:max-w-7xl h-full md:h-[92vh] md:max-h-[950px] bg-[#221a14] text-[#f4efe8] rounded-none md:rounded-2xl shadow-2xl flex flex-col border-0 md:border md:border-[#523f2f] overflow-hidden'
@@ -526,20 +508,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       ? 'hidden md:flex w-60 lg:w-64 border-r border-[#523f2f] bg-[#2a211a] p-4 flex-col justify-between shrink-0'
       : 'hidden md:flex w-60 lg:w-64 border-r border-stone-200 bg-[#faf8f5] p-4 flex-col justify-between shrink-0',
     contentArea: isCarton 
-      ? 'flex-1 bg-[#1e1712] p-3 sm:p-5 md:p-6 overflow-y-auto overscroll-contain'
-      : 'flex-1 bg-white p-3 sm:p-5 md:p-6 overflow-y-auto overscroll-contain',
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
+      ? 'min-w-0 min-h-0 flex-1 bg-[#1e1712] p-3 sm:p-5 md:p-6 overflow-y-auto overscroll-contain'
+      : 'min-w-0 min-h-0 flex-1 bg-white p-3 sm:p-5 md:p-6 overflow-y-auto overscroll-contain',
     card: isCarton 
       ? 'bg-[#2b221a] border border-[#523f2f] rounded-2xl p-3.5 sm:p-5 shadow-sm'
       : 'bg-white border border-stone-200 rounded-2xl p-3.5 sm:p-5 shadow-xs',
     input: isCarton 
-<<<<<<< HEAD
-      ? 'w-full px-3.5 py-2.5 rounded-xl bg-[#1a1410] border border-[#5a4635] text-white placeholder-stone-400 focus:outline-none focus:border-[#c2a67e] text-base sm:text-sm'
-      : 'w-full px-3.5 py-2.5 rounded-xl bg-white border border-stone-300 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#16a34a] text-base sm:text-sm',
-=======
       ? 'w-full px-3.5 py-2.5 rounded-xl bg-[#1a1410] border border-[#5a4635] text-white placeholder-stone-400 focus:outline-none focus:border-[#c2a67e] text-base sm:text-sm min-h-[42px] transition-colors'
       : 'w-full px-3.5 py-2.5 rounded-xl bg-white border border-stone-300 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#16a34a] text-base sm:text-sm min-h-[42px] transition-colors',
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
     label: isCarton 
       ? 'text-xs font-mono uppercase tracking-wider text-[#d7cbbe] block mb-1.5 font-bold'
       : 'text-xs font-mono uppercase tracking-wider text-stone-600 block mb-1.5 font-bold',
@@ -561,21 +537,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // -------------------------------------------------------------
   if (!isAuthenticated) {
     return (
-<<<<<<< HEAD
-      <div className={themeClasses.modalOverlay}>
-        <div className={`w-full max-w-md max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-5 sm:p-8 rounded-3xl shadow-2xl relative ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border border-[#523f2f]' : 'bg-white text-stone-900 border border-stone-200'}`}>
-          <div className="flex items-center justify-between pb-6 border-b border-stone-200/50 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#16a34a]/15 text-[#16a34a] flex items-center justify-center font-bold">
-                <ShieldCheck className="w-6 h-6" />
-=======
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
-        <div className={`w-full max-w-md p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl relative my-auto ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border border-[#523f2f]' : 'bg-white text-stone-900 border border-stone-200'}`}>
+        <div className={`w-full max-w-md max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl relative my-auto ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border border-[#523f2f]' : 'bg-white text-stone-900 border border-stone-200'}`}>
           <div className="flex items-center justify-between pb-4 sm:pb-6 border-b border-stone-200/50 mb-4 sm:mb-6">
             <div className="flex items-center gap-2.5 sm:gap-3">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#16a34a]/15 text-[#16a34a] flex items-center justify-center font-bold">
                 <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
               </div>
               <div>
                 <h3 className="font-display font-bold text-base sm:text-lg leading-tight">Admin Console</h3>
@@ -665,24 +632,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         
         {/* Top Header Bar */}
         <header className={themeClasses.header}>
-<<<<<<< HEAD
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#16a34a] text-white flex items-center justify-center font-bold shadow-xs">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="font-display font-bold text-sm leading-tight sm:text-base">Admin Management Console</h2>
-                <span className="hidden text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#16a34a]/15 text-[#16a34a] font-bold min-[420px]:inline-flex">
-                  GLOBAL STANDARD
-                </span>
-              </div>
-              <span className="hidden text-[11px] font-mono text-stone-400 min-[360px]:block">GiniBen & Partners GEOSERVICES LTD</span>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-start gap-2 sm:justify-end sm:gap-2.5">
-=======
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#16a34a] text-white flex items-center justify-center font-bold shadow-xs shrink-0">
               <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -699,7 +648,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
             {/* GO TO HOMEPAGE BUTTON */}
             <button
               onClick={() => {
@@ -938,11 +886,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 <div>
-<<<<<<< HEAD
-                  <h3 className="font-display font-extrabold text-xl tracking-tight sm:text-2xl">System Status & Resource Metrics</h3>
-=======
                   <h3 className="font-display font-extrabold text-xl sm:text-2xl tracking-tight">System Status & Resource Metrics</h3>
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                   <p className="text-xs text-stone-400 mt-1">Manage public site content, verified field media, personnel profiles, and client inquiries.</p>
                 </div>
 
@@ -1023,11 +967,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="space-y-4 sm:space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <div>
-<<<<<<< HEAD
-                    <h3 className="font-display font-extrabold text-xl tracking-tight sm:text-2xl">Fieldwork & Equipment Gallery</h3>
-=======
                     <h3 className="font-display font-extrabold text-xl sm:text-2xl tracking-tight">Fieldwork & Equipment Gallery</h3>
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                     <p className="text-xs text-stone-400 mt-1">
                       Add, edit, or upload photos directly from your phone/PC gallery with instant placement control.
                     </p>
@@ -1043,13 +983,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
 
                 {/* Filter and Placement Selector */}
-<<<<<<< HEAD
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                  <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-black/10 border border-stone-200/20 text-xs font-bold">
-=======
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
                   <div className="flex items-center gap-1 p-1 rounded-xl bg-black/10 border border-stone-200/20 text-xs font-bold overflow-x-auto no-scrollbar max-w-full">
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                     <button
                       onClick={() => setImagePlacementFilter('all')}
                       className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap shrink-0 ${
@@ -1093,13 +1028,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   />
                 </div>
 
-<<<<<<< HEAD
-                {/* Images Grid */}
-                <div className="grid grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-=======
                 {/* Images Grid - 2 columns on mobile, 3 on md, 4 on lg */}
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                   {filteredImages.map((img) => (
                     <div
                       key={img.id}
@@ -1169,11 +1099,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="space-y-4 sm:space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <div>
-<<<<<<< HEAD
-                    <h3 className="font-display font-extrabold text-xl tracking-tight sm:text-2xl">Verified Field Video Records</h3>
-=======
                     <h3 className="font-display font-extrabold text-xl sm:text-2xl tracking-tight">Verified Field Video Records</h3>
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                     <p className="text-xs text-stone-400 mt-1">
                       Manage portrait drilling & exploration videos. Toggle visibility across Homepage, Projects Page, and Gallery.
                     </p>
@@ -1188,11 +1114,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </button>
                 </div>
 
-<<<<<<< HEAD
-                <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
-=======
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                   <span className="text-xs font-mono text-stone-400">Total Records: {filteredVideos.length}</span>
                   <input
                     type="text"
@@ -1286,11 +1208,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="space-y-4 sm:space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <div>
-<<<<<<< HEAD
-                    <h3 className="font-display font-extrabold text-xl tracking-tight sm:text-2xl">Personnel & Technical Team</h3>
-=======
                     <h3 className="font-display font-extrabold text-xl sm:text-2xl tracking-tight">Personnel & Technical Team</h3>
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                     <p className="text-xs text-stone-400 mt-1">
                       Manage company leadership, consultants, geologists, and geophysicists shown on About and Homepage.
                     </p>
@@ -1367,11 +1285,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="space-y-4 sm:space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <div>
-<<<<<<< HEAD
-                    <h3 className="font-display font-extrabold text-xl tracking-tight sm:text-2xl">Client Inquiries & Consultation Requests</h3>
-=======
                     <h3 className="font-display font-extrabold text-xl sm:text-2xl tracking-tight">Client Inquiries & Consultation Requests</h3>
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
                     <p className="text-xs text-stone-400 mt-1">
                       Direct inquiries submitted through the website consultation form appear here in real time.
                     </p>
@@ -1635,21 +1549,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           MODAL: ADD / EDIT IMAGE (With Gallery File Upload Button)
           ========================================================= */}
       {isImageModalOpen && (
-<<<<<<< HEAD
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/75 backdrop-blur-sm">
-          <div className={`w-full max-w-lg max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-4 sm:p-6 rounded-3xl shadow-2xl relative border ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
-            <div className="flex items-center justify-between pb-4 border-b border-stone-200/20 mb-4">
-              <h4 className="font-bold text-base flex items-center gap-2">
-                <Camera className="w-5 h-5 text-[#16a34a]" />
-                <span>{editingImage ? 'Edit Fieldwork Photograph' : 'Upload Fieldwork Image'}</span>
-=======
         <div className="fixed inset-0 z-60 flex items-center justify-center p-2.5 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
           <div className={`w-full max-w-lg max-h-[92dvh] overflow-y-auto p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl relative border my-auto flex flex-col ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
             <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-stone-200/20 mb-3 sm:mb-4 shrink-0">
               <h4 className="font-bold text-sm sm:text-base flex items-center gap-2">
                 <Camera className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#16a34a] shrink-0" />
                 <span className="truncate">{editingImage ? 'Edit Fieldwork Photograph' : 'Upload Fieldwork Image'}</span>
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
               </h4>
               <button
                 type="button"
@@ -1805,21 +1710,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           MODAL: ADD / EDIT VIDEO (With Projects Page Option & Direct Upload)
           ========================================================= */}
       {isVideoModalOpen && (
-<<<<<<< HEAD
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/75 backdrop-blur-sm">
-          <div className={`w-full max-w-lg max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-4 sm:p-6 rounded-3xl shadow-2xl relative border ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
-            <div className="flex items-center justify-between pb-4 border-b border-stone-200/20 mb-4">
-              <h4 className="font-bold text-base flex items-center gap-2">
-                <Video className="w-5 h-5 text-[#16a34a]" />
-                <span>{editingVideo ? 'Edit Field Video Record' : 'Upload Field Video'}</span>
-=======
         <div className="fixed inset-0 z-60 flex items-center justify-center p-2.5 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
           <div className={`w-full max-w-lg max-h-[92dvh] overflow-y-auto p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl relative border my-auto flex flex-col ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
             <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-stone-200/20 mb-3 sm:mb-4 shrink-0">
               <h4 className="font-bold text-sm sm:text-base flex items-center gap-2">
                 <Video className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#16a34a] shrink-0" />
                 <span className="truncate">{editingVideo ? 'Edit Field Video Record' : 'Upload Field Video'}</span>
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
               </h4>
               <button
                 type="button"
@@ -1847,11 +1743,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               onChange={(e) => handleFileChange(e, (dataUrl) => setVideoForm((prev) => ({ ...prev, thumbnail: dataUrl })))}
             />
 
-<<<<<<< HEAD
-            <form onSubmit={handleSaveVideo} className="space-y-4 max-h-[calc(100dvh-9rem)] overflow-y-auto pr-1 sm:max-h-[75vh]">
-=======
             <form onSubmit={handleSaveVideo} className="space-y-3.5 sm:space-y-4">
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
               <div>
                 <label className={themeClasses.label}>Video Title</label>
                 <input
@@ -1992,21 +1884,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           MODAL: ADD / EDIT TEAM MEMBER (With Gallery Photo Upload)
           ========================================================= */}
       {isTeamModalOpen && (
-<<<<<<< HEAD
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/75 backdrop-blur-sm">
-          <div className={`w-full max-w-lg max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-4 sm:p-6 rounded-3xl shadow-2xl relative border ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
-            <div className="flex items-center justify-between pb-4 border-b border-stone-200/20 mb-4">
-              <h4 className="font-bold text-base flex items-center gap-2">
-                <Users className="w-5 h-5 text-[#16a34a]" />
-                <span>{editingTeamMember ? 'Edit Team Member' : 'Add New Team Member'}</span>
-=======
         <div className="fixed inset-0 z-60 flex items-center justify-center p-2.5 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
           <div className={`w-full max-w-lg max-h-[92dvh] overflow-y-auto p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl relative border my-auto flex flex-col ${isCarton ? 'bg-[#261e17] text-[#f4efe8] border-[#523f2f]' : 'bg-white text-stone-900 border-stone-200'}`}>
             <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-stone-200/20 mb-3 sm:mb-4 shrink-0">
               <h4 className="font-bold text-sm sm:text-base flex items-center gap-2">
                 <Users className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#16a34a] shrink-0" />
                 <span className="truncate">{editingTeamMember ? 'Edit Team Member' : 'Add New Team Member'}</span>
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
               </h4>
               <button
                 type="button"
@@ -2027,11 +1910,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               onChange={(e) => handleFileChange(e, (dataUrl) => setTeamForm((prev) => ({ ...prev, image: dataUrl })))}
             />
 
-<<<<<<< HEAD
-            <form onSubmit={handleSaveTeamMember} className="space-y-4 max-h-[calc(100dvh-9rem)] overflow-y-auto pr-1 sm:max-h-[75vh]">
-=======
             <form onSubmit={handleSaveTeamMember} className="space-y-3.5 sm:space-y-4">
->>>>>>> 4990e334ae6a42ae3677702c362abe86eb4d8758
               <div>
                 <label className={themeClasses.label}>Full Name & Academic Honors</label>
                 <input
