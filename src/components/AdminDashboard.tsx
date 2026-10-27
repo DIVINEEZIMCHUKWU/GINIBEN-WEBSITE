@@ -500,7 +500,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // STYLING CLASSES (White vs Carton Brown Mode)
   // -------------------------------------------------------------
   const themeClasses = {
-    modalOverlay: 'fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/75 backdrop-blur-sm overflow-hidden',
+    modalOverlay: 'fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/80 backdrop-blur-sm overflow-hidden',
     mainShell: isCarton 
       ? 'w-full md:max-w-7xl h-full md:h-[92vh] md:max-h-[950px] bg-[#221a14] text-[#f4efe8] rounded-none md:rounded-2xl shadow-2xl flex flex-col border-0 md:border md:border-[#523f2f] overflow-hidden'
       : 'w-full md:max-w-7xl h-full md:h-[92vh] md:max-h-[950px] bg-white text-stone-900 rounded-none md:rounded-2xl shadow-2xl flex flex-col border-0 md:border md:border-stone-200 overflow-hidden',
@@ -511,28 +511,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       ? 'hidden md:flex w-60 lg:w-64 border-r border-[#523f2f] bg-[#2a211a] p-4 flex-col justify-between shrink-0'
       : 'hidden md:flex w-60 lg:w-64 border-r border-stone-200 bg-[#faf8f5] p-4 flex-col justify-between shrink-0',
     contentArea: isCarton 
-      ? 'flex-1 bg-[#1e1712] p-3 sm:p-5 md:p-6 overflow-y-auto'
-      : 'flex-1 bg-white p-3 sm:p-5 md:p-6 overflow-y-auto',
+      ? 'flex-1 bg-[#1e1712] p-3 sm:p-5 md:p-6 overflow-y-auto overscroll-contain'
+      : 'flex-1 bg-white p-3 sm:p-5 md:p-6 overflow-y-auto overscroll-contain',
     card: isCarton 
-      ? 'bg-[#2b221a] border border-[#523f2f] rounded-2xl p-4 sm:p-5 shadow-sm'
-      : 'bg-white border border-stone-200 rounded-2xl p-4 sm:p-5 shadow-xs',
+      ? 'bg-[#2b221a] border border-[#523f2f] rounded-2xl p-3.5 sm:p-5 shadow-sm'
+      : 'bg-white border border-stone-200 rounded-2xl p-3.5 sm:p-5 shadow-xs',
     input: isCarton 
-      ? 'w-full px-3.5 py-2.5 rounded-xl bg-[#1a1410] border border-[#5a4635] text-white placeholder-stone-400 focus:outline-none focus:border-[#c2a67e] text-sm'
-      : 'w-full px-3.5 py-2.5 rounded-xl bg-white border border-stone-300 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#16a34a] text-sm',
+      ? 'w-full px-3.5 py-2.5 rounded-xl bg-[#1a1410] border border-[#5a4635] text-white placeholder-stone-400 focus:outline-none focus:border-[#c2a67e] text-base sm:text-sm min-h-[42px] transition-colors'
+      : 'w-full px-3.5 py-2.5 rounded-xl bg-white border border-stone-300 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#16a34a] text-base sm:text-sm min-h-[42px] transition-colors',
     label: isCarton 
-      ? 'text-xs font-mono uppercase tracking-wider text-[#d7cbbe] block mb-1 font-bold'
-      : 'text-xs font-mono uppercase tracking-wider text-stone-600 block mb-1 font-bold',
-    navButtonActive: 'bg-[#16a34a] text-white shadow-md',
+      ? 'text-xs font-mono uppercase tracking-wider text-[#d7cbbe] block mb-1.5 font-bold'
+      : 'text-xs font-mono uppercase tracking-wider text-stone-600 block mb-1.5 font-bold',
+    navButtonActive: 'bg-[#16a34a] text-white shadow-md ring-2 ring-[#16a34a]/30',
     navButtonInactive: isCarton 
       ? 'text-[#dfd6cb] hover:bg-[#382c22] hover:text-white'
       : 'text-stone-700 hover:bg-stone-100 hover:text-stone-900',
     mobileNavInactive: isCarton
-      ? 'bg-[#2c231b] text-[#dfd6cb] border border-[#4d3a2b]'
-      : 'bg-stone-100 text-stone-700 border border-stone-200',
-    primaryButton: 'px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer',
+      ? 'bg-[#2c231b] hover:bg-[#382c22] text-[#dfd6cb] border border-[#4d3a2b]'
+      : 'bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200',
+    primaryButton: 'px-3.5 sm:px-4 py-2.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] active:scale-[0.98] text-white text-xs sm:text-sm font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation min-h-[40px]',
     secondaryButton: isCarton
-      ? 'px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#3a2e24] hover:bg-[#48392d] text-white text-xs font-bold border border-[#5a4635] transition-all flex items-center justify-center gap-1.5 cursor-pointer'
-      : 'px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white hover:bg-stone-50 text-stone-800 text-xs font-bold border border-stone-300 transition-all shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer'
+      ? 'px-3.5 sm:px-4 py-2.5 rounded-xl bg-[#3a2e24] hover:bg-[#48392d] active:scale-[0.98] text-white text-xs sm:text-sm font-bold border border-[#5a4635] transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation min-h-[40px]'
+      : 'px-3.5 sm:px-4 py-2.5 rounded-xl bg-white hover:bg-stone-50 active:scale-[0.98] text-stone-800 text-xs sm:text-sm font-bold border border-stone-300 transition-all shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation min-h-[40px]'
   };
 
   // -------------------------------------------------------------
@@ -710,59 +710,61 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </header>
 
         {/* Dedicated Mobile Horizontal Tab Bar (Visible on mobile/tablet screens < md) */}
-        <div className={`md:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar px-3 py-2 border-b shrink-0 ${
+        <div className={`md:hidden flex items-center gap-2 overflow-x-auto scrollbar-none touch-pan-x px-3 py-2.5 border-b shrink-0 ${
           isCarton ? 'bg-[#251d16] border-[#523f2f]' : 'bg-[#faf8f5] border-stone-200'
         }`}>
           <button
             onClick={() => setActiveTab('overview')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer active:scale-95 touch-manipulation ${
               activeTab === 'overview' ? themeClasses.navButtonActive : themeClasses.mobileNavInactive
             }`}
           >
-            <LayoutDashboard className="w-3.5 h-3.5" />
+            <LayoutDashboard className="w-4 h-4 shrink-0" />
             <span>Overview</span>
           </button>
 
           <button
             onClick={() => setActiveTab('images')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer active:scale-95 touch-manipulation ${
               activeTab === 'images' ? themeClasses.navButtonActive : themeClasses.mobileNavInactive
             }`}
           >
-            <ImageIcon className="w-3.5 h-3.5" />
+            <ImageIcon className="w-4 h-4 shrink-0" />
             <span>Images ({galleryImages.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('videos')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer active:scale-95 touch-manipulation ${
               activeTab === 'videos' ? themeClasses.navButtonActive : themeClasses.mobileNavInactive
             }`}
           >
-            <Film className="w-3.5 h-3.5" />
+            <Film className="w-4 h-4 shrink-0" />
             <span>Videos ({videos.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('team')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer active:scale-95 touch-manipulation ${
               activeTab === 'team' ? themeClasses.navButtonActive : themeClasses.mobileNavInactive
             }`}
           >
-            <Users className="w-3.5 h-3.5" />
+            <Users className="w-4 h-4 shrink-0" />
             <span>Team ({team.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('enquiries')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer active:scale-95 touch-manipulation ${
               activeTab === 'enquiries' ? themeClasses.navButtonActive : themeClasses.mobileNavInactive
             }`}
           >
-            <MessageSquare className="w-3.5 h-3.5" />
+            <MessageSquare className="w-4 h-4 shrink-0" />
             <span>Enquiries</span>
             {enquiries.length > 0 && (
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-[#16a34a] text-white font-bold">
+              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full font-bold ${
+                activeTab === 'enquiries' ? 'bg-white text-[#16a34a]' : 'bg-[#16a34a] text-white'
+              }`}>
                 {enquiries.length}
               </span>
             )}
@@ -770,11 +772,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           <button
             onClick={() => setActiveTab('settings')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer active:scale-95 touch-manipulation ${
               activeTab === 'settings' ? themeClasses.navButtonActive : themeClasses.mobileNavInactive
             }`}
           >
-            <Settings className="w-3.5 h-3.5" />
+            <Settings className="w-4 h-4 shrink-0" />
             <span>Settings</span>
           </button>
         </div>
@@ -1029,53 +1031,61 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   />
                 </div>
 
-                {/* Images Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                {/* Images Grid - 2 columns on mobile, 3 on md, 4 on lg */}
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
                   {filteredImages.map((img) => (
                     <div
                       key={img.id}
-                      className={`group relative rounded-2xl overflow-hidden border transition-all ${
-                        isCarton ? 'bg-[#2b221a] border-[#523f2f]' : 'bg-white border-stone-200'
+                      className={`group relative rounded-xl sm:rounded-2xl overflow-hidden border transition-all flex flex-col justify-between ${
+                        isCarton ? 'bg-[#2b221a] border-[#523f2f]' : 'bg-white border-stone-200 shadow-xs'
                       }`}
                     >
-                      <div className="aspect-square w-full overflow-hidden bg-black relative">
-                        <img
-                          src={img.url}
-                          alt={img.alt || img.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          referrerPolicy="no-referrer"
-                        />
-                        <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                          {img.showOnHomepage !== false && (
-                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#16a34a] text-white font-bold">
-                              Home
-                            </span>
-                          )}
-                          {img.showOnProjects !== false && (
-                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-600 text-white font-bold">
-                              Project
-                            </span>
-                          )}
+                      <div>
+                        <div className="aspect-square w-full overflow-hidden bg-black relative">
+                          <img
+                            src={img.url}
+                            alt={img.alt || img.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute top-1.5 left-1.5 flex flex-wrap gap-1">
+                            {img.showOnHomepage !== false && (
+                              <span className="text-[8px] sm:text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#16a34a] text-white font-bold">
+                                Home
+                              </span>
+                            )}
+                            {img.showOnProjects !== false && (
+                              <span className="text-[8px] sm:text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-600 text-white font-bold">
+                                Project
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="p-2 sm:p-3.5">
+                          <span className="text-[8px] sm:text-[9px] font-mono text-[#c2a67e] font-bold uppercase">{img.category}</span>
+                          <h4 className="font-bold text-[11px] sm:text-xs line-clamp-1 mt-0.5">{img.title}</h4>
+                          <p className="text-[10px] sm:text-[11px] text-stone-400 line-clamp-1 sm:line-clamp-2 mt-0.5 leading-snug">{img.caption}</p>
                         </div>
                       </div>
 
-                      <div className="p-3 sm:p-3.5">
-                        <span className="text-[9px] font-mono text-[#c2a67e] font-bold uppercase">{img.category}</span>
-                        <h4 className="font-bold text-xs line-clamp-1 mt-0.5">{img.title}</h4>
-                        <p className="text-[11px] text-stone-400 line-clamp-2 mt-1 leading-snug">{img.caption}</p>
-
-                        <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-stone-200/20">
+                      <div className="p-2 sm:p-3.5 pt-0">
+                        <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-stone-200/20 text-xs">
                           <button
                             onClick={() => handleOpenEditImage(img)}
-                            className="text-xs font-semibold text-[#16a34a] hover:underline flex items-center gap-1 cursor-pointer py-1"
+                            className="py-1.5 px-2 rounded-lg bg-[#16a34a]/10 hover:bg-[#16a34a]/20 text-[#16a34a] font-bold flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation text-[11px]"
+                            title="Edit Image Details"
                           >
-                            <Edit className="w-3.5 h-3.5" /> Edit
+                            <Edit className="w-3 h-3" />
+                            <span>Edit</span>
                           </button>
                           <button
                             onClick={() => onDeleteGalleryImage(img.id)}
-                            className="text-xs font-semibold text-rose-500 hover:underline flex items-center gap-1 cursor-pointer py-1"
+                            className="py-1.5 px-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 font-bold flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation text-[11px]"
+                            title="Delete Image"
                           >
-                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                            <Trash2 className="w-3 h-3" />
+                            <span>Del</span>
                           </button>
                         </div>
                       </div>
@@ -1162,25 +1172,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <div className="p-3.5 sm:p-4 space-y-3">
                         <p className="text-xs text-stone-400 line-clamp-2 leading-relaxed">{vid.description}</p>
                         
-                        <div className="flex items-center justify-between pt-2.5 border-t border-stone-200/20 text-xs">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2.5 border-t border-stone-200/20 text-xs">
                           <button
                             onClick={() => setPreviewingVideo(vid)}
-                            className="font-bold text-stone-300 hover:text-white flex items-center gap-1 cursor-pointer py-1"
+                            className="min-h-[36px] py-1.5 px-3 rounded-lg bg-stone-500/10 hover:bg-stone-500/20 text-stone-300 hover:text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 touch-manipulation"
                           >
-                            <Eye className="w-3.5 h-3.5 text-[#16a34a]" /> Preview
+                            <Eye className="w-3.5 h-3.5 text-[#16a34a]" />
+                            <span>Preview Video</span>
                           </button>
-                          <div className="flex items-center gap-3">
+                          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
                             <button
                               onClick={() => handleOpenEditVideo(vid)}
-                              className="font-bold text-[#16a34a] hover:underline flex items-center gap-1 cursor-pointer py-1"
+                              className="min-h-[36px] py-1.5 px-3 rounded-lg bg-[#16a34a]/10 hover:bg-[#16a34a]/20 text-[#16a34a] font-bold flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation"
                             >
-                              <Edit className="w-3.5 h-3.5" /> Edit
+                              <Edit className="w-3.5 h-3.5" />
+                              <span>Edit</span>
                             </button>
                             <button
                               onClick={() => onDeleteVideo(vid.id)}
-                              className="font-bold text-rose-500 hover:underline flex items-center gap-1 cursor-pointer py-1"
+                              className="min-h-[36px] py-1.5 px-3 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 font-bold flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation"
                             >
-                              <Trash2 className="w-3.5 h-3.5" /> Delete
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Delete</span>
                             </button>
                           </div>
                         </div>
@@ -1246,18 +1259,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         )}
                       </div>
 
-                      <div className="flex items-center justify-between pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-stone-200/20 text-xs">
+                      <div className="grid grid-cols-2 gap-2 pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-stone-200/20 text-xs">
                         <button
                           onClick={() => handleOpenEditTeamMember(member)}
-                          className="font-bold text-[#16a34a] hover:underline flex items-center gap-1 cursor-pointer py-1"
+                          className="min-h-[36px] py-1.5 px-2.5 rounded-lg bg-[#16a34a]/10 hover:bg-[#16a34a]/20 text-[#16a34a] font-bold flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation"
                         >
-                          <Edit className="w-3.5 h-3.5" /> Edit Member
+                          <Edit className="w-3.5 h-3.5" />
+                          <span>Edit Member</span>
                         </button>
                         <button
                           onClick={() => onDeleteTeamMember && onDeleteTeamMember(member.id)}
-                          className="font-bold text-rose-500 hover:underline flex items-center gap-1 cursor-pointer py-1"
+                          className="min-h-[36px] py-1.5 px-2.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 font-bold flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation"
                         >
-                          <Trash2 className="w-3.5 h-3.5" /> Delete
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete</span>
                         </button>
                       </div>
                     </div>
@@ -1333,32 +1348,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           <p className="text-stone-400">{enq.message}</p>
                         </div>
 
-                        <div className="flex items-center justify-between pt-2 border-t border-stone-200/20 text-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="text-stone-400 text-[11px]">Status:</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2.5 border-t border-stone-200/20 text-xs">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-stone-400 text-[11px] font-bold">Status:</span>
                             <button
                               onClick={() => onUpdateEnquiryStatus(enq.id, 'reviewed')}
-                              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                                enq.status === 'reviewed' ? 'bg-[#16a34a] text-white' : 'border border-stone-400 text-stone-400 hover:text-white'
+                              className={`min-h-[34px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 touch-manipulation flex items-center gap-1 ${
+                                enq.status === 'reviewed' ? 'bg-[#16a34a] text-white shadow-xs' : 'border border-stone-400/50 text-stone-400 hover:text-white'
                               }`}
                             >
-                              Reviewed
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Reviewed</span>
                             </button>
                             <button
                               onClick={() => onUpdateEnquiryStatus(enq.id, 'resolved')}
-                              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                                enq.status === 'resolved' ? 'bg-blue-600 text-white' : 'border border-stone-400 text-stone-400 hover:text-white'
+                              className={`min-h-[34px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 touch-manipulation flex items-center gap-1 ${
+                                enq.status === 'resolved' ? 'bg-blue-600 text-white shadow-xs' : 'border border-stone-400/50 text-stone-400 hover:text-white'
                               }`}
                             >
-                              Resolved
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Resolved</span>
                             </button>
                           </div>
 
                           <button
                             onClick={() => onDeleteEnquiry(enq.id)}
-                            className="text-xs font-bold text-rose-500 hover:underline flex items-center gap-1 cursor-pointer"
+                            className="min-h-[34px] px-3 py-1 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-500/10 border border-rose-500/20 flex items-center justify-center gap-1 cursor-pointer active:scale-95 touch-manipulation self-start sm:self-auto"
                           >
-                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete Enquiry</span>
                           </button>
                         </div>
                       </div>
