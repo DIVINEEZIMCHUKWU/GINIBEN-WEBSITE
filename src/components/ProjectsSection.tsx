@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Compass, MapPin, Calendar, ArrowRight, Check, X, Layers } from 'lucide-react';
+import { Compass, MapPin, Calendar, ArrowRight, Check, X, Layers, Maximize2, Eye } from 'lucide-react';
 import { ProjectItem } from '../types';
 
 interface ProjectsSectionProps {
@@ -15,6 +15,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [activeProjectModal, setActiveProjectModal] = useState<ProjectItem | null>(null);
+  const [selectedProjectPhoto, setSelectedProjectPhoto] = useState<string | null>(null);
 
   const categories = [
     { key: 'all', label: 'All Assignments' },
@@ -80,19 +81,42 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
               key={project.id}
               className="group rounded-2xl overflow-hidden border border-[#c2a67e]/30 bg-white flex flex-col justify-between hover:border-[#16a34a] hover:shadow-xl transition-all duration-300"
             >
-              {/* Project Image Frame */}
-              <div className="relative h-64 sm:h-72 w-full overflow-hidden bg-stone-100">
+              {/* Project Image Frame (Adaptive Aspect Ratio for Laptops and Smartphones - Uncropped Display) */}
+              <div 
+                onClick={() => setActiveProjectModal(project)}
+                className="relative aspect-[16/10] sm:aspect-[16/9] md:aspect-[4/3] lg:aspect-[16/10] w-full overflow-hidden bg-stone-950 cursor-pointer flex items-center justify-center group/img"
+              >
+                {/* Soft ambient blur backdrop */}
+                <div 
+                  className="absolute inset-0 bg-cover bg-center filter blur-xl opacity-35 scale-110 pointer-events-none"
+                  style={{ backgroundImage: `url(${project.coverImage})` }}
+                />
+
+                {/* Main image with object-contain to preserve full uncropped photograph */}
                 <img
                   src={project.coverImage}
                   alt={project.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-[1.02]"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
 
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-mono font-semibold text-white bg-[#16a34a] shadow-md">
+                <div className="absolute top-4 left-4 z-30 px-3 py-1 rounded-full text-xs font-mono font-semibold text-white bg-[#16a34a] shadow-md pointer-events-none">
                   {project.category}
                 </div>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedProjectPhoto(project.coverImage);
+                  }}
+                  className="absolute top-4 right-4 z-30 p-2 rounded-xl bg-black/80 hover:bg-black text-white text-xs font-mono border border-white/20 shadow-lg flex items-center gap-1.5 transition-all opacity-0 group-hover:opacity-100 backdrop-blur-xs"
+                  title="Inspect Full Uncropped Photo"
+                >
+                  <Maximize2 className="w-3.5 h-3.5 text-[#4ade80]" />
+                  <span className="hidden sm:inline">Inspect Full Image</span>
+                </button>
               </div>
 
               {/* Card Meta & Methodology */}
@@ -176,13 +200,26 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             {/* Gallery Images Strip for this Project */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {activeProjectModal.galleryImages.map((imgUrl, i) => (
-                <div key={i} className="h-44 rounded-xl overflow-hidden border border-[#c2a67e]/30 bg-stone-100 shadow-inner">
+                <div 
+                  key={i} 
+                  onClick={() => setSelectedProjectPhoto(imgUrl)}
+                  className="aspect-[4/3] rounded-xl overflow-hidden border border-[#c2a67e]/30 bg-stone-950 shadow-inner cursor-pointer group/modalimg relative flex items-center justify-center"
+                  title="Click to inspect full uncropped high resolution image"
+                >
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center filter blur-md opacity-30 scale-110 pointer-events-none"
+                    style={{ backgroundImage: `url(${imgUrl})` }}
+                  />
                   <img
                     src={imgUrl}
                     alt=""
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain relative z-10 transition-transform group-hover/modalimg:scale-105"
                     referrerPolicy="no-referrer"
                   />
+                  <div className="absolute inset-0 z-20 bg-black/40 opacity-0 group-hover/modalimg:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white text-xs font-mono">
+                    <Maximize2 className="w-4 h-4 text-[#4ade80]" />
+                    <span>Uncropped View</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -235,6 +272,32 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Uncropped Full-Resolution Photo Lightbox */}
+      {selectedProjectPhoto && (
+        <div 
+          className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-6 bg-black/95 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            onClick={() => setSelectedProjectPhoto(null)}
+            className="absolute top-4 right-4 z-20 p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+            aria-label="Close uncropped preview"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          <div className="relative w-full max-w-5xl h-[85vh] max-h-[900px] flex items-center justify-center">
+            <img
+              src={selectedProjectPhoto}
+              alt="Full Uncropped Project View"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              referrerPolicy="no-referrer"
+            />
           </div>
         </div>
       )}

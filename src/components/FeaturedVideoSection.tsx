@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Film, CheckCircle2, Shield, Play, Maximize2, X } from 'lucide-react';
 import { ProjectVideo } from '../types';
+import { UniversalVideoPlayer } from './UniversalVideoPlayer';
 
 interface FeaturedVideoSectionProps {
   videos: ProjectVideo[];
@@ -96,65 +97,12 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({
                 {/* Rotating Conic Ribbon */}
                 <div className="absolute -inset-[150%] animate-rotate-gradient bg-[conic-gradient(from_0deg_at_50%_50%,#16a34a_0deg,#c2a67e_70deg,#22c55e_150deg,#86efac_240deg,#16a34a_360deg)] opacity-80" />
 
-                {/* Inner Screen Container - Standard Portrait Display for Mobile */}
+                {/* Inner Screen Container - Standard Display for Mobile & Laptops */}
                 <div className="relative w-full overflow-hidden bg-black transition-all duration-500 rounded-[22px] sm:rounded-[30px] aspect-[9/16] sm:aspect-[3/4]">
-                  
-                  {isOnline ? (
-                    /* Live Direct In-Place Video Player: 100% Brightness, Zero Dimming, Watchable Instantly */
-                    <div className="relative w-full h-full bg-black overflow-hidden">
-                      <iframe
-                        key={activeVideo.id}
-                        src={activeVideo.drivePreviewUrl}
-                        title={activeVideo.title}
-                        className="w-full border-0 block brightness-100 contrast-100"
-                        style={{
-                          height: 'calc(100% + 48px)',
-                          marginTop: '-48px',
-                          width: '100%'
-                        }}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                      />
-
-                      {/* Solid black mask over top-right corner to permanently conceal and block any pop-out arrow */}
-                      <div 
-                        className="absolute top-0 right-0 w-16 h-12 z-20 bg-black pointer-events-auto cursor-default select-none"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                        }}
-                        aria-hidden="true"
-                      />
-
-                      {/* Top Right: Full Preview Expand Icon Button */}
-                      <button
-                        onClick={() => setIsFullPreviewOpen(true)}
-                        className="absolute top-2.5 right-2.5 z-30 px-2.5 py-1.5 rounded-xl bg-black/80 hover:bg-black text-white text-[11px] font-mono border border-white/25 shadow-lg flex items-center gap-1.5 cursor-pointer backdrop-blur-md transition-all active:scale-95"
-                        title="Expand to Full Preview modal"
-                        aria-label="Open Full Preview mode"
-                      >
-                        <Maximize2 className="w-3.5 h-3.5 text-[#4ade80]" />
-                        <span className="font-semibold hidden sm:inline">Full Preview</span>
-                      </button>
-                    </div>
-                  ) : (
-                    /* Offline Fallback: Show High-Res Picture Preview with no iframe error screen */
-                    <div className="relative w-full h-full select-none flex items-center justify-center bg-black">
-                      <img
-                        src={activeVideo.thumbnail}
-                        alt={activeVideo.title}
-                        className="w-full h-full object-cover brightness-100 contrast-100"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/60 p-4 text-center">
-                        <div className="bg-black/90 p-4 rounded-xl border border-white/20 text-white max-w-sm space-y-2">
-                          <p className="text-xs font-mono font-bold text-[#86efac]">Offline Preview Mode</p>
-                          <p className="text-[11px] text-stone-300">Photographic preview active. Reconnect to the internet to stream this video record directly.</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
+                  <UniversalVideoPlayer
+                    video={activeVideo}
+                    onOpenFullPreview={() => setIsFullPreviewOpen(true)}
+                  />
                 </div>
               </div>
             </div>
@@ -327,29 +275,11 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({
             </div>
           </div>
 
-          {/* Full Screen Theatre Box (Dedicated Mobile Portrait Standard) */}
-          <div className="relative w-full max-w-[420px] h-[82vh] max-h-[850px] aspect-[9/16] sm:aspect-[3/4] overflow-hidden bg-black shadow-2xl border border-white/20 transition-all duration-300 rounded-2xl mx-auto">
-            <iframe
-              key={`modal-${activeVideo.id}`}
-              src={activeVideo.drivePreviewUrl}
-              title={activeVideo.title}
-              className="w-full h-full border-0 block brightness-100 contrast-100"
-              style={{
-                height: 'calc(100% + 48px)',
-                marginTop: '-48px',
-                width: '100%'
-              }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-            {/* Top-right shield in modal to block pop-out arrow */}
-            <div 
-              className="absolute top-0 right-0 w-16 h-12 z-30 bg-black pointer-events-auto cursor-default select-none"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              aria-hidden="true"
+          {/* Full Screen Theatre Box (Adaptive Display for All Devices) */}
+          <div className="relative w-full max-w-[500px] h-[82vh] max-h-[850px] aspect-[9/16] sm:aspect-[3/4] overflow-hidden bg-black shadow-2xl border border-white/20 transition-all duration-300 rounded-2xl mx-auto flex items-center justify-center">
+            <UniversalVideoPlayer
+              video={activeVideo}
+              isModal={true}
             />
           </div>
 

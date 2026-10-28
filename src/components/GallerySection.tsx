@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Film, Eye, Play, Shield, MapPin, Calendar, WifiOff, Wifi, Maximize2, X } from 'lucide-react';
+import { Camera, Film, Eye, Play, Shield, MapPin, Calendar, WifiOff, Wifi, Maximize2, X, SlidersHorizontal } from 'lucide-react';
 import { MediaItem, ProjectVideo } from '../types';
 import { ALL_PROJECT_VIDEOS } from '../data/companyData';
+import { UniversalVideoPlayer } from './UniversalVideoPlayer';
 
 interface GallerySectionProps {
   images: MediaItem[];
@@ -31,6 +32,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
   excludeCategories = []
 }) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [imageFitMode, setImageFitMode] = useState<'cover' | 'contain'>('contain');
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
   const [isFullPreviewOpen, setIsFullPreviewOpen] = useState(false);
   const [isOnline, setIsOnline] = useState<boolean>(() => {
@@ -135,65 +137,12 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
                     {/* Rotating Conic Ribbon */}
                     <div className="absolute -inset-[150%] animate-rotate-gradient bg-[conic-gradient(from_0deg_at_50%_50%,#16a34a_0deg,#c2a67e_70deg,#22c55e_150deg,#86efac_240deg,#16a34a_360deg)] opacity-80" />
 
-                    {/* Inner Screen Container - Dedicated Portrait Screen for Mobile */}
+                    {/* Inner Screen Container - Dedicated Display for Mobile & Laptops */}
                     <div className="relative w-full overflow-hidden bg-black transition-all duration-500 rounded-[26px] sm:rounded-[32px] aspect-[9/16] sm:aspect-[3/4]">
-                      
-                      {isOnline ? (
-                        /* Live Direct In-Place Video Player: 100% Brightness, Zero Dimming, Watchable Instantly */
-                        <div className="relative w-full h-full bg-black overflow-hidden">
-                          <iframe
-                            key={activeVideo.id}
-                            src={activeVideo.drivePreviewUrl}
-                            title={activeVideo.title}
-                            className="w-full border-0 block brightness-100 contrast-100"
-                            style={{
-                              height: 'calc(100% + 48px)',
-                              marginTop: '-48px',
-                              width: '100%'
-                            }}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen
-                          />
-
-                          {/* Solid black mask over top-right corner to permanently conceal and block any pop-out arrow */}
-                          <div 
-                            className="absolute top-0 right-0 w-16 h-12 z-20 bg-black pointer-events-auto cursor-default select-none"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                            }}
-                            aria-hidden="true"
-                          />
-
-                          {/* Top Right: Full Preview Expand Icon Button */}
-                          <button
-                            onClick={() => setIsFullPreviewOpen(true)}
-                            className="absolute top-2.5 right-2.5 z-30 px-2.5 py-1.5 rounded-xl bg-black/80 hover:bg-black text-white text-[11px] font-mono border border-white/25 shadow-lg flex items-center gap-1.5 cursor-pointer backdrop-blur-md transition-all active:scale-95"
-                            title="Expand to Full Preview modal"
-                            aria-label="Open Full Preview mode"
-                          >
-                            <Maximize2 className="w-3.5 h-3.5 text-[#4ade80]" />
-                            <span className="font-semibold hidden sm:inline">Full Preview</span>
-                          </button>
-                        </div>
-                      ) : (
-                        /* Offline Fallback: Show High-Res Picture Preview with no iframe error screen */
-                        <div className="relative w-full h-full select-none flex items-center justify-center bg-black">
-                          <img
-                            src={activeVideo.thumbnail}
-                            alt={activeVideo.title}
-                            className="w-full h-full object-cover brightness-100 contrast-100"
-                            referrerPolicy="no-referrer"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/60 p-4 text-center">
-                            <div className="bg-black/90 p-4 rounded-xl border border-white/20 text-white max-w-sm space-y-2">
-                              <p className="text-xs font-mono font-bold text-[#86efac]">Offline Preview Mode</p>
-                              <p className="text-[11px] text-stone-300">Photographic preview active. Reconnect to the internet to stream this video record directly.</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
+                      <UniversalVideoPlayer
+                        video={activeVideo}
+                        onOpenFullPreview={() => setIsFullPreviewOpen(true)}
+                      />
                     </div>
                   </div>
                 </div>
@@ -361,28 +310,53 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
             </div>
           </div>
 
+          {/* Gallery Toolbar: Image Fit Mode & Counter */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pt-2 border-t border-[#c2a67e]/20">
+            <span className="text-xs font-mono text-stone-500">
+              Showing <strong className="text-stone-900">{filteredImages.length}</strong> verified field records &bull; Click any photo to inspect full uncropped HD resolution
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setImageFitMode((prev) => (prev === 'cover' ? 'contain' : 'cover'))}
+              className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#faf7f2] hover:bg-[#f2ece2] border border-[#c2a67e]/35 text-xs font-semibold text-stone-700 transition-colors cursor-pointer shadow-2xs"
+              title="Toggle between cropped fill and full uncropped photo fit"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-[#16a34a]" />
+              <span>{imageFitMode === 'cover' ? 'Switch to: Full Photo Fit (Uncropped)' : 'Switch to: Balanced Grid Fill'}</span>
+            </button>
+          </div>
+
           {/* Gallery Grid (Responsive Grid) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {filteredImages.map((image) => (
               <div
                 key={image.id}
                 onClick={() => onOpenLightbox(image)}
-                className="group relative rounded-2xl overflow-hidden border border-[#c2a67e]/30 bg-stone-900 aspect-[4/3] shadow-sm hover:shadow-xl hover:border-[#16a34a] transition-all duration-300 cursor-pointer"
+                className="group relative rounded-2xl overflow-hidden border border-[#c2a67e]/30 bg-stone-950 aspect-[4/3] shadow-sm hover:shadow-xl hover:border-[#16a34a] transition-all duration-300 cursor-pointer flex items-center justify-center"
                 title={`Click for full preview: ${image.title} | ${image.caption}`}
               >
+                {/* Ambient blur backdrop for portrait photos on laptop screens */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center filter blur-xl opacity-40 scale-110 pointer-events-none"
+                  style={{ backgroundImage: `url(${image.url})` }}
+                />
+
                 <img
                   src={image.url}
                   alt={image.alt || image.title}
                   loading="lazy"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className={`w-full h-full relative z-10 transition-transform duration-500 group-hover:scale-105 ${
+                    imageFitMode === 'contain' ? 'object-contain' : 'object-cover object-center'
+                  }`}
                   referrerPolicy="no-referrer"
                 />
 
                 {/* Scrim */}
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/95 via-stone-950/40 to-transparent opacity-85 group-hover:opacity-95 transition-opacity" />
+                <div className="absolute inset-0 z-20 bg-gradient-to-t from-stone-950/95 via-stone-950/30 to-transparent opacity-85 group-hover:opacity-95 transition-opacity pointer-events-none" />
 
                 {/* Glass Caption & Subtitle */}
-                <div className="absolute bottom-3 left-3 right-3 text-left">
+                <div className="absolute bottom-3 left-3 right-3 text-left pointer-events-none">
                   <div className="flex items-center justify-between text-[9px] font-mono text-[#c2a67e] font-semibold uppercase tracking-wider mb-0.5">
                     <span>{image.category}</span>
                     {image.date && <span className="text-stone-300">{image.date}</span>}
@@ -404,7 +378,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
                 </div>
 
                 {/* View Overlay Icon */}
-                <div className="absolute top-3 right-3 p-1.5 rounded-lg bg-stone-900/80 text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
+                <div className="absolute top-3 right-3 p-1.5 rounded-lg bg-stone-900/80 text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-sm pointer-events-none">
                   <Eye className="w-4 h-4 text-[#4ade80]" />
                 </div>
               </div>
@@ -455,29 +429,11 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
             </div>
           </div>
 
-          {/* Full Screen Theatre Box (Dedicated Mobile Portrait Standard) */}
-          <div className="relative w-full max-w-[420px] h-[82vh] max-h-[850px] aspect-[9/16] sm:aspect-[3/4] overflow-hidden bg-black shadow-2xl border border-white/20 transition-all duration-300 rounded-2xl mx-auto">
-            <iframe
-              key={`modal-gal-${activeVideo.id}`}
-              src={activeVideo.drivePreviewUrl}
-              title={activeVideo.title}
-              className="w-full h-full border-0 block brightness-100 contrast-100"
-              style={{
-                height: 'calc(100% + 48px)',
-                marginTop: '-48px',
-                width: '100%'
-              }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-            {/* Top-right shield in modal to block pop-out arrow */}
-            <div 
-              className="absolute top-0 right-0 w-16 h-12 z-30 bg-black pointer-events-auto cursor-default select-none"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              aria-hidden="true"
+          {/* Full Screen Theatre Box (Adaptive Display for All Devices) */}
+          <div className="relative w-full max-w-[500px] h-[82vh] max-h-[850px] aspect-[9/16] sm:aspect-[3/4] overflow-hidden bg-black shadow-2xl border border-white/20 transition-all duration-300 rounded-2xl mx-auto flex items-center justify-center">
+            <UniversalVideoPlayer
+              video={activeVideo}
+              isModal={true}
             />
           </div>
 

@@ -11,7 +11,7 @@ const API_BASE = '/api';
 // Helper for safe fetch with timeout
 async function apiFetch(endpoint: string, options: RequestInit = {}): Promise<any> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 6000);
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
 
   try {
     const res = await fetch(`${API_BASE}${endpoint}`, {
@@ -241,6 +241,23 @@ export async function saveSettingsToApi(settings: Record<string, any>): Promise<
     return Boolean(res?.success);
   } catch {
     return false;
+  }
+}
+
+export async function changeAdminPasswordInApi(currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const res = await apiFetch('/settings.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'change_password',
+        currentPassword,
+        newPassword
+      })
+    });
+    return { success: Boolean(res?.success), message: res?.message || 'Password updated successfully in database.' };
+  } catch (err: any) {
+    return { success: false, message: err?.message || 'Server connection failed' };
   }
 }
 

@@ -51,9 +51,9 @@ load_env_file();
 
 // Database Constants (populated from .env or fallback for cPanel)
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'ginibeng_geoservices');
-define('DB_USER', getenv('DB_USER') ?: 'ginibeng_dbuser');
-define('DB_PASS', getenv('DB_PASS') ?: 'ReplaceWithYourCPanelDbPassword2026!');
+define('DB_NAME', getenv('DB_NAME') ?: 'xjtqwpkd_ginibeng_geoservices');
+define('DB_USER', getenv('DB_USER') ?: 'xjtqwpkd_ginibeng_dbuser');
+define('DB_PASS', getenv('DB_PASS') ?: 'Giniben@2026$');
 define('DB_CHARSET', getenv('DB_CHARSET') ?: 'utf8mb4');
 
 // Allowed Origins (CORS)

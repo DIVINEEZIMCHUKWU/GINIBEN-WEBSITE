@@ -1,97 +1,89 @@
 # GINIBEN & PARTNERS GEOSERVICES LTD
-## Complete Truehost cPanel & Shared Hosting Deployment Guide
-
-This guide provides step-by-step instructions for deploying the **GiniBen & Partners GEOSERVICES LTD** corporate website on Truehost shared hosting with cPanel (using standard PHP 8.x and MySQL/MariaDB).
+## Complete Truehost cPanel, MySQL & Email Integration Guide
 
 **Production Domain:** `https://ginibengeoservices.com/`
 
 ---
 
-### Step 1: Create the MySQL Database in cPanel
+### Why Data Appeared on Phone but Not Laptop (Root Cause Explained)
 
-1. Log into your Truehost cPanel account.
-2. Under the **Databases** section, click **MySQL® Database Wizard**.
-3. **New Database**: Enter database name, for example: `ginibeng_geoservices` and click *Next Step*.
-4. **Create Database Users**:
-   - Username: `ginibeng_dbuser`
-   - Password: Click *Password Generator* to generate a strong password (e.g. 16+ characters with symbols).
-   - Save the password securely.
-   - Click *Create User*.
-5. **Add User to Database**:
-   - Check **ALL PRIVILEGES**.
-   - Click *Make Changes*.
-
----
-
-### Step 2: Import `database.sql` via phpMyAdmin
-
-1. In cPanel, navigate back to the main dashboard and click **phpMyAdmin**.
-2. Select your newly created database (`ginibeng_geoservices`) from the left-hand navigation.
-3. Click the **Import** tab at the top.
-4. Under *File to import*, click **Choose File** and select the `/database.sql` file included in this project.
-5. Ensure the character set is set to **utf-8** (or `utf8mb4`).
-6. Scroll down and click **Import**.
-7. Confirm that all 8 tables are created successfully:
-   - `administrators`
-   - `website_settings`
-   - `services`
-   - `gallery_images`
-   - `projects`
-   - `team_members`
-   - `articles`
-   - `enquiries`
+1. **Local Storage vs. MySQL Database**:
+   - The consultation form handler previously saved submissions to the browser's local device memory (`localStorage`).
+   - When you booked the consultation on your smartphone, it saved to your phone's browser cache. When you opened the Admin Dashboard on your phone, it read from your phone's local cache.
+   - When you opened your laptop, the laptop's cache did not have it, and because the database endpoint had schema mismatches, it had not been written to Truehost MySQL.
+2. **The 24 vs. 104 Images Mystery**:
+   - The original `database.sql` seed script only contained 24 sample entries.
+   - We have generated a comprehensive `database.sql` file containing all **104 verified fieldwork images**, all **14 project videos**, all **6 team member profiles**, and all **company settings**.
+3. **Database Schema & Table Mismatches**:
+   - The tables in `database.sql` and the PHP API endpoints (`enquiries.php`, `images.php`, `videos.php`, `team.php`, `settings.php`) now have matching columns (`id`, `reference_number`, `full_name`, `company`, `email`, `phone`, `service_of_interest`, `project_location`, `subject`, `message`, `status`, etc.).
+   - All endpoints now have **self-healing table creation** (`CREATE TABLE IF NOT EXISTS ...`), so if a table is ever missing, the PHP script creates it on demand.
 
 ---
 
-### Step 3: Configure Database Credentials in PHP
+### Step 1: Import the Complete `database.sql` in cPanel (phpMyAdmin)
 
-1. In cPanel, open **File Manager** and locate your website directory (usually `public_html/` or a subdomain folder).
-2. Inside `public_html/api/config.php`, edit the database constants to match your cPanel setup:
+1. Log into your **Truehost cPanel**.
+2. Under **Databases**, open **phpMyAdmin**.
+3. Click your database name in the left sidebar (e.g. `yourcpaneluser_geoservices`).
+4. Click the **Import** tab at the top.
+5. Click **Choose File** and select the `/database.sql` (or `dist/database.sql`) from this project.
+6. Click **Import** at the bottom.
+7. Confirm that all tables are populated:
+   - `gallery_images` &rarr; Contains **all 104 fieldwork images**
+   - `project_videos` &rarr; Contains **all 14 field videos**
+   - `team_members` &rarr; Contains **all 6 personnel profiles**
+   - `enquiries` &rarr; Ready to receive consultation bookings
+   - `company_settings` &rarr; Stores master password `Giniben123` & company coordinates
+   - `administrators` &rarr; Admin credentials
+
+---
+
+### Step 2: Configure Database Credentials in `public_html/api/config.php`
+
+In **cPanel File Manager**, open `public_html/api/config.php` and set your actual MySQL database credentials created in cPanel MySQL Database Wizard:
 
 ```php
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'ginibeng_geoservices');
-define('DB_USER', 'ginibeng_dbuser');
-define('DB_PASS', 'YourActualGeneratedPasswordHere');
+define('DB_NAME', 'xjtqwpkd_ginibeng_geoservices'); // Your Truehost cPanel database name
+define('DB_USER', 'xjtqwpkd_ginibeng_dbuser');      // Your Truehost cPanel database user
+define('DB_PASS', 'YourActualCpanelPassword!');     // Your database password created in cPanel
 define('DB_CHARSET', 'utf8mb4');
 ```
 
-3. Save the file.
+Save the file.
 
 ---
 
-### Step 4: Build and Deploy the Frontend
+### Step 3: How Consultation Enquiries & Email Alerts Work
 
-1. Generate the optimized production build:
-   ```bash
-   npm run build
-   ```
-2. The compiled assets will be placed into the `dist/` directory.
-3. Upload the contents of `dist/` into your cPanel `public_html/` directory:
-   - `index.html`
-   - `assets/` (CSS & JavaScript bundles)
-   - `api/` (PHP endpoints)
-   - `.htaccess` (Apache routing & compression)
-4. Verify file permissions in cPanel File Manager:
-   - Folders: `755`
-   - Files: `644`
-
----
-
-### Step 5: Verify SSL and HTTPS
-
-1. In cPanel, navigate to **SSL/TLS Status**.
-2. Click **Run AutoSSL** for `ginibengeoservices.com` and `www.ginibengeoservices.com`.
-3. Verify that the `.htaccess` file automatically forces HTTPS.
+When a client books a consultation or submits an inquiry on the website:
+1. **Database Capture**:
+   - The inquiry is written to the `enquiries` MySQL database table on Truehost with a unique reference number (e.g., `GB-2026-4821`).
+2. **Email Alerts to 3 Addresses**:
+   - Immediate HTML & plain-text notification emails are dispatched simultaneously to:
+     - `info@ginibengeoservices.com`
+     - `benukwutevinor@yahoo.com`
+     - `gpg1.geoservices@gmail.com`
+   - FormSubmit also dispatches a backup notification copy to these emails.
+3. **Admin Dashboard Synchronization**:
+   - Whenever any administrator accesses `/admin` (or `#admin`) from **any device** (smartphone, laptop, tablet, desktop) with password `Giniben123`:
+     - The Admin Console fetches the live records from the MySQL database table.
+     - You can review, mark status as **Reviewed** or **Resolved**, or delete inquiries.
+     - Any edit or deletion done in the Admin Dashboard is written directly to the MySQL database and reflects across all devices.
 
 ---
 
-### Step 6: Testing Checklist
+### Step 4: Build and Deploy
 
-- [ ] Load `https://ginibengeoservices.com/` in an incognito browser window.
-- [ ] Verify the 15-image Hero Showcase cycles cleanly.
-- [ ] Test the Signature Dual-Track Slider (continuous marquee on top, static interactive grid below).
-- [ ] Test the Featured Project Film section (Video 01 & Video 02).
-- [ ] Submit a test consultation enquiry and verify the generated reference code (`GB-2026-XXXX`).
-- [ ] Test the floating WhatsApp and Telephone buttons.
-- [ ] Access the Admin Portal (`/admin` or Admin button in header) to review recorded enquiries and system statistics.
+In your local Visual Studio Code:
+```bash
+npm run build
+git add .
+git commit -m "Full MySQL database synchronization and multi-recipient email alert integration"
+git push
+```
+
+On Truehost cPanel **Git™ Version Control**:
+1. Click **UPDATE FROM REMOTE**.
+2. Click **DEPLOY HEAD COMMIT**.
+*(Or directly upload the contents of your local `dist/` folder into `public_html/` using cPanel File Manager).*

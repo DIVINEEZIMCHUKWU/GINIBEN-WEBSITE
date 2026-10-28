@@ -34,7 +34,7 @@ import {
   getImagesFromApi, saveImageToApi, deleteImageFromApi,
   getVideosFromApi, saveVideoToApi, deleteVideoFromApi,
   getTeamFromApi, saveTeamMemberToApi, deleteTeamMemberFromApi,
-  getEnquiriesFromApi, updateEnquiryStatusInApi, deleteEnquiryFromApi, clearAllEnquiriesInApi,
+  getEnquiriesFromApi, submitEnquiryToApi, updateEnquiryStatusInApi, deleteEnquiryFromApi, clearAllEnquiriesInApi,
   getSettingsFromApi, saveSettingsToApi
 } from './services/apiService';
 
@@ -225,6 +225,41 @@ export default function App() {
     });
   }, []);
 
+  // Re-fetch latest database records whenever Admin Console is opened
+  useEffect(() => {
+    if (isAdminOpen) {
+      getEnquiriesFromApi().then((enqs) => {
+        if (enqs && Array.isArray(enqs)) {
+          setEnquiries(enqs);
+          localStorage.setItem('giniben_enquiries', JSON.stringify(enqs));
+        }
+      });
+      getImagesFromApi().then((imgs) => {
+        if (imgs && imgs.length > 0) {
+          setGalleryImages(imgs);
+          localStorage.setItem('giniben_gallery_images_v4', JSON.stringify(imgs));
+        }
+      });
+      getVideosFromApi().then((vids) => {
+        if (vids && vids.length > 0) {
+          setProjectVideos(vids);
+          localStorage.setItem('giniben_project_videos_v4', JSON.stringify(vids));
+        }
+      });
+      getTeamFromApi().then((tm) => {
+        if (tm && tm.length > 0) {
+          setTeam(tm);
+          localStorage.setItem('giniben_team_members_v2', JSON.stringify(tm));
+        }
+      });
+      getSettingsFromApi().then((sets) => {
+        if (sets && typeof sets === 'object') {
+          setCompany((prev) => ({ ...prev, ...sets }));
+        }
+      });
+    }
+  }, [isAdminOpen]);
+
   // State handlers with persistent sync (localStorage + MySQL Backend)
   const handleUpdateCompany = (updated: CompanyConfig) => {
     setCompany(updated);
@@ -233,9 +268,10 @@ export default function App() {
   };
 
   const handleNewEnquiryCreated = (newEnq: ConsultationEnquiry) => {
-    const updated = [newEnq, ...enquiries];
+    const updated = [newEnq, ...enquiries.filter((e) => e.id !== newEnq.id)];
     setEnquiries(updated);
     localStorage.setItem('giniben_enquiries', JSON.stringify(updated));
+    submitEnquiryToApi(newEnq);
   };
 
   const handleUpdateEnquiryStatus = (id: string, newStatus: 'new' | 'reviewed' | 'resolved') => {
@@ -496,19 +532,25 @@ export default function App() {
                     <div
                       key={img.id}
                       onClick={() => setSelectedLightboxImage(img)}
-                      className="group relative rounded-2xl overflow-hidden border border-[#c2a67e]/30 bg-stone-100 aspect-square shadow-sm hover:shadow-xl hover:border-[#16a34a] transition-all cursor-pointer"
+                      className="group relative rounded-2xl overflow-hidden border border-[#c2a67e]/30 bg-stone-950 aspect-square shadow-sm hover:shadow-xl hover:border-[#16a34a] transition-all cursor-pointer flex items-center justify-center"
                       title={`Click to open full preview: ${img.title} | ${img.caption}`}
                     >
+                      {/* Ambient blur backdrop */}
+                      <div 
+                        className="absolute inset-0 bg-cover bg-center filter blur-xl opacity-35 scale-110 pointer-events-none"
+                        style={{ backgroundImage: `url(${img.url})` }}
+                      />
+
                       <img
                         src={img.url}
                         alt={img.alt || img.title}
                         loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-105"
                         referrerPolicy="no-referrer"
                       />
 
                       {/* Dark Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/20 to-transparent opacity-60 group-hover:opacity-90 transition-opacity" />
+                      <div className="absolute inset-0 z-20 bg-gradient-to-t from-stone-950/90 via-stone-950/25 to-transparent opacity-75 group-hover:opacity-90 transition-opacity" />
 
                       {/* Top Right Zoom Icon */}
                       <div className="absolute top-2 right-2 p-1.5 rounded-lg bg-stone-900/80 text-[#4ade80] opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
@@ -786,6 +828,14 @@ export default function App() {
         company={company}
         onUpdateCompany={handleUpdateCompany}
         enquiries={enquiries}
+        onRefreshEnquiries={() => {
+          getEnquiriesFromApi().then((enqs) => {
+            if (enqs && Array.isArray(enqs)) {
+              setEnquiries(enqs);
+              localStorage.setItem('giniben_enquiries', JSON.stringify(enqs));
+            }
+          });
+        }}
         onUpdateEnquiryStatus={handleUpdateEnquiryStatus}
         onDeleteEnquiry={handleDeleteEnquiry}
         onClearAllEnquiries={handleClearAllEnquiries}

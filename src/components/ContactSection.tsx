@@ -76,7 +76,24 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     };
 
     try {
-      // 1. Transmit consultation to FormSubmit for direct delivery to info@ginibengeoservices.com (forwarded to benukwutevinor@yahoo.com and gpg1.geoservices@gmail.com)
+      // 1. Primary Record: Insert into Truehost cPanel MySQL database & dispatch server-side emails
+      try {
+        const res = await fetch('/api/enquiries.php', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(newEnquiry)
+        });
+        if (!res.ok) {
+          console.warn('API returned non-200 status:', res.status);
+        }
+      } catch (err) {
+        console.warn('Primary database sync network warning:', err);
+      }
+
+      // 2. Secondary Guaranteed Delivery: Dispatch via FormSubmit gateway to all mailboxes
       fetch('https://formsubmit.co/ajax/info@ginibengeoservices.com', {
         method: 'POST',
         headers: {
@@ -98,16 +115,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
           'Technical Message': formData.message.trim()
         })
       }).catch(() => {
-        // Fallback silently if offline or blocked
-      });
-
-      // 2. Also attempt sending to local PHP API endpoint if available on Truehost cPanel
-      await fetch('/api/enquiries.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      }).catch(() => {
-        // Fallback gracefully in dev environment without throwing UI error
+        // Fallback silently
       });
 
       // Synchronize in app state and persistent store

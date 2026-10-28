@@ -4,12 +4,15 @@ import {
   Users, Settings, Check, Trash2, Plus, Edit, Eye, EyeOff, 
   ShieldCheck, Film, Lock, KeyRound, Mail, Phone, 
   Globe, CheckCircle2, AlertCircle, Home, Upload, Moon, Sun, 
-  Camera, Video, Database
+  Camera, Video, Database, Loader2
 } from 'lucide-react';
 import { 
   CompanyConfig, ConsultationEnquiry, MediaItem, 
   TeamMember, ProjectVideo, GalleryCategory 
 } from '../types';
+import { changeAdminPasswordInApi } from '../services/apiService';
+import { uploadMediaToServer, uploadVideoInChunks, generateVideoThumbnail, getFormattedVideoEmbedUrl } from '../utils/mediaUtils';
+import { UniversalVideoPlayer } from './UniversalVideoPlayer';
 
 interface AdminDashboardProps {
   isOpen: boolean;
@@ -18,6 +21,7 @@ interface AdminDashboardProps {
   company: CompanyConfig;
   onUpdateCompany: (updated: CompanyConfig) => void;
   enquiries: ConsultationEnquiry[];
+  onRefreshEnquiries?: () => void;
   onUpdateEnquiryStatus: (id: string, newStatus: 'new' | 'reviewed' | 'resolved') => void;
   onDeleteEnquiry: (id: string) => void;
   onClearAllEnquiries?: () => void;
@@ -42,6 +46,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   company,
   onUpdateCompany,
   enquiries,
+  onRefreshEnquiries,
   onUpdateEnquiryStatus,
   onDeleteEnquiry,
   onClearAllEnquiries,
@@ -159,18 +164,95 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [settingsSaved, setSettingsSaved] = useState(false);
 
   // -------------------------------------------------------------
-  // FILE READING HELPERS (DEVICE / PHONE GALLERY UPLOAD)
+  // FILE READING & SERVER UPLOAD HELPERS (DEVICE / PHONE GALLERY UPLOAD)
   // -------------------------------------------------------------
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, onLoaded: (dataUrl: string) => void) => {
+  const [videoUploadProgress, setVideoUploadProgress] = useState<number | null>(null);
+  const [videoUploadStatusText, setVideoUploadStatusText] = useState<string>('');
+  const [imageUploadProgress, setImageUploadProgress] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleVideoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (typeof event.target?.result === 'string') {
-        onLoaded(event.target.result);
+
+    setUploadError(null);
+    setVideoUploadProgress(1);
+    const mbTotal = (file.size / (1024 * 1024)).toFixed(1);
+    setVideoUploadStatusText(`Preparing video (0% of ${mbTotal}MB)...`);
+
+    try {
+      // 1. Generate video thumbnail frame
+      generateVideoThumbnail(file).then((thumbData) => {
+        if (thumbData) {
+          setVideoForm((prev) => ({ ...prev, thumbnail: prev.thumbnail || thumbData }));
+        }
+      });
+
+      // 2. Reliable Chunked upload to /api/chunked_upload.php in 1.5MB slices
+      const res = await uploadVideoInChunks(file, (percent, loadedMb, totalMb) => {
+        setVideoUploadProgress(percent);
+        setVideoUploadStatusText(`${percent}% (${loadedMb}MB / ${totalMb}MB)`);
+      });
+
+      if (res.success && res.url) {
+        setVideoForm((prev) => ({
+          ...prev,
+          driveUrl: res.url
+        }));
+        setVideoUploadProgress(null);
+        setVideoUploadStatusText('');
+      } else {
+        setUploadError(res.error || 'Server upload failed. Please try again.');
+        setVideoUploadProgress(null);
+        setVideoUploadStatusText('');
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err: any) {
+      setUploadError('Failed to upload video: ' + (err?.message || 'Network error'));
+      setVideoUploadProgress(null);
+      setVideoUploadStatusText('');
+    }
+  };
+
+  const handleImageFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onLoaded: (url: string) => void
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImageUploadProgress(5);
+    try {
+      const res = await uploadMediaToServer(file, (percent) => {
+        setImageUploadProgress(percent);
+      });
+
+      if (res.success && res.url) {
+        onLoaded(res.url);
+        setImageUploadProgress(null);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (typeof event.target?.result === 'string') {
+            onLoaded(event.target.result);
+          }
+          setImageUploadProgress(null);
+        };
+        reader.readAsDataURL(file);
+      }
+    } catch {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (typeof event.target?.result === 'string') {
+          onLoaded(event.target.result);
+        }
+        setImageUploadProgress(null);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, onLoaded: (dataUrl: string) => void) => {
+    handleImageFileChange(e, onLoaded);
   };
 
   // -------------------------------------------------------------
@@ -221,7 +303,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
 
     localStorage.setItem('giniben_admin_password', newPass);
-    setPassMessage({ type: 'success', text: 'Password successfully changed! Your new master password is now active.' });
+    changeAdminPasswordInApi(currentPass, newPass).then((res) => {
+      if (res.success) {
+        setPassMessage({ type: 'success', text: 'Password successfully updated in MySQL database & local console!' });
+      } else {
+        setPassMessage({ type: 'success', text: 'Password changed locally. (Server sync note: ' + res.message + ')' });
+      }
+    });
     setCurrentPass('');
     setNewPass('');
     setConfirmPass('');
@@ -337,11 +425,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (!videoForm.title.trim() || !videoForm.driveUrl.trim()) return;
 
     let previewUrl = videoForm.driveUrl.trim();
-    if (previewUrl.includes('drive.google.com/file/d/')) {
-      const match = previewUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-      if (match && match[1]) {
-        previewUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
-      }
+    if (previewUrl.includes('drive.google.com')) {
+      previewUrl = getFormattedVideoEmbedUrl(previewUrl);
     }
 
     if (editingVideo) {
@@ -1291,15 +1376,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </p>
                   </div>
 
-                  {enquiries.length > 0 && onClearAllEnquiries && (
-                    <button
-                      onClick={onClearAllEnquiries}
-                      className="w-full sm:w-auto px-3 py-1.5 rounded-xl border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Clear All Enquiries</span>
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2 self-start sm:self-auto">
+                    {onRefreshEnquiries && (
+                      <button
+                        type="button"
+                        onClick={onRefreshEnquiries}
+                        className="px-3 py-1.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs active:scale-95 touch-manipulation"
+                        title="Fetch latest enquiries directly from MySQL database"
+                      >
+                        <Database className="w-3.5 h-3.5" />
+                        <span>Sync with Database</span>
+                      </button>
+                    )}
+
+                    {enquiries.length > 0 && onClearAllEnquiries && (
+                      <button
+                        onClick={onClearAllEnquiries}
+                        className="px-3 py-1.5 rounded-xl border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Clear All</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {enquiries.length === 0 ? (
@@ -1601,6 +1700,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <span>Upload Direct from Device Gallery</span>
                   </button>
                 </div>
+                {imageUploadProgress !== null && (
+                  <div className="flex items-center gap-2 text-xs font-mono text-[#16a34a] mb-2 p-2 rounded-lg bg-[#16a34a]/10">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Uploading photo to server ({imageUploadProgress}%)...</span>
+                  </div>
+                )}
                 <input
                   type="text"
                   value={imageForm.url}
@@ -1733,14 +1838,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               ref={videoFileInputRef}
               accept="video/*"
               className="hidden"
-              onChange={(e) => handleFileChange(e, (dataUrl) => setVideoForm((prev) => ({ ...prev, driveUrl: dataUrl })))}
+              onChange={handleVideoFileChange}
             />
             <input
               type="file"
               ref={videoThumbFileInputRef}
               accept="image/*"
               className="hidden"
-              onChange={(e) => handleFileChange(e, (dataUrl) => setVideoForm((prev) => ({ ...prev, thumbnail: dataUrl })))}
+              onChange={(e) => handleImageFileChange(e, (url) => setVideoForm((prev) => ({ ...prev, thumbnail: url })))}
             />
 
             <form onSubmit={handleSaveVideo} className="space-y-3.5 sm:space-y-4">
@@ -1774,12 +1879,47 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <button
                     type="button"
                     onClick={() => videoFileInputRef.current?.click()}
-                    className="flex-1 py-2.5 px-3 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98] transition-all"
+                    disabled={videoUploadProgress !== null}
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-[#16a34a] hover:bg-[#15803d] disabled:bg-stone-600 text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98] transition-all"
                   >
-                    <Upload className="w-4 h-4 shrink-0" />
-                    <span>Upload Video from Device Gallery</span>
+                    {videoUploadProgress !== null ? (
+                      <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                    ) : (
+                      <Upload className="w-4 h-4 shrink-0" />
+                    )}
+                    <span>{videoUploadProgress !== null ? `Uploading (${videoUploadProgress}%)...` : 'Upload Video from Device Gallery'}</span>
                   </button>
                 </div>
+
+                {/* Upload Progress Bar */}
+                {videoUploadProgress !== null && (
+                  <div className="p-3 mb-2.5 rounded-xl bg-[#16a34a]/15 border border-[#16a34a]/30 space-y-1.5 animate-pulse">
+                    <div className="flex items-center justify-between text-xs font-mono font-bold text-[#16a34a]">
+                      <span className="flex items-center gap-1.5">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>{videoUploadStatusText || 'Transmitting video chunks to server...'}</span>
+                      </span>
+                      <span>{videoUploadProgress}%</span>
+                    </div>
+                    <div className="w-full bg-black/30 rounded-full h-2.5 overflow-hidden">
+                      <div 
+                        className="bg-[#16a34a] h-full transition-all duration-300 rounded-full shadow-sm"
+                        style={{ width: `${videoUploadProgress}%` }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-stone-400">
+                      Chunked upload active: sends slices in 1.5MB packets directly to server disk. Works for gallery videos of ANY size without timeouts.
+                    </p>
+                  </div>
+                )}
+
+                {uploadError && (
+                  <div className="p-2.5 mb-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{uploadError}</span>
+                  </div>
+                )}
+
                 <input
                   type="text"
                   value={videoForm.driveUrl}
@@ -1790,9 +1930,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 />
               </div>
 
+              {/* Live Preview Player inside modal */}
+              {videoForm.driveUrl && (
+                <div className="space-y-1.5">
+                  <label className={themeClasses.label}>In-Modal Video Player Test</label>
+                  <div className="aspect-[3/4] max-h-52 w-full rounded-xl overflow-hidden bg-black border border-stone-700 mx-auto">
+                    <UniversalVideoPlayer
+                      video={{
+                        id: 'temp-preview',
+                        title: videoForm.title || 'Video Test',
+                        subtitle: videoForm.subtitle || '',
+                        driveViewUrl: videoForm.driveUrl,
+                        drivePreviewUrl: videoForm.driveUrl,
+                        thumbnail: videoForm.thumbnail || '',
+                        description: videoForm.description || '',
+                        showOnHomepage: true,
+                        showOnProjects: true,
+                        showOnGallery: true
+                      }}
+                      isModal={true}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Thumbnail Image */}
               <div>
-                <label className={themeClasses.label}>Cover Thumbnail (Gallery Upload or URL)</label>
+                <label className={themeClasses.label}>Cover Thumbnail (Gallery Upload or Auto-generated)</label>
                 <div className="flex items-center gap-2 mb-2">
                   <button
                     type="button"
@@ -1800,14 +1964,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     className="flex-1 py-2 px-3 rounded-xl bg-stone-700 hover:bg-stone-600 text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98] transition-all"
                   >
                     <Upload className="w-4 h-4 shrink-0" />
-                    <span>Upload Thumbnail from Gallery</span>
+                    <span>Upload Custom Thumbnail</span>
                   </button>
                 </div>
                 <input
                   type="text"
                   value={videoForm.thumbnail}
                   onChange={(e) => setVideoForm({ ...videoForm, thumbnail: e.target.value })}
-                  placeholder="Thumbnail Image URL (https://...)"
+                  placeholder="Thumbnail Image URL (Auto-captured from video or paste URL)"
                   className={themeClasses.input}
                 />
               </div>
@@ -1869,10 +2033,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className={`w-full sm:w-auto ${themeClasses.primaryButton}`}
+                  disabled={videoUploadProgress !== null}
+                  className={`w-full sm:w-auto ${themeClasses.primaryButton} disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  <Check className="w-4 h-4" />
-                  <span>{editingVideo ? 'Save Video Changes' : 'Publish Field Video'}</span>
+                  {videoUploadProgress !== null ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Uploading Video ({videoUploadProgress}%)...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>{editingVideo ? 'Save Video Changes' : 'Publish Field Video'}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>
@@ -2054,22 +2228,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </button>
             </div>
 
-            <div className="aspect-[9/16] w-full bg-black max-h-[60dvh]">
-              {previewingVideo.driveViewUrl && previewingVideo.driveViewUrl.startsWith('data:video') ? (
-                <video
-                  src={previewingVideo.driveViewUrl}
-                  controls
-                  autoPlay
-                  className="w-full h-full object-contain"
-                />
-              ) : (
-                <iframe
-                  src={previewingVideo.drivePreviewUrl}
-                  title={previewingVideo.title}
-                  className="w-full h-full border-0"
-                  allow="autoplay; encrypted-media; fullscreen"
-                />
-              )}
+            <div className="aspect-[9/16] w-full bg-black max-h-[60dvh] flex items-center justify-center">
+              <UniversalVideoPlayer
+                video={previewingVideo}
+                isModal={true}
+              />
             </div>
 
             <div className="p-3 bg-stone-900 text-stone-300 text-xs shrink-0">
