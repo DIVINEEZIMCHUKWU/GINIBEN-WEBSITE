@@ -1,0 +1,1410 @@
+# MASTER WEBSITE DEVELOPMENT PROMPT — GINIBEN & PARTNERS GEOSERVICES LTD
+
+## PROJECT OVERVIEW
+
+Act as a world-class web design agency, senior UI/UX designer, brand strategist, frontend engineer, PHP backend developer, MySQL database architect, motion designer, SEO specialist and cybersecurity engineer.
+
+Your task is to design and build a complete, premium, internationally competitive corporate website for **GINIBEN & PARTNERS GEOSERVICES LTD**, a geoscience consulting and contracting firm.
+
+This must be a substantial transformation of the company's existing website into a visually exceptional, technically reliable, content-rich and professionally structured digital platform.
+
+The new website must communicate scientific precision, technical expertise, investment confidence, environmental responsibility, engineering competence and international professionalism.
+
+The website must be visually impressive from the first second a visitor lands on the homepage. Every section should be thoughtfully designed, with exceptional typography, intentional spacing, rich imagery, refined animations, beautiful layouts, modern glassmorphism and smooth interactions.
+
+Do not build a generic corporate template. Do not use a repetitive collection of ordinary rectangular cards. Do not produce a basic website with a header, hero, three cards and a footer.
+
+Build a coherent visual experience that feels purpose-designed for a serious geoscience and engineering consultancy.
+
+## 1. OFFICIAL COMPANY DETAILS
+
+**Company name:** GiniBen & Partners GEOSERVICES LTD
+
+**Official domain:** https://ginibengeoservices.com/
+
+**Existing website for content research and comparison:** https://www.ginibengeoservicesltd.com/
+
+**Reference website for the animated image-slider experience:** https://thinkersproblemsolvers.com/
+
+**Official Facebook page:** https://web.facebook.com/profile.php?id=61585052773866
+
+**WhatsApp contact supplied by the client:** +234905680556
+
+**Founder and Lead Consultant:** Dr. Benjamin Ukwuteyinor, PhD
+
+**Primary brand positioning:** Precision Beneath the Surface.
+
+**Supporting brand statements:**
+- Exploring Resources. Unlocking Potential.
+- Data. Depth. Development.
+- Geoscience Meets Investment Confidence.
+
+**Official logo:**
+https://i.ibb.co/YzZgSDd/logo.jpg
+
+Use the supplied logo as the official company brand asset. Preserve its proportions, recognizable design and original identity. Do not redesign it into a different logo. Create suitable light and dark placements through its surrounding layout rather than distorting the logo.
+
+IMPORTANT CONTACT REQUIREMENT: The supplied telephone number must be verified with the client before launch because it may be incomplete. Do not invent additional digits. Configure the phone and WhatsApp links centrally so the verified number can be updated in one place.
+
+## 2. CORE TECHNICAL ARCHITECTURE — ABSOLUTELY NO SUPABASE
+
+The company has already purchased domain and Truehost shared hosting with cPanel.
+
+Build the website specifically for ordinary PHP and MySQL hosting.
+
+### Required technology stack
+
+Frontend:
+- React and Vite if appropriate for the generated project.
+- TypeScript where supported by the existing project.
+- Modern CSS, CSS variables and reusable components.
+- Framer Motion or a lightweight equivalent where compatible.
+- Lucide icons or another consistent professional icon library.
+- Responsive layouts for desktop, tablets and smartphones.
+
+Backend:
+- PHP 8.x, using the version supported by the actual hosting plan.
+- MySQL or a compatible supported MySQL/MariaDB version.
+- PDO with prepared statements for database access.
+- REST-style PHP API endpoints returning JSON.
+- PHP sessions or another suitable server-side authentication implementation.
+- Password hashing using PHP's password_hash() and password_verify().
+- Server-side validation, authorization and secure error handling.
+
+Hosting and deployment:
+- Truehost cPanel.
+- phpMyAdmin for database management.
+- GitHub for source control.
+- Production frontend build generated locally.
+- PHP backend deployed to the appropriate server directory.
+- HTTPS using the hosting provider's SSL configuration.
+
+### Prohibited dependencies
+
+Do not use:
+- Supabase.
+- Supabase Auth.
+- Supabase database services.
+- Supabase Storage.
+- Firebase as a replacement backend.
+- Any external hosted database service.
+- Mock authentication presented as real authentication.
+- localStorage as the permanent database for company content, messages or administrator accounts.
+
+The application must remain functional on the purchased shared hosting environment without requiring Node.js to run continuously on the production server.
+
+If the selected frontend uses Vite, generate the static production frontend and deploy the PHP API separately.
+
+Do not assume that cPanel supports a particular PHP extension, Node.js runtime, database feature or server configuration until it has been verified.
+
+## 3. DESIGN DIRECTION AND BRAND AESTHETICS
+
+Create a premium visual identity inspired by the intersection of geology, scientific research, natural landscapes, engineering, environmental stewardship and sophisticated international consulting brands.
+
+### Visual language
+
+Use a carefully balanced palette such as:
+
+- Deep midnight navy: #071B2B
+- Geological charcoal: #172630
+- Mineral blue: #164D72
+- Teal accent: #19B6A4
+- Warm ivory: #F6F5F0
+- Pure white: #FFFFFF
+- Muted stone: #A9B4B8
+- Restrained metallic gold: #C7A66A
+
+Adapt the palette to complement the supplied logo after inspecting its actual colors. The logo must determine the final brand alignment.
+
+Avoid excessive bright colors, excessive gradients, excessive shadows and an overuse of glowing effects.
+
+### Typography
+
+Use a sophisticated combination such as:
+- Manrope or Plus Jakarta Sans for body text and interface elements.
+- Sora, Space Grotesk or a comparable refined typeface for headings.
+- Strong but restrained display typography for the hero headline.
+
+Typography must communicate credibility and confidence. Use a clear hierarchy, excellent line spacing, readable paragraph widths and consistent spacing throughout.
+
+### Glassmorphism
+
+Use refined glassmorphism for selected elements, including:
+- Transparent navigation surfaces.
+- Floating hero information panels.
+- Project image overlays.
+- Image-caption panels.
+- Compact statistics.
+- Interactive gallery controls.
+- Selected feature highlights.
+
+Glass elements should use translucent backgrounds, subtle borders, controlled backdrop blur and tasteful shadows.
+
+Do not apply glassmorphism to every section. Use it strategically so that it feels premium rather than distracting.
+
+### General design principles
+
+- Use generous whitespace.
+- Create strong contrast between light and dark sections.
+- Use full-bleed project photography in selected areas.
+- Introduce asymmetrical editorial layouts where appropriate.
+- Use rounded corners selectively, not universally.
+- Make all sections feel connected through a consistent design system.
+- Ensure animations enhance usability rather than interfere with it.
+- Support reduced-motion preferences.
+- Optimize for fast loading, especially on Nigerian mobile networks.
+
+## 4. RESEARCH THE OLD WEBSITE BEFORE REPLACING IT
+
+Inspect the current website:
+
+https://www.ginibengeoservicesltd.com/
+
+Identify and preserve all relevant existing information, including:
+- Company overview.
+- About and company history.
+- Service descriptions.
+- Project names and descriptions.
+- Existing image captions.
+- Team information.
+- Contact information.
+- Address and other published business details.
+- Existing page titles and useful search-engine content.
+- Any other authentic corporate information.
+
+Compare the existing information with the new company content supplied in this prompt.
+
+Where information overlaps, merge it intelligently without duplicating entire paragraphs.
+
+Where the new supplied content is more recent or more detailed, use it as the primary source.
+
+Where older content contains relevant project descriptions or image titles not provided in this prompt, retain them if they can be verified from the old website.
+
+Do not invent company achievements, client names, partnerships, certifications, licenses, awards, project values, project locations or international affiliations.
+
+Do not invent team biographies or claim that the company has completed projects that have not been verified.
+
+If the existing website is inaccessible, use the supplied information and mark missing legacy content for later confirmation. Never pretend that unavailable content was successfully retrieved.
+
+## 5. HOMEPAGE NAVIGATION AND HEADER
+
+Build a sophisticated, responsive navigation system.
+
+Recommended desktop navigation:
+
+- Home
+- About Us
+- Services
+- Projects
+- Our Team
+- Insights
+- Contact
+
+Include a visually distinctive **Request a Consultation** button.
+
+Use the supplied logo on the left and a clean navigation arrangement on the right.
+
+### Header behavior
+
+- Transparent or subtly glass-like over the hero where appropriate.
+- Transition to a solid, blurred surface when scrolling.
+- Remain accessible and readable over both dark and light backgrounds.
+- Include tasteful hover states and active-page indicators.
+- Use a compact mobile navigation drawer.
+- Include clear keyboard focus states.
+- Ensure the mobile menu opens and closes properly.
+- Prevent page scrolling behind an open mobile drawer when appropriate.
+
+Do not overcrowd the navigation with too many links. Secondary destinations should be accessible through relevant dropdowns, page sections and the footer.
+
+## 6. HOMEPAGE HERO SECTION
+
+Create an exceptional, cinematic hero section that immediately communicates the company's expertise.
+
+The hero must use a curated selection of the **15 most visually relevant supplied company images**, chosen after reviewing the actual images.
+
+The 15 images must represent the company's genuine activities as accurately as the available photographs allow.
+
+Potential image categories include:
+- Geological fieldwork.
+- Geophysical investigations.
+- Mineral exploration.
+- Surveying and field data collection.
+- Groundwater exploration.
+- Borehole investigations.
+- Environmental studies.
+- Geotechnical investigations.
+- Engineering and site assessments.
+- Scientific instruments and technical equipment.
+- Project teams in the field.
+- Geological formations and terrain.
+- Laboratory or analytical work, if actually represented.
+- Mapping and geospatial work, if actually represented.
+- Other verified company projects.
+
+Do not assign a category to an image without examining its contents.
+
+### Hero layout
+
+Create a spacious, premium hero with:
+- A strong headline.
+- A concise supporting statement.
+- Two clear calls to action.
+- A high-quality visual composition using the selected company photographs.
+- Elegant depth and motion.
+- A subtle geological or topographic graphic treatment where appropriate.
+
+Suggested headline:
+
+**Precision Beneath the Surface.**
+
+Supporting copy:
+
+“Integrated geoscience, mineral exploration, environmental and engineering solutions that transform technical data into informed decisions and sustainable development.”
+
+Primary CTA: **Explore Our Services**
+
+Secondary CTA: **Discuss Your Project**
+
+Use the supplied images in an editorial collage, layered visual composition or sophisticated image-led layout.
+
+A large dominant image may be paired with smaller overlapping images, restrained parallax, floating labels and carefully controlled depth effects.
+
+Use the 15 selected images as the source material for the hero composition, but do not force all 15 into a cramped single viewport. The hero should feel spacious and purposeful.
+
+Include small, elegant metadata labels where supported by the actual photographs. Examples include “Field Investigations,” “Mineral Exploration” and “Environmental Assessment.” These are labels, not claims of specific project outcomes.
+
+Use a dark navy overlay only where necessary to maintain legibility.
+
+Do not make the headline difficult to read because of busy photography.
+
+## 7. SIGNATURE DUAL-TRACK IMAGE SLIDER
+
+THIS IS ONE OF THE MOST IMPORTANT REQUIREMENTS.
+
+Reference:
+
+https://thinkersproblemsolvers.com/
+
+Inspect the reference website if possible. Study the appearance, spacing, movement, image treatment and relationship between the upper and lower image rows.
+
+Recreate the requested visual behavior using original implementation code. Do not copy the reference site's source code, branding or proprietary assets.
+
+The image-slider section must appear immediately after the hero section.
+
+It must contain two visually connected horizontal image tracks, with an upper moving row and a lower static row.
+
+### Upper image track — animated horizontal marquee
+
+Create a continuously moving horizontal track of company photographs.
+
+Requirements:
+- Smooth, seamless horizontal movement.
+- Consistent image dimensions and spacing.
+- Premium rounded image treatments.
+- Subtle glass-like captions.
+- Slow, controlled motion that feels elegant.
+- No sudden jumps or visible gaps when the track loops.
+- Duplicate track items where needed to create seamless looping.
+- Pause or reduce movement when appropriate for accessibility.
+- Touch-friendly behavior on mobile.
+- Optimized image loading.
+- No horizontal overflow that breaks the page layout.
+
+Choose a suitable direction based on the reference. The direction may be left-to-right or right-to-left, but it must be deliberate and consistent.
+
+### Lower image track — static visual gallery
+
+Below the moving row, create a separate, visually aligned row of stationary image tiles.
+
+This lower row must not automatically scroll like the upper marquee.
+
+Use carefully composed image tiles with varied but consistent visual weight. Include:
+- Descriptive image titles.
+- Short explanatory captions.
+- Restrained glassmorphism overlays.
+- Hover effects on desktop.
+- Tap-friendly interactions on mobile.
+- Links to relevant project details or the full gallery when applicable.
+
+The static row must feel connected to the moving row through shared spacing, image treatment and typography.
+
+### Image captions
+
+Every image must have a meaningful caption.
+
+Where the original website provides an exact image title or project caption, preserve that wording.
+
+Otherwise, create a concise, accurate descriptive caption based on the photograph's actual content. Mark uncertain project details for client confirmation.
+
+Do not assign invented project names, dates, locations or technical findings to photographs.
+
+### Slider behavior
+
+- The upper track moves continuously.
+- The lower track remains stationary until the user interacts with it.
+- Provide a way to explore images through the full gallery.
+- Clicking an image should open a suitable lightbox or image-detail view.
+- Provide accessible close controls.
+- Support keyboard navigation.
+- Prevent animation from interfering with text selection or controls.
+- Respect prefers-reduced-motion.
+- Ensure captions remain readable against every image.
+
+On smaller screens, reduce image widths and spacing intelligently. Do not simply shrink the entire desktop layout.
+
+## 8. COMPLETE IMAGE ASSET LIBRARY
+
+Use the following supplied images as the company's primary image library.
+
+Review each image, determine its actual content, assign a suitable descriptive title, and select the best 15 for the hero.
+
+Use all relevant unique images across the homepage, project showcases, gallery page, service pages and other appropriate locations.
+
+Do not use every image in the hero. The hero uses 15 carefully selected images, while the wider website can use the complete library.
+
+Do not discard images merely because they are not suitable for the hero.
+
+Do not display the same photograph repeatedly throughout the homepage unless a repetition serves a clear design purpose.
+
+Create a reusable image manifest or database-driven media structure so that image URLs and captions can be updated easily.
+
+### Official logo
+
+https://i.ibb.co/YzZgSDd/logo.jpg
+
+### Company image library
+
+01. https://i.ibb.co/mrQLCJTb/Whats-App-Image-2026-10-23-at-6-39-30-PM-1.jpg
+
+02. https://i.ibb.co/yngMcXWr/Whats-App-Image-2026-10-23-at-6-39-30-PM.jpg
+
+03. https://i.ibb.co/JFpB1MRs/Whats-App-Image-2026-10-23-at-6-39-31-PM-1.jpg
+
+04. https://i.ibb.co/tp4Sj6hz/Whats-App-Image-2026-10-23-at-6-39-31-PM-2.jpg
+
+05. https://i.ibb.co/h1gTzjgy/Whats-App-Image-2026-10-23-at-6-39-31-PM.jpg
+
+06. https://i.ibb.co/mVYDKDsg/Whats-App-Image-2026-10-23-at-6-39-32-PM-1.jpg
+
+07. https://i.ibb.co/Cp1BZXSK/Whats-App-Image-2026-10-23-at-6-39-32-PM.jpg
+
+08. https://i.ibb.co/sdPT6Zxq/Whats-App-Image-2026-10-23-at-6-39-33-PM-1.jpg
+
+09. https://i.ibb.co/WvGQMHmf/Whats-App-Image-2026-10-23-at-6-39-33-PM-2.jpg
+
+10. https://i.ibb.co/gLFDJ8yH/Whats-App-Image-2026-10-23-at-6-39-33-PM.jpg
+
+11. https://i.ibb.co/CTNfv6k/Whats-App-Image-2026-10-23-at-6-39-34-PM-1.jpg
+
+12. https://i.ibb.co/XrttsZQL/Whats-App-Image-2026-10-23-at-6-39-34-PM.jpg
+
+13. https://i.ibb.co/FkvwLGFK/Whats-App-Image-2026-10-23-at-6-39-35-PM-1.jpg
+
+14. https://i.ibb.co/b5V0nds7/Whats-App-Image-2026-10-23-at-6-39-35-PM-2.jpg
+
+15. https://i.ibb.co/1J6tGDFq/Whats-App-Image-2026-10-23-at-6-39-35-PM.jpg
+
+16. https://i.ibb.co/HpT9hCQ3/Whats-App-Image-2026-10-23-at-6-39-36-PM-1.jpg
+
+17. https://i.ibb.co/DHP3RGM0/Whats-App-Image-2026-10-23-at-6-39-36-PM-2.jpg
+
+18. https://i.ibb.co/HLPjmqyK/Whats-App-Image-2026-10-23-at-6-39-37-PM-1.jpg
+
+19. https://i.ibb.co/Y4p0qFvG/Whats-App-Image-2026-10-23-at-6-39-37-PM-2.jpg
+
+20. https://i.ibb.co/DHnrs3Hg/Whats-App-Image-2026-10-23-at-6-39-37-PM.jpg
+
+21. https://i.ibb.co/0psMBYqs/Whats-App-Image-2026-10-23-at-6-39-38-PM-1.jpg
+
+22. https://i.ibb.co/ccsDQjRW/Whats-App-Image-2026-10-23-at-6-39-38-PM.jpg
+
+23. https://i.ibb.co/VYCKFqT7/Whats-App-Image-2026-10-23-at-6-39-39-PM-1.jpg
+
+24. https://i.ibb.co/ksFt40BR/Whats-App-Image-2026-10-23-at-6-39-39-PM-2.jpg
+
+25. https://i.ibb.co/JwcM61yS/Whats-App-Image-2026-10-23-at-6-39-39-PM.jpg
+
+26. https://i.ibb.co/1YHbckyG/Whats-App-Image-2026-10-23-at-6-39-40-PM-1.jpg
+
+27. https://i.ibb.co/9kHrKR7Q/Whats-App-Image-2026-10-23-at-6-39-40-PM.jpg
+
+28. https://i.ibb.co/CpQtM2RW/Whats-App-Image-2026-10-23-at-6-39-41-PM-1.jpg
+
+29. https://i.ibb.co/0yWdwfj5/Whats-App-Image-2026-10-23-at-6-39-41-PM.jpg
+
+30. https://i.ibb.co/KpTSkxn0/Whats-App-Image-2026-10-23-at-6-39-42-PM-1.jpg
+
+31. https://i.ibb.co/PGsyQjXy/Whats-App-Image-2026-10-23-at-6-39-42-PM-2.jpg
+
+32. https://i.ibb.co/nNRMvYfy/Whats-App-Image-2026-10-23-at-6-39-42-PM.jpg
+
+33. https://i.ibb.co/6J15k85w/Whats-App-Image-2026-10-23-at-6-39-43-PM-1.jpg
+
+34. https://i.ibb.co/DH3L8q7y/Whats-App-Image-2026-10-23-at-6-39-43-PM-2.jpg
+
+35. https://i.ibb.co/ZzXJCFKM/Whats-App-Image-2026-10-23-at-6-39-43-PM.jpg
+
+36. https://i.ibb.co/4nK4wrRQ/Whats-App-Image-2026-10-23-at-6-39-44-PM-1.jpg
+
+37. https://i.ibb.co/Wp41wWXw/Whats-App-Image-2026-10-23-at-6-39-44-PM.jpg
+
+38. https://i.ibb.co/wN8RhZQm/Whats-App-Image-2026-10-23-at-6-39-45-PM.jpg
+
+39. https://i.ibb.co/GvWdkt9q/Whats-App-Image-2026-10-23-at-6-39-46-PM-1.jpg
+
+40. https://i.ibb.co/Vcj2KcYL/Whats-App-Image-2026-10-23-at-6-39-46-PM-2.jpg
+
+41. https://i.ibb.co/27DRRcpd/Whats-App-Image-2026-10-23-at-6-39-46-PM.jpg
+
+There are repeated source URLs in the original submission. Deduplicate identical URLs in the media manifest while retaining the original source list for traceability.
+
+### Image handling requirements
+
+- Test that each external image URL loads successfully.
+- Do not assume every URL is valid or that the hosting provider permits unrestricted hotlinking.
+- If an image fails, report it and provide a replacement workflow.
+- Prefer downloading and optimizing the approved images into the company's own hosting storage when permitted.
+- Generate sensible filenames based on confirmed content.
+- Use descriptive alt text.
+- Use object-fit and object-position intentionally.
+- Do not stretch or distort photographs.
+- Use modern image formats when conversion is available.
+- Add lazy loading to below-the-fold imagery.
+- Prioritize loading the main hero images.
+- Generate visually attractive placeholders while images load.
+- Ensure the gallery remains usable if an individual image fails.
+
+## 9. PROJECT VIDEOS — DIRECTLY AFTER THE IMAGE SLIDER
+
+Immediately after the complete dual-track image-slider section, build a premium **Featured Project Film** section.
+
+The client has supplied two Google Drive videos documenting a project executed by the company.
+
+Video 1:
+https://drive.google.com/file/d/14Do_GSiCEbKGtt8SrXa3lK6pE5e9JnfK/view?usp=drive_link
+
+Video 2:
+https://drive.google.com/file/d/1oZjEdTBiPy-pz2beARbh_RhtqMPHrMsr/view?usp=drive_link
+
+### Required presentation
+
+Create a visually striking section featuring:
+- A sophisticated dark background.
+- A large featured video area.
+- A clear section heading.
+- A short introductory paragraph.
+- Attractive video preview thumbnails.
+- Separate controls for the two supplied videos.
+- Professional video titles and captions.
+- A clear link to explore the company's projects.
+
+Suggested heading:
+
+**From Field Intelligence to Real-World Impact**
+
+Suggested introductory copy:
+
+“Explore selected fieldwork and project documentation showcasing the practical application of geoscientific expertise.”
+
+Only use this copy as an introductory statement, not as proof of a specific technical outcome.
+
+### Video implementation
+
+First verify that the supplied Google Drive files are accessible and that their sharing permissions allow the intended audience to view them.
+
+Do not assume that a Google Drive viewing link is a direct video-stream URL.
+
+Where supported, use an appropriate embedded player or a valid preview URL. If embedding is restricted, provide a clear button that opens the original Drive video.
+
+If the files can be obtained with the client's permission, consider storing optimized video files on the hosting server or using an appropriate video delivery method that is compatible with the hosting budget.
+
+Do not invent project names, dates, locations, client identities or results. Use neutral titles such as “Featured Project Video 01” and “Featured Project Video 02” until the client confirms the correct titles.
+
+Provide responsive video dimensions, accessible playback controls, useful poster images and appropriate loading behavior.
+
+## 10. COMPANY INTRODUCTION SECTION
+
+After the featured project videos, create an elegant company introduction section.
+
+Use an asymmetrical layout combining text, a strong photograph, subtle topographic patterns and a clear call to action.
+
+### Corporate Overview
+
+Use the following company information:
+
+“GiniBen & Partners GEOSERVICES LTD is a professional geoscience consulting and contracting firm delivering high-value technical solutions across the mineral resources, infrastructure, environmental, and water sectors.
+
+We provide integrated, data-driven services that support resource discovery, project development, environmental compliance, and engineering decision-making. Our expertise spans the full project lifecycle — from exploration and evaluation to development support and regulatory advisory.
+
+We operate with precision, technical depth, and strict professional standards to ensure our clients make informed, profitable, and sustainable investment decisions.”
+
+Present this content in a readable format. Avoid squeezing the entire description into a small card.
+
+Use the company's real images to reinforce the message.
+
+Add a CTA linking to the About Us page.
+
+## 11. OUR SERVICES SECTION
+
+Build a sophisticated services overview on the homepage.
+
+Do not simply create six identical white cards. Use a combination of editorial layouts, photography, large numbered markers, understated icons, image backgrounds and interactive service panels.
+
+The homepage should introduce each major service category with a concise description and a link to a dedicated service page.
+
+Create the following six core service categories.
+
+### A. Mineral Resources & Exploration
+
+Services include:
+- Geological mapping and structural interpretation.
+- Advanced geophysical surveys, including Resistivity, IP, Magnetic and EM methods.
+- Target generation and drill program design.
+- Resource delineation and technical evaluation.
+
+Use genuine photographs of relevant field investigations where available.
+
+### B. Resource Assessment & Project Advisory
+
+Services include:
+- Resource estimation support.
+- Technical reporting.
+- Due diligence and feasibility input.
+- Investment-grade evaluation support.
+
+Use appropriate geological, analytical and technical imagery only where the image content supports it.
+
+### C. Environmental & Regulatory Services
+
+Services include:
+- Environmental Impact Assessment (EIA).
+- Baseline and compliance studies.
+- Environmental management planning.
+
+The visual design should communicate environmental responsibility and regulatory professionalism.
+
+### D. Geotechnical & Engineering Support
+
+Services include:
+- Subsurface investigations.
+- Soil and rock characterization.
+- Site suitability and foundation assessment.
+
+Use authentic site investigation and engineering-related images where available.
+
+### E. Hydrogeology & Water Development
+
+Services include:
+- Groundwater exploration.
+- Borehole siting and supervision.
+- Pump testing and aquifer analysis.
+- Community and industrial water projects.
+
+Use appropriate groundwater and water-development photographs from the supplied library.
+
+### F. Geospatial, Mapping & Related Technical Services
+
+Inspect the old website for any additional verified mapping, GIS, geospatial or surveying services.
+
+Include this category only to the extent supported by the company's actual published service portfolio and client-approved content. Do not invent capabilities merely to make the website appear more comprehensive.
+
+Each service must have a dedicated page or a meaningful, detailed service section.
+
+Every service page should explain:
+1. What the service involves.
+2. The problems it helps clients address.
+3. The relevant methods and deliverables, where verified.
+4. How clients can request a consultation.
+5. Related company images or verified projects.
+
+Do not claim specific technical capabilities beyond the supplied or verified information.
+
+## 12. WHY CLIENTS SHOULD CHOOSE GINIBEN
+
+Create a compelling value-proposition section.
+
+Use the following exact value points:
+
+- Scientific precision.
+- Technology-driven solutions.
+- Investment-focused reporting.
+- Sustainable resource development.
+- Reliable project execution.
+- Strong regulatory alignment.
+
+Display them using refined editorial typography, subtle animated indicators and well-composed layouts.
+
+Include this prominent statement:
+
+**“We do not just generate data — we convert data into strategic insight.”**
+
+This should become one of the website's signature messages.
+
+Avoid fabricated statistics, client logos, unsupported performance claims and unverified guarantees.
+
+If the company has verified certifications, project metrics, regulatory registrations or client testimonials on the existing website, present them only after confirming their accuracy.
+
+## 13. FOUNDER'S MESSAGE
+
+Create a premium founder's message section with an appropriate portrait if one is available and verified.
+
+Do not substitute an unrelated stock photograph for the founder.
+
+Use this supplied message:
+
+“At GiniBen & Partners GEOSERVICES LTD, we believe that geology is the foundation of sustainable wealth creation and infrastructure development.
+
+Our vision is clear: to build a geoscience firm that delivers technical excellence, ethical integrity, and measurable value to investors, governments, and communities.
+
+In resource development, accuracy is capital. Precision reduces risk. Insight drives profitability.
+
+We are committed to ensuring that every project we undertake is grounded in sound science, strategic thinking, and long-term sustainability.”
+
+Attribution:
+
+**Dr. Benjamin Ukwuteyinor, PhD**  
+Founder & Lead Consultant
+
+Present the message with generous spacing, excellent typography and a refined background treatment.
+
+Do not shorten or alter the substance of the founder's statement without authorization.
+
+## 14. OUR TEAM PAGE AND TEAM SHOWCASE
+
+Create a dedicated Our Team page and a shorter team preview on the homepage.
+
+The team page should use a sophisticated professional layout with verified portraits, credentials, role descriptions and biographies.
+
+### Team member 1
+
+**Dr. Ben Ukwuteyinor**
+
+PhD Applied Geophysics, CEO. 20+ years of experience, COMEG, MNMGS.
+
+The supplied information identifies him as Founder & Lead Consultant. Preserve that designation where appropriate and verify the preferred public-facing title.
+
+### Team member 2
+
+**Alichi U.**
+
+Environmental Hydrogeology, Senior Partner.
+
+The client supplied “Alichi U. (PhD view)” in the team information. Verify the correct full name, degree and preferred title before publishing. Do not invent a full name.
+
+### Team member 3
+
+**Prof. M.N. Tijani**
+
+Principal Partner, Environmental Geology, 30+ years of experience.
+
+### Team member 4
+
+**Okeke Celestine**
+
+Head of Geophysics, M.Sc, 15+ years of experience.
+
+### Team presentation requirements
+
+- Use authentic team photographs where available.
+- Do not generate fake portraits of real staff members.
+- Do not use a random stock portrait and label it as a specific employee.
+- Create attractive portrait placeholders until genuine photographs are provided.
+- Use elegant biography panels, restrained motion and clear typography.
+- Provide more detailed biographies only when verified information is available.
+
+## 15. PROJECTS AND CASE STUDIES
+
+Create a dedicated Projects page with a polished portfolio experience.
+
+Use the supplied images and videos to showcase genuine company work.
+
+Potential project categories, subject to the actual content of the photographs, include:
+- Mineral exploration.
+- Geophysical investigations.
+- Geological mapping.
+- Environmental assessments.
+- Geotechnical investigations.
+- Groundwater exploration.
+- Borehole projects.
+- Engineering investigations.
+- Surveying and mapping.
+- Other verified geoscientific assignments.
+
+### Project listing requirements
+
+Each project should have:
+- A suitable cover image.
+- A verified title.
+- A short description.
+- A relevant category.
+- The project location, only when verified and approved.
+- The project date, only when verified.
+- A dedicated detail page when adequate information exists.
+
+Do not invent client names, project budgets, measured results, locations, technical findings or completion dates.
+
+Where the available material consists only of photographs, label the entry as a project gallery or fieldwork documentation rather than fabricating a full case study.
+
+Build category filters and an attractive project-detail layout.
+
+Use a responsive masonry-inspired or editorial portfolio grid where appropriate.
+
+## 16. DEDICATED GALLERY PAGE
+
+Create a standalone Gallery page accessible through the Projects navigation or another suitable menu location.
+
+This page must use the company's full collection of verified, unique photographs.
+
+The gallery should not be an ordinary grid of identical thumbnails.
+
+Include:
+- An elegant gallery introduction.
+- Category filters based on actual image content.
+- A visually rich, responsive image grid.
+- A lightbox for viewing individual photographs.
+- Previous and next controls.
+- Keyboard navigation.
+- Descriptive captions.
+- Meaningful alt text.
+- Optional project links where verified.
+- Pagination or progressive loading when necessary.
+
+Keep the homepage image slider visually distinct from the dedicated Gallery page.
+
+The homepage slider should create visual excitement, while the Gallery page should help visitors examine the company's work in greater detail.
+
+Ensure the image gallery works on mobile devices and does not create unwanted horizontal scrolling.
+
+## 17. ABOUT US PAGE
+
+Build a dedicated About Us page containing:
+- Corporate Overview.
+- Company philosophy.
+- What We Do.
+- Our Value Proposition.
+- Founder's Message.
+- Our Team preview.
+- A clear consultation CTA.
+
+Preserve the supplied wording wherever possible.
+
+Organize the content into meaningful sections with strong headings, suitable imagery and excellent readability.
+
+Do not add unsupported mission statements, vision statements, corporate milestones or historical claims.
+
+If the old website contains additional verified information, incorporate it appropriately.
+
+## 18. INSIGHTS AND KNOWLEDGE SECTION
+
+Create an Insights page designed for professional articles, technical commentary, company updates and educational resources.
+
+Possible topics should relate to the company's verified areas of expertise, including:
+- Mineral exploration.
+- Geological interpretation.
+- Geophysical investigations.
+- Groundwater exploration.
+- Environmental compliance.
+- Geotechnical considerations.
+- Sustainable resource development.
+- Technical reporting and investment decisions.
+
+Do not publish invented technical research or fabricated project findings.
+
+Create an article structure with:
+- Article title.
+- Author, when verified.
+- Publication date.
+- Featured image.
+- Article body.
+- Related content.
+- Appropriate metadata.
+- Social sharing links where useful.
+
+Provide a functional backend so authorized administrators can create, edit, publish, unpublish and delete articles.
+
+If no articles are supplied, build the page structure and an appropriate empty state rather than presenting fabricated articles as real company publications.
+
+## 19. CONTACT PAGE AND CONSULTATION ENQUIRIES
+
+Create a premium Contact page that makes it easy for prospective clients to contact the company.
+
+Include:
+- A professional introduction.
+- A consultation enquiry form.
+- The verified phone number.
+- The verified WhatsApp contact.
+- The official Facebook page.
+- Verified email and business address details from the old website, if available.
+- Appropriate office or location information where confirmed.
+
+Do not invent an email address or physical office location.
+
+### Enquiry form fields
+
+- Full name.
+- Company or organization, optional.
+- Email address.
+- Phone number, optional.
+- Service of interest.
+- Project location, optional.
+- Subject.
+- Message.
+
+Form requirements:
+- Frontend and backend validation.
+- Secure server-side processing.
+- CSRF protection.
+- Spam prevention.
+- Database storage of submissions.
+- Submission success and error states.
+- A reference identifier for successful submissions, if implemented.
+- A secure administrator interface for reviewing enquiries.
+- Optional email notifications only after SMTP has been properly configured.
+- No false success message if database storage fails.
+
+Use prepared SQL statements and ensure that submitted content cannot execute as HTML or script.
+
+Create a thoughtful success screen with a clear explanation of what happens next.
+
+Do not promise a response time unless the client confirms one.
+
+## 20. FLOATING WHATSAPP AND PHONE BUTTONS
+
+This requirement applies to the homepage and all public website pages.
+
+Create two elegant floating contact controls:
+
+1. WhatsApp.
+2. Phone call.
+
+### Visual design
+
+- Fixed position near the lower-right corner.
+- Proper spacing between buttons.
+- Refined shadows and a subtle glass or elevated surface.
+- Tasteful hover animation.
+- Gentle entrance animation.
+- Clear accessible labels.
+- Appropriate icon sizing.
+- Responsive placement that does not cover essential content.
+- Safe spacing around mobile navigation and page controls.
+
+The WhatsApp button should open a conversation using the verified company number.
+
+The phone button should use a `tel:` link with the verified telephone number.
+
+Do not make either button nonfunctional or decorative only.
+
+Do not create aggressive pulsing animations that distract users.
+
+Use the company contact details in a single shared configuration file so the number can be updated easily.
+
+## 21. ADMIN DASHBOARD — FULL PHP + MYSQL IMPLEMENTATION
+
+Build a private, secure, functional admin dashboard that allows authorized company personnel to manage the website without manually editing source code for ordinary content changes.
+
+This is a core requirement.
+
+Create the admin interface with a separate route such as `/admin/`, protected by server-side authentication.
+
+Do not expose private administrative pages, API credentials or database passwords.
+
+### Dashboard design
+
+Create a professional administration interface featuring:
+- A sidebar.
+- A top navigation bar.
+- A clear page title and breadcrumb system.
+- Responsive layouts.
+- Summary panels backed by real database data.
+- Data tables.
+- Search and filtering.
+- Pagination where needed.
+- Clear loading, empty and error states.
+- Confirmation dialogs for destructive operations.
+- Accessible forms and buttons.
+
+Do not display fake analytics or hardcoded counts as though they were real database information.
+
+### Required management modules
+
+**A. Dashboard Overview**
+- Real counts of published projects, services, gallery images, articles and enquiries.
+- Recent enquiries.
+- Recent content changes where audit tracking is implemented.
+
+**B. Project Management**
+- Create projects.
+- Edit projects.
+- Publish and unpublish projects.
+- Upload or select cover images.
+- Add descriptions and verified metadata.
+- Assign categories.
+- Delete projects with appropriate confirmation.
+
+**C. Gallery Management**
+- Add images.
+- Edit image titles and captions.
+- Manage alt text.
+- Assign categories.
+- Reorder gallery items.
+- Hide or publish images.
+- Remove images when authorized.
+
+**D. Services Management**
+- Create and edit service descriptions.
+- Manage service page content.
+- Control publication status.
+- Select associated images.
+
+**E. Team Management**
+- Create and edit team profiles.
+- Manage job titles and credentials.
+- Upload authentic portraits.
+- Control display order and publication status.
+
+**F. Article Management**
+- Create, edit and publish articles.
+- Manage titles, slugs, body content, featured images and metadata.
+- Preview content where practical.
+- Validate unique slugs.
+
+**G. Enquiry Management**
+- View contact form submissions.
+- Search and filter enquiries.
+- Open complete enquiry details.
+- Change enquiry status.
+- Mark enquiries as reviewed or resolved.
+- Delete enquiries only when authorized.
+- Preserve a safe record of relevant status changes where implemented.
+
+**H. Website Settings**
+- Update verified contact information.
+- Update social media links.
+- Manage approved brand settings.
+- Edit homepage section content.
+- Manage approved calls to action.
+- Update image captions and relevant display settings.
+
+### Admin authentication and security
+
+- Create the first administrator securely.
+- Do not hardcode default administrator passwords.
+- Do not provide a public administrator registration page.
+- Use password hashing and server-side sessions.
+- Regenerate session IDs after successful login.
+- Implement secure logout.
+- Protect all administrator APIs with server-side authorization.
+- Use CSRF tokens for state-changing requests.
+- Validate and sanitize inputs.
+- Use prepared statements.
+- Apply appropriate login rate limiting.
+- Secure file uploads by checking MIME type, file extension, size and allowed formats.
+- Prevent executable uploads in public media directories.
+- Prevent directory traversal.
+- Use secure cookie settings supported by the hosting environment.
+- Implement appropriate session expiration.
+- Never expose database credentials in frontend code.
+- Never return password hashes or sensitive internal details in API responses.
+
+Do not rely on hidden buttons or frontend route protection as the only security mechanism.
+
+## 22. MYSQL DATABASE ARCHITECTURE
+
+Design a normalized, documented MySQL database suitable for cPanel hosting.
+
+Generate a complete importable SQL file, such as:
+
+`database.sql`
+
+The schema should include appropriate tables for:
+- Administrators.
+- Projects.
+- Project categories.
+- Gallery images.
+- Services.
+- Team members.
+- Articles.
+- Contact enquiries.
+- Website settings.
+- Any additional supporting entities genuinely required by the implementation.
+
+Use appropriate:
+- Primary keys.
+- Foreign keys where supported.
+- Indexes.
+- Unique constraints.
+- Timestamps.
+- Publication status fields.
+- Slugs where applicable.
+- Data types.
+- Character sets and collations.
+- Relationship rules.
+
+Use `utf8mb4` where appropriate.
+
+Avoid storing every type of content in one giant table.
+
+Avoid creating unnecessary tables without a clear purpose.
+
+Provide sensible database constraints and deletion behavior.
+
+Ensure the schema matches the PHP code exactly.
+
+If the SQL schema is changed during development, update the final SQL file and migration instructions accordingly.
+
+The SQL file must not contain real production passwords, API secrets or credentials.
+
+Provide a separate, clearly documented setup process for creating the first administrator securely.
+
+Do not assume that importing SQL automatically configures the PHP backend.
+
+## 23. PHP API STRUCTURE
+
+Build a maintainable PHP application structure compatible with the actual cPanel environment.
+
+Use a clean architecture that separates:
+- Configuration.
+- Database connection.
+- Authentication.
+- Authorization.
+- API routing.
+- Controllers or request handlers.
+- Data access.
+- Validation.
+- File uploads.
+- Shared utilities.
+- Error handling.
+
+A possible structure is:
+
+`public_html/`
+- `index.html`
+- `assets/`
+- `api/`
+- `admin/`
+- `media/`
+
+Private application files and secrets should be stored outside the publicly accessible web root where the hosting setup permits it.
+
+If a different structure is necessary for the selected frontend or hosting environment, document it clearly.
+
+Do not expose private PHP configuration files, SQL backups, logs or `.env` files through public URLs.
+
+### API requirements
+
+Create working endpoints for:
+- Public service listings.
+- Published projects.
+- Project detail retrieval.
+- Gallery images.
+- Published team profiles.
+- Published articles.
+- Contact form submission.
+- Administrator login and logout.
+- Administrator dashboard data.
+- Project management.
+- Gallery management.
+- Service management.
+- Team management.
+- Article management.
+- Enquiry management.
+- Approved website settings.
+
+Every endpoint must perform the correct server-side validation and authorization.
+
+Public endpoints must not expose unpublished content or administrator-only information.
+
+Use appropriate HTTP status codes and consistent JSON response structures.
+
+Return safe error messages to users while recording necessary diagnostic details in protected server logs.
+
+## 24. DOMAIN, URLS AND DEPLOYMENT
+
+The official domain is:
+
+`https://ginibengeoservices.com/`
+
+Configure the application for the actual production domain.
+
+Do not assume that the domain has already been pointed correctly to the hosting account.
+
+Provide clear deployment instructions for:
+- DNS verification.
+- SSL configuration.
+- Frontend production build.
+- PHP file deployment.
+- Database creation in cPanel.
+- Database user creation and privileges.
+- Importing `database.sql` through phpMyAdmin.
+- Creating the production database configuration.
+- Setting correct file permissions.
+- Configuring API base URLs.
+- Testing public and administrator routes.
+- Testing image and video availability.
+- Testing contact form submissions.
+- Testing HTTPS.
+- Troubleshooting common deployment failures.
+
+If React Router is used, configure routing appropriately for the deployed frontend.
+
+Do not apply a React fallback rule that causes PHP API requests to return the frontend HTML.
+
+Keep API routes separate from frontend routes.
+
+If the frontend and PHP API are deployed under the same domain, use a clearly documented URL structure.
+
+If `.htaccess` is needed, generate the correct rules and explain where they belong.
+
+If `.env` is used, generate `.env.example` for version control and a separate production configuration process. PHP does not automatically load `.env` files without an appropriate loader or explicit configuration code.
+
+Keep the real production configuration private.
+
+Do not upload real passwords to GitHub.
+
+Do not upload database dumps containing personal data.
+
+## 25. ADDITIONAL WEBSITE PAGES
+
+Create the following complete public pages:
+
+- Home.
+- About Us.
+- Services overview.
+- Individual service detail pages.
+- Projects.
+- Individual project details where verified content exists.
+- Gallery.
+- Our Team.
+- Insights.
+- Individual articles.
+- Contact.
+- Privacy Policy.
+- Custom 404 page.
+
+The Privacy Policy must be prepared for client review and must accurately reflect the website's actual data collection, retention, cookies, analytics and contact form behavior. Do not invent compliance certifications or legal guarantees.
+
+Use clear page titles, breadcrumbs where appropriate, consistent navigation and a comprehensive footer.
+
+## 26. HOMEPAGE CONTENT ORDER
+
+Use this order as the initial homepage structure:
+
+1. Premium responsive header.
+2. Cinematic hero section featuring the selected 15 company images.
+3. Signature dual-track image-slider section: moving upper row and static lower row.
+4. Featured Project Film section featuring the two supplied videos.
+5. Corporate Overview.
+6. Services overview.
+7. Why Choose GiniBen.
+8. Featured Projects.
+9. Founder’s Message.
+10. Team preview.
+11. Insights preview, populated only with genuine published content.
+12. Consultation CTA.
+13. Comprehensive footer.
+14. Persistent floating WhatsApp and phone controls.
+
+You may make thoughtful layout refinements if they improve the visual narrative, but the image slider must remain directly below the hero, and the project videos must appear directly after the image-slider section.
+
+## 27. FOOTER DESIGN
+
+Build a comprehensive, elegant footer featuring:
+- Company logo.
+- Company name.
+- Brand statement.
+- Short company description.
+- Main navigation links.
+- Service links.
+- Project and gallery links.
+- Verified contact details.
+- Official Facebook link.
+- Verified WhatsApp contact.
+- Privacy Policy.
+- Copyright notice.
+
+Use a sophisticated dark background with restrained visual accents.
+
+Do not invent the company's email address, physical address or additional social media accounts.
+
+## 28. SEO AND INTERNATIONAL PRESENTATION
+
+Build the website to professional search-engine standards.
+
+Implement:
+- Unique page titles.
+- Appropriate meta descriptions.
+- Canonical URLs.
+- Open Graph metadata.
+- Social sharing metadata.
+- A generated XML sitemap.
+- A sensible robots.txt.
+- Semantic HTML.
+- Proper heading hierarchy.
+- Descriptive image alt text.
+- Human-readable URLs.
+- Internal linking.
+- Breadcrumbs where appropriate.
+- Structured data only when the company information can be verified.
+- Appropriate redirects if old URLs need to be preserved.
+- Search-engine-friendly server responses.
+
+Use the company's actual name consistently.
+
+Ensure the website communicates professionalism to prospective clients, investors, government institutions, engineering firms, environmental organizations and other relevant stakeholders.
+
+Do not claim that the website is globally recognized merely because it has an international visual design. The objective is to create a website suitable for international audiences and professional evaluation.
+
+## 29. PERFORMANCE AND ACCESSIBILITY
+
+The website must be optimized for desktop, tablet and mobile devices.
+
+Requirements:
+- Responsive layouts.
+- Fast initial rendering.
+- Optimized images.
+- Minimal unnecessary dependencies.
+- Efficient database queries.
+- Appropriate caching where compatible with the application.
+- Lazy loading for noncritical media.
+- Correct image dimensions.
+- Accessible navigation.
+- Keyboard-operable interactive elements.
+- Sufficient color contrast.
+- Visible focus indicators.
+- Accessible form labels.
+- Reduced-motion support.
+- Clear validation messages.
+- No unwanted horizontal scrolling.
+- No broken image placeholders in the final verified build.
+- No console errors caused by the application.
+
+Do not allow animation effects to compromise usability or loading speed.
+
+## 30. REQUIRED FUNCTIONALITY — NO FAKE FEATURES
+
+Every visible button must work.
+
+Every navigation item must lead to a valid page or appropriate destination.
+
+Every form must perform its intended operation.
+
+Every project and service card must link to relevant content.
+
+The image slider must animate as specified.
+
+The static lower gallery track must remain static until the user interacts with it.
+
+The videos must open or play through a verified method.
+
+The WhatsApp button must open the intended contact.
+
+The phone button must initiate a call on supported devices.
+
+The admin dashboard must retrieve actual database data.
+
+Create, read, update and delete operations must be implemented for the relevant administrative modules.
+
+Do not create placeholder charts, fake analytics, fake testimonials, fake login screens or decorative buttons that do nothing.
+
+Where a third-party integration requires credentials or client approval, create the appropriate integration structure and clearly document what remains to be configured.
+
+## 31. DEVELOPMENT AND TESTING WORKFLOW
+
+Do not attempt to produce a huge, unverified code dump without checking consistency.
+
+Develop the project in a structured sequence:
+
+Phase 1: Inspect the existing project, the reference website where accessible, the logo, all image assets and the supplied content.
+
+Phase 2: Establish the design system, sitemap, component structure and responsive layouts.
+
+Phase 3: Implement the homepage, hero and signature dual-track image slider.
+
+Phase 4: Implement the featured project videos and remaining public pages.
+
+Phase 5: Build the PHP application structure, MySQL schema and API endpoints.
+
+Phase 6: Connect the frontend to the real PHP API.
+
+Phase 7: Implement authentication and the functional administrator dashboard.
+
+Phase 8: Add secure contact form processing, image management and content publishing.
+
+Phase 9: Test the complete application locally and against the actual capabilities of the intended hosting environment.
+
+Phase 10: Generate the production build and provide cPanel deployment instructions.
+
+After each phase, review the code for errors and fix issues before proceeding.
+
+Do not claim that deployment has succeeded unless the deployment has actually been performed and verified.
+
+## 32. FINAL DELIVERABLES
+
+Produce a complete, organized project containing:
+
+1. The responsive frontend source code.
+2. The production build configuration.
+3. The PHP backend source code.
+4. All required API endpoints.
+5. The MySQL schema in `database.sql`.
+6. A secure administrator authentication implementation.
+7. A complete functional admin dashboard.
+8. The project and gallery management system.
+9. The services and team management system.
+10. The article management system.
+11. The contact enquiry management system.
+12. The supplied company image library and its metadata manifest.
+13. The dual-track animated image slider.
+14. The two featured video integrations.
+15. Environment configuration examples.
+16. A `.gitignore` file that excludes secrets and unnecessary build artifacts.
+17. A README with setup instructions.
+18. A cPanel deployment guide.
+19. Database setup and migration instructions.
+20. A first-administrator setup procedure.
+21. A testing checklist.
+22. A list of any unresolved client confirmations or unavailable assets.
+
+Use clear filenames and a maintainable folder structure.
+
+Keep the project compatible with PHP and MySQL on ordinary cPanel hosting.
+
+Do not require Supabase, Firebase or a permanently running Node.js server.
+
+## 33. FINAL QUALITY STANDARD
+
+The completed website should communicate five qualities immediately:
+
+**Scientific authority.**  
+The company appears technically capable, serious and knowledgeable.
+
+**Visual distinction.**  
+The website has a memorable, sophisticated identity with carefully designed imagery, typography, glassmorphism and motion.
+
+**Project credibility.**  
+The company's actual field photographs, project videos, team information and verified technical services demonstrate its work.
+
+**Operational functionality.**  
+The frontend, PHP backend, MySQL database, contact forms and admin dashboard work together as one coherent application.
+
+**International readiness.**  
+The website is responsive, accessible, secure, search-engine friendly and suitable for professional audiences across different countries.
+
+The overall experience must be polished without becoming visually noisy, impressive without becoming confusing, and technically ambitious without depending on services unavailable on the company's hosting plan.
+
+Build the real application, not merely a visual mockup.
+
+Begin by inspecting the existing project and reference materials, then establish the design system and implement the website systematically. If you cannot access a reference URL or image, state that limitation and continue using the verified assets and content supplied here.
+
+Before declaring completion, verify the major pages, image slider behavior, video access, database integration, administrator permissions, contact form, responsive layouts and deployment configuration.
+
+The final objective is a premium corporate digital platform for:
+
+**GINIBEN & PARTNERS GEOSERVICES LTD**
+
+**Precision Beneath the Surface.**  
+**Exploring Resources. Unlocking Potential.**  
+**Data. Depth. Development.**  
+**Geoscience Meets Investment Confidence.**
