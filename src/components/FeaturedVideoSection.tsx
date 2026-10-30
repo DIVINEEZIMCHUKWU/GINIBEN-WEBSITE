@@ -145,6 +145,9 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({
                             alt={vid.title}
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                             referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
                           />
                           <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                             <div className={`w-7 h-7 rounded-full flex items-center justify-center ${

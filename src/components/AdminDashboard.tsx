@@ -108,7 +108,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     title: '',
     url: '',
     caption: '',
-    category: 'geology' as GalleryCategory,
+    category: 'GEOLOGICAL MAPPING & EXPLORATION' as GalleryCategory,
     showOnHomepage: true,
     showOnProjects: true,
     showOnGallery: true,
@@ -324,7 +324,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       title: '',
       url: '',
       caption: '',
-      category: 'geology',
+      category: 'GEOLOGICAL MAPPING & EXPLORATION',
       showOnHomepage: true,
       showOnProjects: true,
       showOnGallery: true,
@@ -530,7 +530,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         credentials: teamForm.credentials.trim(),
         experienceYears: teamForm.experienceYears.trim(),
         bio: teamForm.bio.trim() || 'Professional geoscience team member delivering high standard technical services.',
-        image: teamForm.image.trim() || 'https://i.ibb.co/zHxFmrmt/Whats-App-Image-2026-10-23-at-9-04-34-PM.jpg',
+        image: teamForm.image.trim() || 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg',
         isPlaceholder: false,
         affiliations: parsedAffiliations,
         order: team.length + 1
@@ -1129,6 +1129,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             alt={img.alt || img.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                             referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
                           />
                           <div className="absolute top-1.5 left-1.5 flex flex-wrap gap-1">
                             {img.showOnHomepage !== false && (
@@ -1224,6 +1227,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           alt={vid.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                           referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
                         
@@ -1323,6 +1329,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             alt={member.name}
                             className="w-full h-full object-cover"
                             referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              if (target.src !== 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg') {
+                                target.src = 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg';
+                              }
+                            }}
                           />
                         </div>
                         <div className="overflow-hidden min-w-0">
@@ -1723,6 +1735,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     src={imageForm.url}
                     alt="Preview"
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
                   />
                 </div>
               )}
@@ -1745,12 +1760,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   onChange={(e) => setImageForm({ ...imageForm, category: e.target.value as GalleryCategory })}
                   className={themeClasses.input}
                 >
-                  <option value="geology">Geology & Exploration</option>
-                  <option value="geophysics">Geophysics & Resistivity</option>
-                  <option value="groundwater">Groundwater & Hydrogeology</option>
-                  <option value="drilling">Drilling Operations</option>
-                  <option value="environmental">Environmental Compliance</option>
-                  <option value="instruments">Field Instrumentation</option>
+                  <option value="GEOLOGICAL MAPPING & EXPLORATION">GEOLOGICAL MAPPING & EXPLORATION</option>
+                  <option value="BOREHOLE CONSTRUCTION & WATER PROJECT">BOREHOLE CONSTRUCTION & WATER PROJECT</option>
+                  <option value="GEOPHYSICS & MINERAL EXPLORATION">GEOPHYSICS & MINERAL EXPLORATION</option>
+                  <option value="CORE DRILLING & MINERAL EVALUATION">CORE DRILLING & MINERAL EVALUATION</option>
+                  <option value="GEOCHEMICAL MAPPING">GEOCHEMICAL MAPPING</option>
+                  <option value="GIS & GEOSPATIAL DATA SERVICES">GIS & GEOSPATIAL DATA SERVICES</option>
+                  <option value="GEOPHYSICAL SURVEYS">GEOPHYSICAL SURVEYS</option>
+                  <option value="ENVIRONMENTAL GEOSCIENCE SERVICES">ENVIRONMENTAL GEOSCIENCE SERVICES</option>
                 </select>
               </div>
 
@@ -2162,6 +2179,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     src={teamForm.image}
                     alt="Preview"
                     className="w-12 h-12 rounded-xl object-cover shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
                   />
                   <span className="text-xs text-stone-300">Photo preview loaded successfully</span>
                 </div>

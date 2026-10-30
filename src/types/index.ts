@@ -1,20 +1,22 @@
-export type ServiceCategory = 
-  | 'mineral-exploration'
-  | 'resource-assessment'
-  | 'environmental-regulatory'
-  | 'geotechnical-engineering'
-  | 'hydrogeology-water'
-  | 'geospatial-mapping';
+export type ServiceCategory = string;
+
+export const OFFICIAL_CATEGORIES = [
+  'GEOLOGICAL MAPPING & EXPLORATION',
+  'BOREHOLE CONSTRUCTION & WATER PROJECT',
+  'GEOPHYSICS & MINERAL EXPLORATION',
+  'CORE DRILLING & MINERAL EVALUATION',
+  'GEOCHEMICAL MAPPING',
+  'GIS & GEOSPATIAL DATA SERVICES',
+  'GEOPHYSICAL SURVEYS',
+  'ENVIRONMENTAL GEOSCIENCE SERVICES'
+] as const;
+
+export type OfficialCategory = typeof OFFICIAL_CATEGORIES[number];
 
 export type GalleryCategory = 
   | 'all'
-  | 'geophysics'
-  | 'geology'
-  | 'groundwater'
-  | 'drilling'
-  | 'environmental'
-  | 'instruments'
-  | 'team';
+  | OfficialCategory
+  | (string & {});
 
 export interface CompanyConfig {
   name: string;

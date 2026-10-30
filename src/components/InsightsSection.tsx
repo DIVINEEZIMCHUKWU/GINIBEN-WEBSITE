@@ -48,6 +48,12 @@ export const InsightsSection: React.FC<InsightsSectionProps> = ({ articles }) =>
                   alt={article.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== 'https://i.ibb.co/KcMj4W6Q/IMG-20261030-WA0032.jpg') {
+                      target.src = 'https://i.ibb.co/KcMj4W6Q/IMG-20261030-WA0032.jpg';
+                    }
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1a1612] via-transparent to-transparent" />
                 
@@ -138,6 +144,12 @@ export const InsightsSection: React.FC<InsightsSectionProps> = ({ articles }) =>
                 alt=""
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (target.src !== 'https://i.ibb.co/KcMj4W6Q/IMG-20261030-WA0032.jpg') {
+                    target.src = 'https://i.ibb.co/KcMj4W6Q/IMG-20261030-WA0032.jpg';
+                  }
+                }}
               />
             </div>
 

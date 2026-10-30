@@ -46,6 +46,9 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
             alt={video.title}
             className="w-full h-full object-cover brightness-100 contrast-100"
             referrerPolicy="no-referrer"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
           />
         )}
         <div className="absolute inset-0 flex items-center justify-center bg-black/75 p-4 text-center">

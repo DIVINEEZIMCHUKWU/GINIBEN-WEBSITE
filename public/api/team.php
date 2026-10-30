@@ -20,6 +20,7 @@ try {
           `role` VARCHAR(150) NOT NULL,
           `credentials` VARCHAR(255) NULL,
           `experience_years` VARCHAR(100) NULL,
+          `affiliations` TEXT NULL,
           `affiliations_json` TEXT NULL,
           `bio` TEXT NOT NULL,
           `image` TEXT NOT NULL,
@@ -31,6 +32,13 @@ try {
           INDEX `idx_team_sort` (`sort_order`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
+    // Ensure both columns exist if table was created in older schema
+    try {
+        $pdo->exec("ALTER TABLE `team_members` ADD COLUMN `affiliations` TEXT NULL AFTER `experience_years`");
+    } catch (Throwable $eIgnore) {}
+    try {
+        $pdo->exec("ALTER TABLE `team_members` ADD COLUMN `affiliations_json` TEXT NULL AFTER `affiliations`");
+    } catch (Throwable $eIgnore) {}
 } catch (Exception $e) {
     error_log("team_members table check warning: " . $e->getMessage());
 }
@@ -43,8 +51,9 @@ if ($method === 'GET') {
 
         $members = array_map(function($m) {
             $affiliations = [];
-            if (!empty($m['affiliations_json'])) {
-                $decoded = json_decode($m['affiliations_json'], true);
+            $affVal = !empty($m['affiliations']) ? $m['affiliations'] : (!empty($m['affiliations_json']) ? $m['affiliations_json'] : '');
+            if (!empty($affVal)) {
+                $decoded = json_decode($affVal, true);
                 if (is_array($decoded)) {
                     $affiliations = $decoded;
                 }
@@ -97,16 +106,17 @@ if ($method === 'GET') {
         $stmt = $pdo->prepare("
             INSERT INTO `team_members` (
                 `id`, `name`, `title`, `role`, `credentials`, `experience_years`,
-                `affiliations_json`, `bio`, `image`, `sort_order`
+                `affiliations`, `affiliations_json`, `bio`, `image`, `sort_order`
             ) VALUES (
                 :id, :name, :title, :role, :credentials, :experience_years,
-                :affiliations_json, :bio, :image, :sort_order
+                :affiliations, :affiliations_json, :bio, :image, :sort_order
             ) ON DUPLICATE KEY UPDATE
                 `name` = VALUES(`name`),
                 `title` = VALUES(`title`),
                 `role` = VALUES(`role`),
                 `credentials` = VALUES(`credentials`),
                 `experience_years` = VALUES(`experience_years`),
+                `affiliations` = VALUES(`affiliations`),
                 `affiliations_json` = VALUES(`affiliations_json`),
                 `bio` = VALUES(`bio`),
                 `image` = VALUES(`image`),
@@ -120,6 +130,7 @@ if ($method === 'GET') {
             ':role' => $role,
             ':credentials' => $credentials,
             ':experience_years' => $experienceYears,
+            ':affiliations' => $affiliationsJson,
             ':affiliations_json' => $affiliationsJson,
             ':bio' => $bio,
             ':image' => $image,

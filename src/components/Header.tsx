@@ -78,10 +78,13 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-[#c2a67e]/45 shadow-xs bg-[#faf9f6] shrink-0">
               <img
-                src={company.logoUrl}
+                src={company.logoUrl || '/logo.jpg'}
                 alt="GiniBen & Partners Logo"
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.currentTarget.src = '/logo.jpg';
+                }}
               />
             </div>
             <div className="flex flex-col truncate">

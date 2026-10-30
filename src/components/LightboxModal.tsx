@@ -228,6 +228,12 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
                 fillMode === 'fill' ? 'object-cover' : 'object-contain'
               }`}
               referrerPolicy="no-referrer"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (target.src !== 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg') {
+                  target.src = 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg';
+                }
+              }}
             />
           </div>
         </div>
@@ -305,6 +311,9 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
                     className="w-full h-full object-cover"
                     loading="lazy"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
                   />
                   {item.id === image.id && (
                     <div className="absolute inset-0 bg-[#16a34a]/25" />

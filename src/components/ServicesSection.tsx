@@ -53,6 +53,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                   alt={service.title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent" />
                 
@@ -66,7 +69,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
               <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-5">
                 <div>
                   <h3 className="text-xl font-bold text-stone-900 group-hover:text-[#16a34a] transition-colors leading-snug">
-                    {service.title}
+                    {parseInt(service.numericCode, 10)}. {service.title}
                   </h3>
 
                   <p className="text-xs font-mono text-[#9c7a4e] mt-1 uppercase font-semibold">
@@ -79,12 +82,12 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                 </div>
 
                 {/* Scope Preview List */}
-                <div className="pt-4 border-t border-[#c2a67e]/20 space-y-2 text-xs text-stone-700">
-                  <div className="text-[11px] font-mono text-[#9c7a4e] uppercase font-bold">Key Technical Focus:</div>
-                  {service.methodsAndDeliverables.slice(0, 3).map((item: string, idx: number) => (
+                <div className="pt-4 border-t border-[#c2a67e]/20 space-y-2.5 text-xs text-stone-700">
+                  <div className="text-[11px] font-mono text-[#9c7a4e] uppercase font-bold tracking-wider">Core Technical Activities:</div>
+                  {service.detailedScope.map((item: string, idx: number) => (
                     <div key={idx} className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-[#22c55e] mt-0.5 shrink-0" />
-                      <span className="line-clamp-1">{item}</span>
+                      <Check className="w-4 h-4 text-[#16a34a] mt-0.5 shrink-0" />
+                      <span className="leading-snug text-stone-800 font-medium">{item}</span>
                     </div>
                   ))}
                 </div>
@@ -100,7 +103,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                   </button>
 
                   <button
-                    onClick={() => onSelectServiceForConsultation(service.title)}
+                    onClick={() => onSelectServiceForConsultation(`${parseInt(service.numericCode, 10)}. ${service.title}`)}
                     className="text-xs font-bold text-[#15803d] hover:text-[#16a34a] flex items-center gap-1 cursor-pointer transition-colors"
                   >
                     <span>Book Service</span>
@@ -149,6 +152,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                 alt=""
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             </div>
 

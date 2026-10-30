@@ -12,39 +12,44 @@
 
 require_once __DIR__ . '/db.php';
 
-$pdo = Database::getConnection();
+$pdo = Database::tryGetConnection();
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Self-healing table check
-try {
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS `enquiries` (
-          `id` VARCHAR(64) NOT NULL,
-          `reference_number` VARCHAR(50) NOT NULL UNIQUE,
-          `full_name` VARCHAR(150) NOT NULL,
-          `company` VARCHAR(180) NULL,
-          `email` VARCHAR(180) NOT NULL,
-          `phone` VARCHAR(60) NULL,
-          `service_of_interest` VARCHAR(150) NOT NULL,
-          `project_location` VARCHAR(180) NULL,
-          `subject` VARCHAR(255) NOT NULL,
-          `message` TEXT NOT NULL,
-          `status` ENUM('new', 'reviewed', 'resolved') NOT NULL DEFAULT 'new',
-          `ip_address` VARCHAR(50) NULL,
-          `user_agent` VARCHAR(255) NULL,
-          `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          PRIMARY KEY (`id`),
-          INDEX `idx_enq_status` (`status`),
-          INDEX `idx_enq_ref` (`reference_number`),
-          INDEX `idx_enq_created` (`created_at`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    ");
-} catch (Throwable $e) {
-    error_log("Enquiries table check warning: " . $e->getMessage());
+// Self-healing table check if database is reachable
+if ($pdo !== null) {
+    try {
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `enquiries` (
+              `id` VARCHAR(64) NOT NULL,
+              `reference_number` VARCHAR(50) NOT NULL UNIQUE,
+              `full_name` VARCHAR(150) NOT NULL,
+              `company` VARCHAR(180) NULL,
+              `email` VARCHAR(180) NOT NULL,
+              `phone` VARCHAR(60) NULL,
+              `service_of_interest` VARCHAR(150) NOT NULL,
+              `project_location` VARCHAR(180) NULL,
+              `subject` VARCHAR(255) NOT NULL,
+              `message` TEXT NOT NULL,
+              `status` ENUM('new', 'reviewed', 'resolved') NOT NULL DEFAULT 'new',
+              `ip_address` VARCHAR(50) NULL,
+              `user_agent` VARCHAR(255) NULL,
+              `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`id`),
+              INDEX `idx_enq_status` (`status`),
+              INDEX `idx_enq_ref` (`reference_number`),
+              INDEX `idx_enq_created` (`created_at`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+    } catch (Throwable $e) {
+        error_log("Enquiries table check warning: " . $e->getMessage());
+    }
 }
 
 if ($method === 'GET') {
+    if ($pdo === null) {
+        send_json(['success' => true, 'data' => [], 'warning' => 'Database offline']);
+    }
     // 1. Fetch enquiries for Admin Console
     try {
         $stmt = $pdo->query("SELECT * FROM `enquiries` ORDER BY `created_at` DESC LIMIT 300");
@@ -116,72 +121,77 @@ if ($method === 'GET') {
     $dbSaved = false;
     $dbError = '';
 
-    try {
-        $stmt = $pdo->prepare("
-            INSERT INTO `enquiries` (
-                `id`, `reference_number`, `full_name`, `company`, `email`, `phone`, 
-                `service_of_interest`, `project_location`, `subject`, `message`, 
-                `status`, `ip_address`, `user_agent`, `created_at`
-            ) VALUES (
-                :id, :ref, :name, :company, :email, :phone, 
-                :service, :location, :subject, :msg, 
-                :status, :ip, :ua, NOW()
-            )
-        ");
+    if ($pdo !== null) {
+        try {
+            $stmt = $pdo->prepare("
+                INSERT INTO `enquiries` (
+                    `id`, `reference_number`, `full_name`, `company`, `email`, `phone`, 
+                    `service_of_interest`, `project_location`, `subject`, `message`, 
+                    `status`, `ip_address`, `user_agent`, `created_at`
+                ) VALUES (
+                    :id, :ref, :name, :company, :email, :phone, 
+                    :service, :location, :subject, :msg, 
+                    :status, :ip, :ua, NOW()
+                )
+            ");
 
-        $dbSaved = $stmt->execute([
-            ':id'       => $id,
-            ':ref'      => $refNumber,
-            ':name'     => $fullName,
-            ':company'  => $company,
-            ':email'    => $email,
-            ':phone'    => $phone,
-            ':service'  => $serviceOfInterest,
-            ':location' => $projectLocation,
-            ':subject'  => $subject,
-            ':msg'      => $message,
-            ':status'   => $status,
-            ':ip'       => $ip,
-            ':ua'       => $userAgent
-        ]);
-    } catch (Throwable $e) {
-        $dbError = $e->getMessage();
-        error_log("Database insert error in enquiries.php: " . $dbError);
+            $dbSaved = $stmt->execute([
+                ':id'       => $id,
+                ':ref'      => $refNumber,
+                ':name'     => $fullName,
+                ':company'  => $company,
+                ':email'    => $email,
+                ':phone'    => $phone,
+                ':service'  => $serviceOfInterest,
+                ':location' => $projectLocation,
+                ':subject'  => $subject,
+                ':msg'      => $message,
+                ':status'   => $status,
+                ':ip'       => $ip,
+                ':ua'       => $userAgent
+            ]);
+        } catch (Throwable $e) {
+            $dbError = $e->getMessage();
+            error_log("Database insert error in enquiries.php: " . $dbError);
 
-        // If duplicate reference, retry with timestamp-based reference
-        if (strpos($dbError, 'reference_number') !== false || strpos($dbError, 'Duplicate') !== false) {
-            try {
-                $refNumber = 'GB-' . date('Y') . '-' . rand(10000, 99999);
-                $stmt = $pdo->prepare("
-                    INSERT INTO `enquiries` (
-                        `id`, `reference_number`, `full_name`, `company`, `email`, `phone`, 
-                        `service_of_interest`, `project_location`, `subject`, `message`, 
-                        `status`, `ip_address`, `user_agent`, `created_at`
-                    ) VALUES (
-                        :id, :ref, :name, :company, :email, :phone, 
-                        :service, :location, :subject, :msg, 
-                        :status, :ip, :ua, NOW()
-                    )
-                ");
-                $dbSaved = $stmt->execute([
-                    ':id'       => $id . '-' . rand(10, 99),
-                    ':ref'      => $refNumber,
-                    ':name'     => $fullName,
-                    ':company'  => $company,
-                    ':email'    => $email,
-                    ':phone'    => $phone,
-                    ':service'  => $serviceOfInterest,
-                    ':location' => $projectLocation,
-                    ':subject'  => $subject,
-                    ':msg'      => $message,
-                    ':status'   => $status,
-                    ':ip'       => $ip,
-                    ':ua'       => $userAgent
-                ]);
-            } catch (Throwable $e2) {
-                $dbError = $e2->getMessage();
+            // If duplicate reference, retry with timestamp-based reference
+            if (strpos($dbError, 'reference_number') !== false || strpos($dbError, 'Duplicate') !== false) {
+                try {
+                    $refNumber = 'GB-' . date('Y') . '-' . rand(10000, 99999);
+                    $stmt = $pdo->prepare("
+                        INSERT INTO `enquiries` (
+                            `id`, `reference_number`, `full_name`, `company`, `email`, `phone`, 
+                            `service_of_interest`, `project_location`, `subject`, `message`, 
+                            `status`, `ip_address`, `user_agent`, `created_at`
+                        ) VALUES (
+                            :id, :ref, :name, :company, :email, :phone, 
+                            :service, :location, :subject, :msg, 
+                            :status, :ip, :ua, NOW()
+                        )
+                    ");
+                    $dbSaved = $stmt->execute([
+                        ':id'       => $id . '-' . rand(10, 99),
+                        ':ref'      => $refNumber,
+                        ':name'     => $fullName,
+                        ':company'  => $company,
+                        ':email'    => $email,
+                        ':phone'    => $phone,
+                        ':service'  => $serviceOfInterest,
+                        ':location' => $projectLocation,
+                        ':subject'  => $subject,
+                        ':msg'      => $message,
+                        ':status'   => $status,
+                        ':ip'       => $ip,
+                        ':ua'       => $userAgent
+                    ]);
+                } catch (Throwable $e2) {
+                    $dbError = $e2->getMessage();
+                }
             }
         }
+    } else {
+        $dbError = 'Database instance not connected. Please verify MySQL user privileges in cPanel.';
+        error_log($dbError);
     }
 
     // ========================================================================
@@ -262,37 +272,38 @@ if ($method === 'GET') {
         if ($mailSent) $anyMailSent = true;
     }
 
-    // 2. Guaranteed Server-to-Server Relay via FormSubmit (bypasses shared host IP spam blocks)
-    try {
-        $relayPayload = json_encode([
-            '_subject' => "New Consultation: {$serviceOfInterest} [{$refNumber}] - {$fullName}",
-            '_cc' => 'benukwutevinor@yahoo.com,gpg1.geoservices@gmail.com',
-            '_template' => 'table',
-            'Reference Code' => $refNumber,
-            'Client Name' => $fullName,
-            'Company' => $company ?: 'Not specified',
-            'Email' => $email,
-            'Phone' => $phone ?: 'Not provided',
-            'Service' => $serviceOfInterest,
-            'Location' => $projectLocation ?: 'Not specified',
-            'Subject' => $subject,
-            'Message' => $message
-        ]);
+    // 2. Guaranteed Server-to-Server Relay via FormSubmit directly to each email destination
+    $relayPayload = json_encode([
+        '_subject' => "New Consultation: {$serviceOfInterest} [{$refNumber}] - {$fullName}",
+        '_template' => 'table',
+        'Reference Code' => $refNumber,
+        'Client Name' => $fullName,
+        'Company' => $company ?: 'Not specified',
+        'Email' => $email,
+        'Phone' => $phone ?: 'Not provided',
+        'Service' => $serviceOfInterest,
+        'Location' => $projectLocation ?: 'Not specified',
+        'Subject' => $subject,
+        'Message' => $message
+    ]);
 
-        $ch = curl_init('https://formsubmit.co/ajax/info@ginibengeoservices.com');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $relayPayload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Accept: application/json'
-        ]);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 6);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        @curl_exec($ch);
-        curl_close($ch);
-    } catch (Throwable $relayErr) {
-        // Silently continue if external gateway unavailable
+    foreach ($destinations as $destEmail) {
+        try {
+            $ch = curl_init('https://formsubmit.co/ajax/' . urlencode($destEmail));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $relayPayload);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Accept: application/json'
+            ]);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            @curl_exec($ch);
+            curl_close($ch);
+        } catch (Throwable $relayErr) {
+            // Silently continue if gateway unavailable
+        }
     }
 
     if ($dbSaved) {
@@ -314,6 +325,9 @@ if ($method === 'GET') {
     }
 
 } elseif ($method === 'PUT') {
+    if ($pdo === null) {
+        send_json(['success' => false, 'message' => 'Database not connected'], 503);
+    }
     // 3. Update enquiry status
     $rawInput = file_get_contents('php://input');
     $data = json_decode($rawInput, true);
@@ -334,6 +348,9 @@ if ($method === 'GET') {
     }
 
 } elseif ($method === 'DELETE') {
+    if ($pdo === null) {
+        send_json(['success' => false, 'message' => 'Database not connected'], 503);
+    }
     // 4. Delete single or clear all
     $id = $_GET['id'] ?? '';
     if (empty($id)) {

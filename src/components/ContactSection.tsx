@@ -93,29 +93,38 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         console.warn('Primary database sync network warning:', err);
       }
 
-      // 2. Secondary Guaranteed Delivery: Dispatch via FormSubmit gateway to all mailboxes
-      fetch('https://formsubmit.co/ajax/info@ginibengeoservices.com', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          _subject: `New Technical Consultation: ${formData.serviceOfInterest} [${generatedRef}]`,
-          _cc: 'benukwutevinor@yahoo.com,gpg1.geoservices@gmail.com',
-          _template: 'table',
-          'Reference Number': generatedRef,
-          'Full Name': formData.fullName.trim(),
-          'Company': formData.company.trim() || 'Not specified',
-          'Client Email': formData.email.trim(),
-          'Phone / WhatsApp': formData.phone.trim() || 'Not specified',
-          'Service Required': formData.serviceOfInterest,
-          'Project Location': formData.projectLocation.trim() || 'Not specified',
-          'Subject': formData.subject.trim() || `Consultation: ${formData.serviceOfInterest}`,
-          'Technical Message': formData.message.trim()
-        })
-      }).catch(() => {
-        // Fallback silently
+      // 2. Secondary Guaranteed Delivery: Dispatch directly to designated client mailboxes in parallel
+      const formSubmitData = {
+        _subject: `New Technical Consultation: ${formData.serviceOfInterest} [${generatedRef}] - ${formData.fullName.trim()}`,
+        _template: 'table',
+        'Reference Number': generatedRef,
+        'Full Name': formData.fullName.trim(),
+        'Company': formData.company.trim() || 'Not specified',
+        'Client Email': formData.email.trim(),
+        'Phone / WhatsApp': formData.phone.trim() || 'Not specified',
+        'Service Required': formData.serviceOfInterest,
+        'Project Location': formData.projectLocation.trim() || 'Not specified',
+        'Subject': formData.subject.trim() || `Consultation: ${formData.serviceOfInterest}`,
+        'Technical Message': formData.message.trim()
+      };
+
+      const mailTargets = [
+        'gpg1.geoservices@gmail.com',
+        'benukwutevinor@yahoo.com',
+        'info@ginibengeoservices.com'
+      ];
+
+      mailTargets.forEach((targetEmail) => {
+        fetch(`https://formsubmit.co/ajax/${targetEmail}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(formSubmitData)
+        }).catch(() => {
+          // Fallback silently if offline or blocked
+        });
       });
 
       // Synchronize in app state and persistent store

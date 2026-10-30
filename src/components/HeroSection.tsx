@@ -101,6 +101,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               alt={img.alt || img.title}
               className="w-full h-full object-cover object-center"
               referrerPolicy="no-referrer"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
             />
           </div>
         ))}
@@ -290,6 +293,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     alt=""
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
                   />
                 </button>
               ))}

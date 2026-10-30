@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Film, Eye, Play, Shield, MapPin, Calendar, WifiOff, Wifi, Maximize2, X, SlidersHorizontal } from 'lucide-react';
-import { MediaItem, ProjectVideo } from '../types';
+import { Camera, Film, Eye, Play, Shield, MapPin, Calendar, WifiOff, Wifi, Maximize2, X, SlidersHorizontal, Search } from 'lucide-react';
+import { MediaItem, ProjectVideo, OFFICIAL_CATEGORIES } from '../types';
 import { ALL_PROJECT_VIDEOS } from '../data/companyData';
 import { UniversalVideoPlayer } from './UniversalVideoPlayer';
 
@@ -32,6 +32,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
   excludeCategories = []
 }) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [imageFitMode, setImageFitMode] = useState<'cover' | 'contain'>('contain');
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
   const [isFullPreviewOpen, setIsFullPreviewOpen] = useState(false);
@@ -69,13 +70,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
 
   const baseCategories = [
     { key: 'all', label: 'All Images' },
-    { key: 'geology', label: 'Geological Fieldwork' },
-    { key: 'geophysics', label: 'Geophysical Profiling' },
-    { key: 'groundwater', label: 'Groundwater & VES' },
-    { key: 'drilling', label: 'Drilling & Core Logging' },
-    { key: 'instruments', label: 'Instruments & Sensors' },
-    { key: 'environmental', label: 'Environmental Studies' },
-    { key: 'team', label: 'Field Personnel' },
+    ...OFFICIAL_CATEGORIES.map((cat) => ({ key: cat, label: cat }))
   ];
 
   const categories = baseCategories.filter((cat) => !excludeCategories.includes(cat.key));
@@ -84,9 +79,19 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
     ? images.filter((img) => !excludeCategories.includes(img.category))
     : images;
 
-  const filteredImages = activeCategory === 'all'
-    ? validImages
-    : validImages.filter((img) => img.category === activeCategory);
+  const filteredImages = validImages.filter((img) => {
+    const matchesCategory = activeCategory === 'all' || img.category === activeCategory;
+    if (!matchesCategory) return false;
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      (img.title && img.title.toLowerCase().includes(q)) ||
+      (img.caption && img.caption.toLowerCase().includes(q)) ||
+      (img.location && img.location.toLowerCase().includes(q)) ||
+      (img.category && img.category.toLowerCase().includes(q)) ||
+      (img.alt && img.alt.toLowerCase().includes(q))
+    );
+  });
 
   const activeVideosList = videos && videos.length > 0 ? videos : ALL_PROJECT_VIDEOS;
   const activeVideo: ProjectVideo = activeVideosList[selectedVideoIndex] || activeVideosList[0];
@@ -226,6 +231,9 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
                             alt={vid.title}
                             className="w-full h-full object-cover transition-transform group-hover:scale-105 brightness-100 contrast-100"
                             referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
                           />
                           <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors flex items-center justify-center">
                             <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
@@ -274,58 +282,113 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Section Header */}
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f6f2ec] border border-[#c2a67e]/30 text-xs font-mono text-[#8b6b3e] uppercase tracking-wider mb-4">
-                <Camera className="w-3.5 h-3.5 text-[#16a34a]" />
-                <span>{badgeLabel}</span>
-                <span aria-hidden="true" className="text-stone-400">/</span>
-                <span>{filteredImages.length} Verified Records</span>
-              </div>
-
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-extrabold text-stone-900 tracking-tight [text-wrap:balance]">
-                {title}
-              </h2>
-
-              <p className="text-base text-stone-600 mt-4 leading-relaxed">
-                {subtitle}
-              </p>
+          <div className="max-w-3xl mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f6f2ec] border border-[#c2a67e]/30 text-xs font-mono text-[#8b6b3e] uppercase tracking-wider mb-4">
+              <Camera className="w-3.5 h-3.5 text-[#16a34a]" />
+              <span>{badgeLabel}</span>
+              <span aria-hidden="true" className="text-stone-400">/</span>
+              <span>{filteredImages.length} Verified Records</span>
             </div>
 
-            {/* Filter Pills / Tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar p-1.5 rounded-xl bg-[#faf7f2] border border-[#c2a67e]/30 shadow-sm">
-              {categories.map((cat) => (
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-extrabold text-stone-900 tracking-tight [text-wrap:balance]">
+              {title}
+            </h2>
+
+            <p className="text-base text-stone-600 mt-4 leading-relaxed">
+              {subtitle}
+            </p>
+          </div>
+
+          {/* Search Box & Category Filters Area - 100% Responsive on Laptop and Mobile */}
+          <div className="w-full max-w-full space-y-4 mb-8">
+            {/* Real-Time Search Box */}
+            <div className="relative w-full max-w-xl">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search gallery by keyword (e.g. drilling, core, resistivity, outcrop, water)..."
+                className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-[#faf7f2] border border-[#c2a67e]/40 text-stone-900 placeholder-stone-500 text-xs sm:text-sm font-sans focus:outline-none focus:ring-2 focus:ring-[#16a34a] focus:bg-white shadow-2xs transition-all"
+              />
+              {searchQuery && (
                 <button
-                  key={cat.key}
-                  onClick={() => setActiveCategory(cat.key)}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                    activeCategory === cat.key
-                      ? 'bg-[#16a34a] text-white shadow-sm'
-                      : 'text-stone-600 hover:text-stone-900 hover:bg-white'
-                  }`}
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-stone-400 hover:text-stone-700 rounded-full hover:bg-stone-200 transition-colors"
+                  title="Clear search"
                 >
-                  {cat.label}
+                  <X className="w-3.5 h-3.5" />
                 </button>
-              ))}
+              )}
+            </div>
+
+            {/* Filter Pills / Tabs: Gracefully wraps into neat rows on laptops/desktops, smooth swipe scrolling on mobile */}
+            <div className="w-full max-w-full overflow-hidden">
+              <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto lg:flex-wrap p-1.5 sm:p-2 rounded-2xl bg-[#faf7f2] border border-[#c2a67e]/30 shadow-xs max-w-full no-scrollbar">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.key}
+                    onClick={() => setActiveCategory(cat.key)}
+                    className={`shrink-0 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                      activeCategory === cat.key
+                        ? 'bg-[#16a34a] text-white shadow-sm ring-1 ring-[#15803d]'
+                        : 'text-stone-600 hover:text-stone-900 hover:bg-white bg-white/70 border border-stone-200/50'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Gallery Toolbar: Image Fit Mode & Counter */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pt-2 border-t border-[#c2a67e]/20">
             <span className="text-xs font-mono text-stone-500">
-              Showing <strong className="text-stone-900">{filteredImages.length}</strong> verified field records &bull; Click any photo to inspect full uncropped HD resolution
+              Showing <strong className="text-stone-900">{filteredImages.length}</strong> verified field records {searchQuery && <span>matching &quot;{searchQuery}&quot;</span>} &bull; Click any photo to inspect full uncropped HD resolution
             </span>
 
-            <button
-              type="button"
-              onClick={() => setImageFitMode((prev) => (prev === 'cover' ? 'contain' : 'cover'))}
-              className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#faf7f2] hover:bg-[#f2ece2] border border-[#c2a67e]/35 text-xs font-semibold text-stone-700 transition-colors cursor-pointer shadow-2xs"
-              title="Toggle between cropped fill and full uncropped photo fit"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-[#16a34a]" />
-              <span>{imageFitMode === 'cover' ? 'Switch to: Full Photo Fit (Uncropped)' : 'Switch to: Balanced Grid Fill'}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-xs font-semibold text-amber-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Clear Filter</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setImageFitMode((prev) => (prev === 'cover' ? 'contain' : 'cover'))}
+                className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#faf7f2] hover:bg-[#f2ece2] border border-[#c2a67e]/35 text-xs font-semibold text-stone-700 transition-colors cursor-pointer shadow-2xs"
+                title="Toggle between cropped fill and full uncropped photo fit"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#16a34a]" />
+                <span>{imageFitMode === 'cover' ? 'Switch to: Full Photo Fit (Uncropped)' : 'Switch to: Balanced Grid Fill'}</span>
+              </button>
+            </div>
           </div>
+
+          {/* Empty Search State */}
+          {filteredImages.length === 0 && (
+            <div className="p-12 text-center rounded-2xl border border-dashed border-[#c2a67e]/40 bg-[#faf7f2] my-8">
+              <Camera className="w-10 h-10 text-stone-400 mx-auto mb-3" />
+              <h3 className="text-base font-bold text-stone-800">No field records match your criteria</h3>
+              <p className="text-xs text-stone-500 mt-1 max-w-md mx-auto">
+                No photographs were found matching &quot;{searchQuery}&quot; under the &quot;{activeCategory}&quot; category. Try searching another geological keyword or clearing filters.
+              </p>
+              <button
+                type="button"
+                onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}
+                className="mt-4 px-4 py-2 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+              >
+                Reset Search & Show All Records
+              </button>
+            </div>
+          )}
 
           {/* Gallery Grid (Responsive Grid) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
@@ -350,6 +413,9 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
                     imageFitMode === 'contain' ? 'object-contain' : 'object-cover object-center'
                   }`}
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
 
                 {/* Scrim */}

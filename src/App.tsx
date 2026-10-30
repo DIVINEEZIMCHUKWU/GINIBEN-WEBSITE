@@ -38,6 +38,12 @@ import {
   getSettingsFromApi, saveSettingsToApi
 } from './services/apiService';
 
+const DELETED_IMAGE_TOKENS = ['ccsDQjRW', 'VYCKFqT7', 'ksFt40BR', 'img-22', 'img-23', 'img-24'];
+const sanitizeImages = (imgs: MediaItem[]): MediaItem[] => {
+  if (!Array.isArray(imgs)) return [];
+  return imgs.filter((img) => !DELETED_IMAGE_TOKENS.some((tok) => img.id === tok || img.url?.includes(tok)));
+};
+
 export default function App() {
   // State initialization with persistence fallback
   const [company, setCompany] = useState<CompanyConfig>(() => {
@@ -46,11 +52,11 @@ export default function App() {
   });
 
   const [galleryImages, setGalleryImages] = useState<MediaItem[]>(() => {
-    const saved = localStorage.getItem('giniben_gallery_images_v4');
+    const saved = localStorage.getItem('giniben_gallery_images_v10');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= INITIAL_GALLERY_IMAGES.length) {
+        if (Array.isArray(parsed) && parsed.length === INITIAL_GALLERY_IMAGES.length) {
           return parsed;
         }
       } catch (e) {
@@ -61,7 +67,7 @@ export default function App() {
   });
 
   const [projects, setProjects] = useState<ProjectItem[]>(() => {
-    const saved = localStorage.getItem('giniben_projects');
+    const saved = localStorage.getItem('giniben_projects_v3');
     return saved ? JSON.parse(saved) : INITIAL_PROJECTS;
   });
 
@@ -236,8 +242,12 @@ export default function App() {
       });
       getImagesFromApi().then((imgs) => {
         if (imgs && imgs.length > 0) {
-          setGalleryImages(imgs);
-          localStorage.setItem('giniben_gallery_images_v4', JSON.stringify(imgs));
+          const validUrls = new Set(INITIAL_GALLERY_IMAGES.map((i) => i.url));
+          const cleanImgs = imgs.filter((i) => validUrls.has(i.url) || i.id?.startsWith('img-user-'));
+          if (cleanImgs.length > 0) {
+            setGalleryImages(cleanImgs);
+            localStorage.setItem('giniben_gallery_images_v6', JSON.stringify(cleanImgs));
+          }
         }
       });
       getVideosFromApi().then((vids) => {
@@ -293,33 +303,33 @@ export default function App() {
   const handleAddProject = (newProj: ProjectItem) => {
     const updated = [newProj, ...projects];
     setProjects(updated);
-    localStorage.setItem('giniben_projects', JSON.stringify(updated));
+    localStorage.setItem('giniben_projects_v3', JSON.stringify(updated));
   };
 
   const handleDeleteProject = (id: string) => {
     const updated = projects.filter((p) => p.id !== id);
     setProjects(updated);
-    localStorage.setItem('giniben_projects', JSON.stringify(updated));
+    localStorage.setItem('giniben_projects_v3', JSON.stringify(updated));
   };
 
   const handleAddGalleryImage = (newImg: MediaItem) => {
     const updated = [newImg, ...galleryImages];
     setGalleryImages(updated);
-    localStorage.setItem('giniben_gallery_images_v4', JSON.stringify(updated));
+    localStorage.setItem('giniben_gallery_images_v6', JSON.stringify(updated));
     saveImageToApi(newImg);
   };
 
   const handleUpdateGalleryImage = (updatedImg: MediaItem) => {
     const updated = galleryImages.map((img) => img.id === updatedImg.id ? updatedImg : img);
     setGalleryImages(updated);
-    localStorage.setItem('giniben_gallery_images_v4', JSON.stringify(updated));
+    localStorage.setItem('giniben_gallery_images_v6', JSON.stringify(updated));
     saveImageToApi(updatedImg);
   };
 
   const handleDeleteGalleryImage = (id: string) => {
     const updated = galleryImages.filter((img) => img.id !== id);
     setGalleryImages(updated);
-    localStorage.setItem('giniben_gallery_images_v4', JSON.stringify(updated));
+    localStorage.setItem('giniben_gallery_images_v6', JSON.stringify(updated));
     deleteImageFromApi(id);
   };
 
@@ -547,6 +557,9 @@ export default function App() {
                         loading="lazy"
                         className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-105"
                         referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
 
                       {/* Dark Gradient Overlay */}
@@ -718,27 +731,27 @@ export default function App() {
               subtitle="Full tabular breakdown of executed industrial boreholes, groundwater schemes, and regulatory ESIA."
             />
 
-            {/* Full Projects Section */}
+            {/* Full Projects Section - 8 Core Disciplines */}
             <ProjectsSection
-              projects={projects}
               onOpenConsultation={() => handleOpenConsultation()}
               isStandalonePage={true}
             />
 
-            {/* Complete Photographic Fieldwork Gallery & Subtitles (Also on Projects Page, Excluding Instruments Images) */}
-            <GallerySection
-              images={projectPageImages}
-              videos={projectPageVideos}
-              selectedLightboxImage={selectedLightboxImage}
-              onCloseLightbox={() => setSelectedLightboxImage(null)}
-              onOpenLightbox={(img) => setSelectedLightboxImage(img)}
-              isStandalonePage={true}
-              showVideoSection={false}
-              excludeCategories={['instruments']}
-              title="Project Photographic Evidence & Fieldwork Gallery"
-              subtitle="All authentic operational photographs, field records, and subtitles documenting active drilling, geophysical resistivity imaging, core logging, and personnel on project concessions across Nigeria."
-              badgeLabel="Project Field Records & Subtitles"
-            />
+            {/* Complete Photographic Fieldwork Gallery & Subtitles (Also on Projects Page) */}
+            <div id="project-photographic-gallery" className="scroll-mt-10">
+              <GallerySection
+                images={projectPageImages}
+                videos={projectPageVideos}
+                selectedLightboxImage={selectedLightboxImage}
+                onCloseLightbox={() => setSelectedLightboxImage(null)}
+                onOpenLightbox={(img) => setSelectedLightboxImage(img)}
+                isStandalonePage={true}
+                showVideoSection={false}
+                title="Project Photographic Evidence & Fieldwork Gallery"
+                subtitle="All authentic operational photographs, field records, and subtitles documenting active drilling, geophysical resistivity imaging, core logging, and personnel on project concessions across Nigeria."
+                badgeLabel="Project Field Records & Subtitles"
+              />
+            </div>
           </div>
         )}
 
@@ -863,7 +876,7 @@ export default function App() {
       {/* Global High-Resolution Fill Preview Lightbox Modal */}
       <LightboxModal
         image={selectedLightboxImage}
-        allImages={currentPage === 'projects' ? galleryImages.filter((img) => img.category !== 'instruments') : galleryImages}
+        allImages={galleryImages}
         onClose={() => setSelectedLightboxImage(null)}
         onSelectImage={(img) => setSelectedLightboxImage(img)}
       />

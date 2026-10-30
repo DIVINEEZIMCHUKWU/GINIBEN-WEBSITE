@@ -50,6 +50,12 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ team }) => {
                   alt={member.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg') {
+                      target.src = 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg';
+                    }
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
                 
@@ -106,6 +112,13 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ team }) => {
                   src={activeMemberModal.image}
                   alt={activeMemberModal.name}
                   className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg') {
+                      target.src = 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg';
+                    }
+                  }}
                 />
               </div>
               <div>

@@ -29,10 +29,13 @@ export const Footer: React.FC<FooterProps> = ({
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl overflow-hidden border border-[#c2a67e]/50 bg-white p-1 shadow-sm shrink-0">
                 <img
-                  src={company.logoUrl}
+                  src={company.logoUrl || '/logo.jpg'}
                   alt={company.name}
                   className="w-full h-full object-contain"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.currentTarget.src = '/logo.jpg';
+                  }}
                 />
               </div>
               <div>
