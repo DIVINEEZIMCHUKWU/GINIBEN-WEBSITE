@@ -1,10 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   X, LayoutDashboard, MessageSquare, Image as ImageIcon, 
   Users, Settings, Check, Trash2, Plus, Edit, Eye, EyeOff, 
   ShieldCheck, Film, Lock, KeyRound, Mail, Phone, 
   Globe, CheckCircle2, AlertCircle, Home, Upload, Moon, Sun, 
-  Camera, Video, Database, Loader2
+  Camera, Video, Database, Loader2, RefreshCw
 } from 'lucide-react';
 import { 
   CompanyConfig, ConsultationEnquiry, MediaItem, 
@@ -90,6 +90,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [activeTab, setActiveTab] = useState<
     'overview' | 'images' | 'videos' | 'team' | 'enquiries' | 'settings'
   >('overview');
+
+  const [isSyncingEnquiries, setIsSyncingEnquiries] = useState(false);
+
+  const handleManualSyncEnquiries = async () => {
+    if (!onRefreshEnquiries || isSyncingEnquiries) return;
+    setIsSyncingEnquiries(true);
+    try {
+      await onRefreshEnquiries();
+    } finally {
+      setTimeout(() => setIsSyncingEnquiries(false), 400);
+    }
+  };
+
+  // Auto-sync whenever administrator opens or navigates to the Client Enquiries tab
+  useEffect(() => {
+    if (isAuthenticated && activeTab === 'enquiries' && onRefreshEnquiries) {
+      handleManualSyncEnquiries();
+    }
+  }, [isAuthenticated, activeTab]);
 
   // File Input References for Direct Device/Gallery Uploads
   const imageFileInputRef = useRef<HTMLInputElement>(null);
@@ -1392,12 +1411,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     {onRefreshEnquiries && (
                       <button
                         type="button"
-                        onClick={onRefreshEnquiries}
-                        className="px-3 py-1.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs active:scale-95 touch-manipulation"
+                        onClick={handleManualSyncEnquiries}
+                        disabled={isSyncingEnquiries}
+                        className="px-3 py-1.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs active:scale-95 touch-manipulation disabled:opacity-75"
                         title="Fetch latest enquiries directly from MySQL database"
                       >
-                        <Database className="w-3.5 h-3.5" />
-                        <span>Sync with Database</span>
+                        <RefreshCw className={`w-3.5 h-3.5 ${isSyncingEnquiries ? 'animate-spin' : ''}`} />
+                        <span>{isSyncingEnquiries ? 'Syncing...' : 'Sync with Database'}</span>
                       </button>
                     )}
 

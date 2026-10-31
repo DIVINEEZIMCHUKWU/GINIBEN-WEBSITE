@@ -231,9 +231,11 @@ export default function App() {
     });
   }, []);
 
-  // Re-fetch latest database records whenever Admin Console is opened
+  // Re-fetch latest database records whenever Admin Console is open (with 8s auto-poll)
   useEffect(() => {
-    if (isAdminOpen) {
+    if (!isAdminOpen) return;
+
+    const syncLiveDatabase = () => {
       getEnquiriesFromApi().then((enqs) => {
         if (enqs && Array.isArray(enqs)) {
           setEnquiries(enqs);
@@ -267,7 +269,14 @@ export default function App() {
           setCompany((prev) => ({ ...prev, ...sets }));
         }
       });
-    }
+    };
+
+    // Immediate sync on admin open
+    syncLiveDatabase();
+
+    // Auto-poll every 8 seconds while admin is viewing the dashboard
+    const pollInterval = setInterval(syncLiveDatabase, 8000);
+    return () => clearInterval(pollInterval);
   }, [isAdminOpen]);
 
   // State handlers with persistent sync (localStorage + MySQL Backend)
@@ -841,13 +850,12 @@ export default function App() {
         company={company}
         onUpdateCompany={handleUpdateCompany}
         enquiries={enquiries}
-        onRefreshEnquiries={() => {
-          getEnquiriesFromApi().then((enqs) => {
-            if (enqs && Array.isArray(enqs)) {
-              setEnquiries(enqs);
-              localStorage.setItem('giniben_enquiries', JSON.stringify(enqs));
-            }
-          });
+        onRefreshEnquiries={async () => {
+          const enqs = await getEnquiriesFromApi();
+          if (enqs && Array.isArray(enqs)) {
+            setEnquiries(enqs);
+            localStorage.setItem('giniben_enquiries', JSON.stringify(enqs));
+          }
         }}
         onUpdateEnquiryStatus={handleUpdateEnquiryStatus}
         onDeleteEnquiry={handleDeleteEnquiry}

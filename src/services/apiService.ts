@@ -8,17 +8,24 @@ import { MediaItem, ProjectVideo, TeamMember, ConsultationEnquiry, CompanyConfig
 
 const API_BASE = '/api';
 
-// Helper for safe fetch with timeout
+// Helper for safe fetch with timeout and strict cache-busting
 async function apiFetch(endpoint: string, options: RequestInit = {}): Promise<any> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
 
+  // Prevent browser caching by appending a unique timestamp to every request
+  const separator = endpoint.includes('?') ? '&' : '?';
+  const url = `${API_BASE}${endpoint}${separator}_t=${Date.now()}`;
+
   try {
-    const res = await fetch(`${API_BASE}${endpoint}`, {
+    const res = await fetch(url, {
       ...options,
+      cache: 'no-store',
       signal: controller.signal,
       headers: {
         'Accept': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
         ...(options.headers || {})
       }
     });
