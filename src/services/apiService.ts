@@ -203,6 +203,19 @@ export async function updateEnquiryStatusInApi(id: string, status: 'new' | 'revi
 
 export async function deleteEnquiryFromApi(id: string): Promise<boolean> {
   try {
+    // Primary: POST with action: 'delete' (bypasses any cPanel ModSecurity restrictions on HTTP DELETE)
+    const res = await apiFetch('/enquiries.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', id })
+    });
+    if (res?.success) return true;
+  } catch {
+    // Silent fallback
+  }
+
+  // Secondary fallback: Standard HTTP DELETE
+  try {
     const res = await apiFetch(`/enquiries.php?id=${encodeURIComponent(id)}`, {
       method: 'DELETE'
     });
@@ -213,6 +226,17 @@ export async function deleteEnquiryFromApi(id: string): Promise<boolean> {
 }
 
 export async function clearAllEnquiriesInApi(): Promise<boolean> {
+  try {
+    const res = await apiFetch('/enquiries.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'clear_all' })
+    });
+    if (res?.success) return true;
+  } catch {
+    // Silent fallback
+  }
+
   try {
     const res = await apiFetch('/enquiries.php?all=true', {
       method: 'DELETE'

@@ -303,11 +303,11 @@ export default function App() {
     updateEnquiryStatusInApi(id, newStatus);
   };
 
-  const handleDeleteEnquiry = (id: string) => {
-    const updated = enquiries.filter((enq) => enq.id !== id);
+  const handleDeleteEnquiry = async (id: string) => {
+    const updated = enquiries.filter((enq) => enq.id !== id && enq.referenceNumber !== id);
     setEnquiries(updated);
     localStorage.setItem('giniben_enquiries', JSON.stringify(updated));
-    deleteEnquiryFromApi(id);
+    await deleteEnquiryFromApi(id);
   };
 
   const handleAddProject = (newProj: ProjectItem) => {
@@ -391,10 +391,10 @@ export default function App() {
     deleteTeamMemberFromApi(id);
   };
 
-  const handleClearAllEnquiries = () => {
+  const handleClearAllEnquiries = async () => {
     setEnquiries([]);
     localStorage.setItem('giniben_enquiries', JSON.stringify([]));
-    clearAllEnquiriesInApi();
+    await clearAllEnquiriesInApi();
   };
 
   return (

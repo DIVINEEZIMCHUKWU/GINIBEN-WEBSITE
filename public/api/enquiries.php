@@ -78,12 +78,43 @@ if ($method === 'GET') {
     }
 
 } elseif ($method === 'POST') {
-    // 2. Process New Consultation Enquiry Submission
+    // 2. Process New Consultation Enquiry Submission or Action
     $rawInput = file_get_contents('php://input');
     $data = json_decode($rawInput, true);
 
     if (!is_array($data)) {
         send_json(['success' => false, 'message' => 'Invalid JSON payload received.'], 400);
+    }
+
+    // Handle delete/clear actions via POST (ensures 100% compatibility across cPanel ModSecurity firewalls)
+    $action = trim($data['action'] ?? '');
+    if ($action === 'delete') {
+        $delId = trim($data['id'] ?? '');
+        if (empty($delId)) {
+            send_json(['success' => false, 'message' => 'Enquiry ID is required for deletion.'], 400);
+        }
+        if ($pdo === null) {
+            send_json(['success' => false, 'message' => 'Database connection unavailable.'], 503);
+        }
+        try {
+            $stmt = $pdo->prepare("DELETE FROM `enquiries` WHERE `id` = :id1 OR `reference_number` = :id2");
+            $stmt->execute([':id1' => $delId, ':id2' => $delId]);
+            send_json(['success' => true, 'message' => 'Enquiry deleted successfully from database.']);
+        } catch (Throwable $delErr) {
+            send_json(['success' => false, 'message' => $delErr->getMessage()], 500);
+        }
+    }
+
+    if ($action === 'clear_all') {
+        if ($pdo === null) {
+            send_json(['success' => false, 'message' => 'Database connection unavailable.'], 503);
+        }
+        try {
+            $pdo->query("TRUNCATE TABLE `enquiries`");
+            send_json(['success' => true, 'message' => 'All enquiries cleared successfully from database.']);
+        } catch (Throwable $delErr) {
+            send_json(['success' => false, 'message' => $delErr->getMessage()], 500);
+        }
     }
 
     $id = trim($data['id'] ?? ('enq-' . round(microtime(true) * 1000)));
@@ -559,6 +590,95 @@ if ($method === 'GET') {
         $logLines[] = date('Y-m-d H:i:s') . " | Ref: {$refNumber} | To: {$dest} | Status: " . ($sent ? "SUCCESS ({$methodUsed})" : "QUEUED/SENT (local Exim transport)") . "\n";
     }
 
+    // ========================================================================
+    // CLIENT AUTO-ACKNOWLEDGMENT RECEIPT (Enables seamless 2-way replies)
+    // ========================================================================
+    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $clientSubject = "Consultation Request Received: [{$refNumber}] {$serviceOfInterest} - GiniBen Geoservices";
+        $clientHtml = "<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>Receipt of Consultation Enquiry - {$refNumberHtml}</title>
+</head>
+<body style='margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; background-color: #f4efe9; color: #1c1917;'>
+  <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: #f4efe9; padding: 24px 12px;'>
+    <tr>
+      <td align='center'>
+        <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #dcd1c3; box-shadow: 0 4px 16px rgba(0,0,0,0.06);'>
+          <tr>
+            <td style='background: linear-gradient(135deg, #0f5132 0%, #16a34a 100%); padding: 26px 30px; color: #ffffff;'>
+              <div style='font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #a7f3d0; margin-bottom: 4px;'>
+                Official Acknowledgment
+              </div>
+              <h1 style='margin: 0; font-size: 20px; font-weight: 800; color: #ffffff;'>
+                GiniBen &amp; Partners Geoservices Ltd
+              </h1>
+              <div style='font-size: 12px; color: #dcfce7; margin-top: 4px;'>
+                Precision Beneath the Surface &bull; Exploration &amp; Engineering
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style='padding: 28px 30px;'>
+              <h2 style='margin: 0 0 12px; font-size: 16px; font-weight: 700; color: #1c1917;'>
+                Dear {$fullNameHtml},
+              </h2>
+              <p style='font-size: 14px; line-height: 1.6; color: #44403c; margin: 0 0 16px;'>
+                Thank you for contacting <strong>GiniBen &amp; Partners Geoservices Ltd</strong>. Your technical consultation inquiry regarding <strong>{$serviceHtml}</strong> has been successfully received and logged under reference code:
+              </p>
+              <div style='background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; text-align: center;'>
+                <span style='font-size: 11px; font-mono; color: #166534; font-weight: 700; text-transform: uppercase; display: block;'>Tracking Reference Code</span>
+                <span style='font-size: 18px; font-mono; font-weight: 800; color: #166534;'>{$refNumberHtml}</span>
+              </div>
+              <p style='font-size: 14px; line-height: 1.6; color: #44403c; margin: 0 0 16px;'>
+                Our Lead Consultant, <strong>Dr. Benjamin Ukwuteyinor</strong>, and our senior geoscience team are evaluating your project scope. A member of our technical team will contact you directly to discuss methodology, schedules, and deliverables.
+              </p>
+              <div style='background-color: #faf7f2; border-left: 4px solid #16a34a; border-radius: 6px; padding: 14px 18px; margin-bottom: 20px;'>
+                <div style='font-size: 12px; font-weight: 700; color: #166534; margin-bottom: 4px;'>Direct Two-Way Communication:</div>
+                <div style='font-size: 13px; color: #57534e; line-height: 1.5;'>
+                  You can <strong>reply directly to this email</strong> at any time to share additional project coordinates, topographic plans, or borehole objectives. Your reply will route directly to our consulting team.
+                </div>
+              </div>
+              <table role='presentation' cellspacing='0' cellpadding='0' border='0' style='margin-top: 10px;'>
+                <tr>
+                  <td style='padding-right: 12px;'>
+                    <a href='https://wa.me/2348036251405' target='_blank' style='display: inline-block; background-color: #25D366; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 10px 18px; border-radius: 8px;'>
+                      Direct WhatsApp: +234 803 625 1405
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style='background-color: #f5f0e8; border-top: 1px solid #e7e0d5; padding: 18px 30px; text-align: center; font-size: 11px; color: #78716c;'>
+              <div style='font-weight: 700; color: #44403c;'>GiniBen &amp; Partners GEOSERVICES LTD</div>
+              <div>2 Leck Avenue, Adjacent State Police Headquarters GRA, Enugu, Nigeria</div>
+              <div style='margin-top: 4px;'>Direct Desks: gpgl.geoservices@gmail.com &bull; benukwuteyinor@yahoomail.com</div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>";
+
+        // Dispatch client confirmation with Reply-To directing to Dr. Ben and Gmail
+        $consultantReplyEmail = 'gpgl.geoservices@gmail.com';
+        $consultantReplyName = 'GiniBen & Partners Geoservices';
+
+        try {
+            $clientSent = $sendSmtp($email, $clientSubject, $clientHtml, $senderEmail, $senderName, $consultantReplyEmail, $consultantReplyName);
+            if (!$clientSent) {
+                $sendPhpMail($email, $clientSubject, $clientHtml, $senderEmail, $senderName, $consultantReplyEmail, $consultantReplyName);
+            }
+        } catch (Throwable $clientErr) {
+            // non-fatal
+        }
+    }
+
     // Write audit log (silent, safe)
     if (!empty($logLines)) {
         @file_put_contents($logFile, implode('', $logLines), FILE_APPEND | LOCK_EX);
@@ -612,9 +732,9 @@ if ($method === 'GET') {
             $pdo->query("TRUNCATE TABLE `enquiries`");
             send_json(['success' => true, 'message' => 'All enquiries cleared successfully.']);
         } elseif (!empty($id)) {
-            $stmt = $pdo->prepare("DELETE FROM `enquiries` WHERE `id` = :id");
-            $stmt->execute([':id' => $id]);
-            send_json(['success' => true, 'message' => 'Enquiry deleted successfully.']);
+            $stmt = $pdo->prepare("DELETE FROM `enquiries` WHERE `id` = :id1 OR `reference_number` = :id2");
+            $stmt->execute([':id1' => $id, ':id2' => $id]);
+            send_json(['success' => true, 'message' => 'Enquiry deleted successfully from database.']);
         } else {
             send_json(['success' => false, 'message' => 'Enquiry ID is required.'], 400);
         }
