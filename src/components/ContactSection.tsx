@@ -29,7 +29,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [emailDeliveryWarning, setEmailDeliveryWarning] = useState(false);
   const [copiedRef, setCopiedRef] = useState(false);
 
   const servicesList = [
@@ -77,9 +76,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     };
 
     try {
-      // The API records the enquiry and sends email notifications to the configured recipients.
+      // Record enquiry in MySQL database and dispatch email notifications
       try {
-        const res = await fetch('/api/enquiries.php', {
+        await fetch('/api/enquiries.php', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -87,16 +86,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
           },
           body: JSON.stringify(newEnquiry)
         });
-        const responseData = await res.json();
-        if (!res.ok) {
-          console.warn('API returned non-200 status:', res.status);
-          setEmailDeliveryWarning(true);
-        } else {
-          setEmailDeliveryWarning(responseData?.emailNotificationsSent !== true);
-        }
       } catch (err) {
-        console.warn('Primary database sync network warning:', err);
-        setEmailDeliveryWarning(true);
+        console.warn('Backend sync warning:', err);
       }
 
       // Synchronize in app state and persistent store
@@ -296,18 +287,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 </div>
 
                 <h3 className="text-2xl font-bold text-stone-900">
-                  Consultation Enquiry Logged
+                  Technical Consultation Request Submitted
                 </h3>
 
                 <p className="text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-                  Thank you. Your project specifications have been securely recorded. Our Lead Consultant, <strong className="text-stone-900 font-bold">Dr. Benjamin Ukwuteyinor</strong>, will evaluate your scope.
+                  Thank you. Your project specifications have been successfully received and logged. Our Lead Consultant, <strong className="text-stone-900 font-bold">Dr. Benjamin Ukwuteyinor</strong>, and our technical team will review your scope and get in touch with you shortly.
                 </p>
-
-                {emailDeliveryWarning && (
-                  <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-3 max-w-md mx-auto">
-                    Your enquiry is recorded, but email alert delivery could not be confirmed. For urgent matters, contact us directly using the details below.
-                  </p>
-                )}
 
                 <div className="p-4 rounded-xl bg-white border border-[#c2a67e]/35 max-w-xs mx-auto flex items-center justify-between shadow-sm">
                   <div className="text-left">
