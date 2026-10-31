@@ -44,6 +44,8 @@ const sanitizeImages = (imgs: MediaItem[]): MediaItem[] => {
   return imgs.filter((img) => !DELETED_IMAGE_TOKENS.some((tok) => img.id === tok || img.url?.includes(tok)));
 };
 
+const GALLERY_STORAGE_KEY = 'giniben_gallery_images_v12';
+
 export default function App() {
   // State initialization with persistence fallback
   const [company, setCompany] = useState<CompanyConfig>(() => {
@@ -52,11 +54,11 @@ export default function App() {
   });
 
   const [galleryImages, setGalleryImages] = useState<MediaItem[]>(() => {
-    const saved = localStorage.getItem('giniben_gallery_images_v10');
+    const saved = localStorage.getItem(GALLERY_STORAGE_KEY);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length === INITIAL_GALLERY_IMAGES.length) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed;
         }
       } catch (e) {
@@ -213,7 +215,10 @@ export default function App() {
   // Initial load from Truehost cPanel MySQL Backend (with graceful localStorage fallback)
   useEffect(() => {
     getImagesFromApi().then((imgs) => {
-      if (imgs && imgs.length > 0) setGalleryImages(imgs);
+      if (imgs && Array.isArray(imgs) && imgs.length > 0) {
+        setGalleryImages(imgs);
+        localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(imgs));
+      }
     });
     getVideosFromApi().then((vids) => {
       if (vids && vids.length > 0) setProjectVideos(vids);
@@ -243,13 +248,9 @@ export default function App() {
         }
       });
       getImagesFromApi().then((imgs) => {
-        if (imgs && imgs.length > 0) {
-          const validUrls = new Set(INITIAL_GALLERY_IMAGES.map((i) => i.url));
-          const cleanImgs = imgs.filter((i) => validUrls.has(i.url) || i.id?.startsWith('img-user-'));
-          if (cleanImgs.length > 0) {
-            setGalleryImages(cleanImgs);
-            localStorage.setItem('giniben_gallery_images_v6', JSON.stringify(cleanImgs));
-          }
+        if (imgs && Array.isArray(imgs) && imgs.length > 0) {
+          setGalleryImages(imgs);
+          localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(imgs));
         }
       });
       getVideosFromApi().then((vids) => {
@@ -324,21 +325,21 @@ export default function App() {
   const handleAddGalleryImage = (newImg: MediaItem) => {
     const updated = [newImg, ...galleryImages];
     setGalleryImages(updated);
-    localStorage.setItem('giniben_gallery_images_v6', JSON.stringify(updated));
+    localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(updated));
     saveImageToApi(newImg);
   };
 
   const handleUpdateGalleryImage = (updatedImg: MediaItem) => {
     const updated = galleryImages.map((img) => img.id === updatedImg.id ? updatedImg : img);
     setGalleryImages(updated);
-    localStorage.setItem('giniben_gallery_images_v6', JSON.stringify(updated));
+    localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(updated));
     saveImageToApi(updatedImg);
   };
 
   const handleDeleteGalleryImage = (id: string) => {
     const updated = galleryImages.filter((img) => img.id !== id);
     setGalleryImages(updated);
-    localStorage.setItem('giniben_gallery_images_v6', JSON.stringify(updated));
+    localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(updated));
     deleteImageFromApi(id);
   };
 
