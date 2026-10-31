@@ -14,7 +14,7 @@ export const COMPANY_CONFIG: CompanyConfig = {
   linkedinUrl: "https://www.linkedin.com/company/giniben-geoservices/",
   phone: "+234 803 625 1405",
   whatsappNumber: "+234 803 625 1405",
-  email: "info@ginibengeoservices.com / benukwutevinor@yahoo.com / gpg1.geoservices@gmail.com",
+  email: "info@ginibengeoservices.com / benukwuteyinor@yahoomail.com / gpgl.geoservices@gmail.com",
   address: "2 Leck Avenue, Adjacent State Police Headquarters GRA, Enugu, Enugu State, Nigeria",
   otherAddress: "#3 Nnamani Street, Trans Ekulu, Enugu",
   logoUrl: "/logo.jpg",

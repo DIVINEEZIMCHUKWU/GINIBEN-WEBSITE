@@ -109,8 +109,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       };
 
       const mailTargets = [
-        'gpg1.geoservices@gmail.com',
-        'benukwutevinor@yahoo.com',
+        'gpgl.geoservices@gmail.com',
+        'benukwuteyinor@yahoomail.com',
         'info@ginibengeoservices.com'
       ];
 
@@ -243,11 +243,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       <a href="mailto:info@ginibengeoservices.com" className="block text-[#16a34a] hover:underline transition-colors font-bold">
                         info@ginibengeoservices.com
                       </a>
-                      <a href="mailto:benukwutevinor@yahoo.com" className="block hover:text-[#16a34a] transition-colors">
-                        benukwutevinor@yahoo.com
+                      <a href="mailto:benukwuteyinor@yahoomail.com" className="block hover:text-[#16a34a] transition-colors">
+                        benukwuteyinor@yahoomail.com
                       </a>
-                      <a href="mailto:gpg1.geoservices@gmail.com" className="block hover:text-[#16a34a] transition-colors">
-                        gpg1.geoservices@gmail.com
+                      <a href="mailto:gpgl.geoservices@gmail.com" className="block hover:text-[#16a34a] transition-colors">
+                        gpgl.geoservices@gmail.com
                       </a>
                     </div>
                   </div>

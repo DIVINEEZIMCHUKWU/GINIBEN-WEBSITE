@@ -1607,7 +1607,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           className={themeClasses.input}
                         />
                         <span className="text-[11px] text-stone-400 mt-1 block">
-                          Official corporate address: info@ginibengeoservices.com (forwarding to benukwutevinor@yahoo.com and gpg1.geoservices@gmail.com)
+                          Official corporate address: info@ginibengeoservices.com (forwarding to benukwuteyinor@yahoomail.com and gpgl.geoservices@gmail.com)
                         </span>
                       </div>
 

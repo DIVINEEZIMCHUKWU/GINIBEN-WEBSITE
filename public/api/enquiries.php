@@ -6,8 +6,8 @@
  * Captures all website consultation enquiries into MySQL database
  * and guarantees immediate email alert delivery across all 3 mailboxes:
  * 1) info@ginibengeoservices.com
- * 2) benukwutevinor@yahoo.com
- * 3) gpg1.geoservices@gmail.com
+ * 2) benukwuteyinor@yahoomail.com
+ * 3) gpgl.geoservices@gmail.com
  */
 
 require_once __DIR__ . '/db.php';
@@ -197,18 +197,22 @@ if ($method === 'GET') {
     // ========================================================================
     // DISPATCH NOTIFICATION EMAILS TO ALL 3 DESTINATIONS
     // 1) info@ginibengeoservices.com
-    // 2) benukwutevinor@yahoo.com
-    // 3) gpg1.geoservices@gmail.com
+    // 2) benukwuteyinor@yahoomail.com
+    // 3) gpgl.geoservices@gmail.com
     // ========================================================================
     $destinations = [
         'info@ginibengeoservices.com',
-        'benukwutevinor@yahoo.com',
-        'gpg1.geoservices@gmail.com'
+        'benukwuteyinor@yahoomail.com',
+        'gpgl.geoservices@gmail.com'
     ];
 
-    $emailSubject = "New Consultation Enquiry: [{$refNumber}] {$serviceOfInterest} - {$fullName}";
+    $emailSubject = "[Consultation Request] [{$refNumber}] {$serviceOfInterest} - {$fullName}";
     
-    $plainBody = "GINIBEN & PARTNERS GEOSERVICES LTD - CONSULTATION ALERT\n"
+    $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+    $waLink = !empty($cleanPhone) ? "https://wa.me/{$cleanPhone}" : "";
+
+    $plainBody = "========================================================\n"
+               . "GINIBEN & PARTNERS GEOSERVICES LTD - CONSULTATION ALERT\n"
                . "========================================================\n\n"
                . "Reference Code: {$refNumber}\n"
                . "Client Name:    {$fullName}\n"
@@ -216,41 +220,184 @@ if ($method === 'GET') {
                . "Email Address:  {$email}\n"
                . "Phone / WA:     " . ($phone ?: 'Not provided') . "\n"
                . "Service Area:   {$serviceOfInterest}\n"
-               . "Location:       " . ($projectLocation ?: 'Not specified') . "\n"
-               . "Date/Time:      " . date('Y-m-d H:i:s') . "\n\n"
+               . "Site Location:  " . ($projectLocation ?: 'Not specified') . "\n"
+               . "Submitted At:   " . date('Y-m-d H:i:s') . " UTC\n\n"
                . "Subject:        {$subject}\n\n"
                . "Client Message:\n"
                . "--------------------------------------------------------\n"
                . "{$message}\n"
                . "--------------------------------------------------------\n\n"
-               . "Access Admin Console: https://ginibengeoservices.com/admin\n";
+               . "Admin Console: https://ginibengeoservices.com/admin\n"
+               . "Direct Reply:  mailto:{$email}\n";
 
-    $htmlBody = "<!DOCTYPE html><html><body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #faf9f6; padding: 20px;'>"
-              . "<div style='max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e0d6c8; border-radius: 12px; overflow: hidden;'>"
-              . "<div style='background: #16a34a; color: #ffffff; padding: 18px 24px;'>"
-              . "<h2 style='margin: 0; font-size: 18px;'>GiniBen & Partners Geoservices Ltd</h2>"
-              . "<p style='margin: 4px 0 0; font-size: 12px; opacity: 0.9;'>New Technical Consultation Request &bull; Ref: <strong>{$refNumber}</strong></p>"
-              . "</div>"
-              . "<div style='padding: 24px;'>"
-              . "<table style='width: 100%; border-collapse: collapse; font-size: 14px;'>"
-              . "<tr><td style='padding: 8px 0; color: #777; width: 140px;'>Client Name:</td><td style='font-weight: bold;'>{$fullName}</td></tr>"
-              . "<tr><td style='padding: 8px 0; color: #777;'>Company:</td><td>" . ($company ?: 'Not specified') . "</td></tr>"
-              . "<tr><td style='padding: 8px 0; color: #777;'>Email:</td><td><a href='mailto:{$email}' style='color: #16a34a; font-weight: bold;'>{$email}</a></td></tr>"
-              . "<tr><td style='padding: 8px 0; color: #777;'>Phone:</td><td>" . ($phone ?: 'Not provided') . "</td></tr>"
-              . "<tr><td style='padding: 8px 0; color: #777;'>Service:</td><td style='font-weight: bold; color: #16a34a;'>{$serviceOfInterest}</td></tr>"
-              . "<tr><td style='padding: 8px 0; color: #777;'>Project Location:</td><td>" . ($projectLocation ?: 'Not specified') . "</td></tr>"
-              . "</table>"
-              . "<div style='margin-top: 18px; padding: 16px; background: #f6f2ec; border-left: 4px solid #16a34a; border-radius: 4px;'>"
-              . "<div style='font-weight: bold; margin-bottom: 6px; font-size: 13px;'>Subject: {$subject}</div>"
-              . "<p style='margin: 0; white-space: pre-wrap; font-size: 14px;'>{$message}</p>"
-              . "</div>"
-              . "<div style='margin-top: 24px; text-align: center;'>"
-              . "<a href='https://ginibengeoservices.com/admin' style='display: inline-block; background: #16a34a; color: #ffffff; text-decoration: none; padding: 10px 24px; border-radius: 8px; font-size: 13px; font-weight: bold;'>Open Admin Console</a>"
-              . "</div>"
-              . "</div>"
-              . "<div style='padding: 12px 24px; background: #f2eee8; font-size: 11px; color: #888; text-align: center;'>"
-              . "&copy; " . date('Y') . " GiniBen & Partners GEOSERVICES LTD &bull; Precision Beneath the Surface"
-              . "</div></div></body></html>";
+    $htmlBody = "<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>New Consultation Enquiry - {$refNumber}</title>
+</head>
+<body style='margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; background-color: #f4efe9; color: #1c1917;'>
+  <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: #f4efe9; padding: 24px 12px;'>
+    <tr>
+      <td align='center'>
+        
+        <!-- Main Card Container -->
+        <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='max-width: 620px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #dcd1c3; box-shadow: 0 4px 16px rgba(0,0,0,0.06);'>
+          
+          <!-- Corporate Header Banner -->
+          <tr>
+            <td style='background: linear-gradient(135deg, #0f5132 0%, #16a34a 100%); padding: 28px 32px; color: #ffffff;'>
+              <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
+                <tr>
+                  <td>
+                    <div style='font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #a7f3d0; margin-bottom: 6px;'>
+                      Official Client Technical Inquiry
+                    </div>
+                    <h1 style='margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: #ffffff; line-height: 1.25;'>
+                      GiniBen &amp; Partners Geoservices Ltd
+                    </h1>
+                    <div style='font-size: 12px; color: #dcfce7; margin-top: 4px; font-weight: 400;'>
+                      Precision Beneath the Surface &bull; Exploration &amp; Engineering
+                    </div>
+                  </td>
+                  <td align='right' style='vertical-align: top;'>
+                    <span style='display: inline-block; background-color: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.35); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-family: monospace; font-weight: 700; color: #ffffff;'>
+                      {$refNumber}
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Summary Alert Strip -->
+          <tr>
+            <td style='background-color: #faf7f2; border-bottom: 1px solid #ece4d8; padding: 12px 32px;'>
+              <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
+                <tr>
+                  <td style='font-size: 12px; color: #78716c;'>
+                    <strong>Received:</strong> " . date('D, d M Y - H:i') . " UTC
+                  </td>
+                  <td align='right' style='font-size: 12px;'>
+                    <span style='background-color: #dcfce7; color: #166534; font-weight: 700; padding: 3px 10px; border-radius: 12px; border: 1px solid #86efac;'>
+                      Action Required
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td style='padding: 28px 32px;'>
+              
+              <!-- Client Details Table -->
+              <h2 style='margin: 0 0 16px; font-size: 15px; font-weight: 700; color: #1c1917; text-transform: uppercase; letter-spacing: 0.5px;'>
+                Client &amp; Project Specifications
+              </h2>
+
+              <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='border-collapse: separate; border-spacing: 0; border: 1px solid #e7e0d5; border-radius: 10px; overflow: hidden; margin-bottom: 24px;'>
+                <tr style='background-color: #faf7f2;'>
+                  <td style='padding: 10px 14px; font-size: 12px; font-weight: 600; color: #78716c; width: 140px; border-bottom: 1px solid #e7e0d5;'>Client Full Name</td>
+                  <td style='padding: 10px 14px; font-size: 14px; font-weight: 700; color: #1c1917; border-bottom: 1px solid #e7e0d5;'>{$fullName}</td>
+                </tr>
+                <tr>
+                  <td style='padding: 10px 14px; font-size: 12px; font-weight: 600; color: #78716c; border-bottom: 1px solid #e7e0d5;'>Company / Entity</td>
+                  <td style='padding: 10px 14px; font-size: 13px; color: #292524; border-bottom: 1px solid #e7e0d5;'>" . ($company ?: '<span style=\"color:#a8a29e;\">Not specified</span>') . "</td>
+                </tr>
+                <tr style='background-color: #faf7f2;'>
+                  <td style='padding: 10px 14px; font-size: 12px; font-weight: 600; color: #78716c; border-bottom: 1px solid #e7e0d5;'>Corporate Email</td>
+                  <td style='padding: 10px 14px; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e7e0d5;'>
+                    <a href='mailto:{$email}?subject=Re: [{$refNumber}] {$serviceOfInterest}' style='color: #16a34a; text-decoration: none;'>{$email}</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style='padding: 10px 14px; font-size: 12px; font-weight: 600; color: #78716c; border-bottom: 1px solid #e7e0d5;'>Phone / WhatsApp</td>
+                  <td style='padding: 10px 14px; font-size: 13px; color: #292524; border-bottom: 1px solid #e7e0d5;'>" . ($phone ?: '<span style=\"color:#a8a29e;\">Not provided</span>') . "</td>
+                </tr>
+                <tr style='background-color: #faf7f2;'>
+                  <td style='padding: 10px 14px; font-size: 12px; font-weight: 600; color: #78716c; border-bottom: 1px solid #e7e0d5;'>Practice Area / Service</td>
+                  <td style='padding: 10px 14px; font-size: 13px; font-weight: 700; color: #166534; border-bottom: 1px solid #e7e0d5;'>
+                    <span style='background-color: #dcfce7; padding: 2px 8px; border-radius: 6px; border: 1px solid #bbf7d0;'>
+                      {$serviceOfInterest}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style='padding: 10px 14px; font-size: 12px; font-weight: 600; color: #78716c;'>Site / Concession Location</td>
+                  <td style='padding: 10px 14px; font-size: 13px; color: #292524;'>" . ($projectLocation ?: '<span style=\"color:#a8a29e;\">Not specified</span>') . "</td>
+                </tr>
+              </table>
+
+              <!-- Client Message Block -->
+              <h3 style='margin: 0 0 10px; font-size: 13px; font-weight: 700; color: #1c1917; text-transform: uppercase; letter-spacing: 0.5px;'>
+                Client Message &amp; Statement of Requirements:
+              </h3>
+              
+              <div style='background-color: #faf7f2; border: 1px solid #e7e0d5; border-left: 4px solid #16a34a; border-radius: 8px; padding: 18px 20px; margin-bottom: 24px;'>
+                <div style='font-size: 13px; font-weight: 700; color: #1c1917; margin-bottom: 8px;'>
+                  Subject: {$subject}
+                </div>
+                <div style='font-size: 14px; line-height: 1.6; color: #292524; white-space: pre-wrap;'>{$message}</div>
+              </div>
+
+              <!-- Quick Action Buttons -->
+              <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
+                <tr>
+                  <td align='center' style='padding-top: 8px;'>
+                    <table role='presentation' cellspacing='0' cellpadding='0' border='0'>
+                      <tr>
+                        <td style='padding-right: 12px;'>
+                          <a href='mailto:{$email}?subject=Re: [{$refNumber}] {$serviceOfInterest} - GiniBen Geoservices' style='display: inline-block; background-color: #16a34a; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 11px 22px; border-radius: 8px;'>
+                            Reply to {$fullName}
+                          </a>
+                        </td>" . (!empty($waLink) ? "
+                        <td style='padding-right: 12px;'>
+                          <a href='{$waLink}' target='_blank' style='display: inline-block; background-color: #25D366; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 11px 20px; border-radius: 8px;'>
+                            WhatsApp Chat
+                          </a>
+                        </td>" : "") . "
+                        <td>
+                          <a href='https://ginibengeoservices.com/admin' style='display: inline-block; background-color: #292524; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 11px 20px; border-radius: 8px;'>
+                            Open Admin Console
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Corporate Legal Footer -->
+          <tr>
+            <td style='background-color: #f5f0e8; border-top: 1px solid #e7e0d5; padding: 20px 32px; text-align: center; font-size: 11px; color: #78716c; line-height: 1.5;'>
+              <div style='font-weight: 700; color: #44403c; margin-bottom: 4px;'>
+                GiniBen &amp; Partners GEOSERVICES LTD
+              </div>
+              <div>Head Office: 2 Leck Avenue, Adjacent State Police Headquarters GRA, Enugu, Nigeria</div>
+              <div style='margin-top: 4px;'>
+                Direct Desks: <a href='mailto:info@ginibengeoservices.com' style='color:#16a34a; text-decoration:none;'>info@ginibengeoservices.com</a> &bull; 
+                <a href='mailto:benukwuteyinor@yahoomail.com' style='color:#16a34a; text-decoration:none;'>benukwuteyinor@yahoomail.com</a> &bull; 
+                <a href='mailto:gpgl.geoservices@gmail.com' style='color:#16a34a; text-decoration:none;'>gpgl.geoservices@gmail.com</a>
+              </div>
+              <div style='margin-top: 8px; font-size: 10px; color: #a8a29e;'>
+                This automated briefing was generated by the GiniBen &amp; Partners inquiry dispatcher for authorized executive personnel.
+              </div>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>";
 
     // Clean Linux Exim headers (use \n, not \r\n, to prevent header mangling in Exim)
     $headers = "From: GiniBen Geoservices <info@ginibengeoservices.com>\n"
@@ -274,17 +421,19 @@ if ($method === 'GET') {
 
     // 2. Guaranteed Server-to-Server Relay via FormSubmit directly to each email destination
     $relayPayload = json_encode([
-        '_subject' => "New Consultation: {$serviceOfInterest} [{$refNumber}] - {$fullName}",
+        '_subject' => "Consultation Request: [{$refNumber}] {$serviceOfInterest} - {$fullName}",
+        '_replyto' => $email,
         '_template' => 'table',
         'Reference Code' => $refNumber,
-        'Client Name' => $fullName,
-        'Company' => $company ?: 'Not specified',
-        'Email' => $email,
-        'Phone' => $phone ?: 'Not provided',
-        'Service' => $serviceOfInterest,
-        'Location' => $projectLocation ?: 'Not specified',
+        'Client Full Name' => $fullName,
+        'Company / Organization' => $company ?: 'Not specified',
+        'Corporate Email' => $email,
+        'Phone / WhatsApp' => $phone ?: 'Not provided',
+        'Practice Area' => $serviceOfInterest,
+        'Concession / Site Location' => $projectLocation ?: 'Not specified',
         'Subject' => $subject,
-        'Message' => $message
+        'Client Statement / Message' => $message,
+        'Submission Timestamp' => date('Y-m-d H:i:s') . ' UTC'
     ]);
 
     foreach ($destinations as $destEmail) {

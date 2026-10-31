@@ -47,7 +47,7 @@ const sanitizeImages = (imgs: MediaItem[]): MediaItem[] => {
 export default function App() {
   // State initialization with persistence fallback
   const [company, setCompany] = useState<CompanyConfig>(() => {
-    const saved = localStorage.getItem('giniben_company_config');
+    const saved = localStorage.getItem('giniben_company_config_v2');
     return saved ? JSON.parse(saved) : COMPANY_CONFIG;
   });
 
