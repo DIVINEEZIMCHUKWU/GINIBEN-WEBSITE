@@ -201,13 +201,13 @@ export async function updateEnquiryStatusInApi(id: string, status: 'new' | 'revi
   }
 }
 
-export async function deleteEnquiryFromApi(id: string): Promise<boolean> {
+export async function deleteEnquiryFromApi(id: string, referenceNumber?: string): Promise<boolean> {
   try {
     // Primary: POST with action: 'delete' (bypasses any cPanel ModSecurity restrictions on HTTP DELETE)
     const res = await apiFetch('/enquiries.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'delete', id })
+      body: JSON.stringify({ action: 'delete', id, referenceNumber: referenceNumber || id })
     });
     if (res?.success) return true;
   } catch {

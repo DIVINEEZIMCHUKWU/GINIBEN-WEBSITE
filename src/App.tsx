@@ -291,7 +291,6 @@ export default function App() {
     const updated = [newEnq, ...enquiries.filter((e) => e.id !== newEnq.id)];
     setEnquiries(updated);
     localStorage.setItem('giniben_enquiries', JSON.stringify(updated));
-    submitEnquiryToApi(newEnq);
   };
 
   const handleUpdateEnquiryStatus = (id: string, newStatus: 'new' | 'reviewed' | 'resolved') => {
@@ -304,10 +303,12 @@ export default function App() {
   };
 
   const handleDeleteEnquiry = async (id: string) => {
+    const item = enquiries.find((enq) => enq.id === id || enq.referenceNumber === id);
+    const refNum = item?.referenceNumber || id;
     const updated = enquiries.filter((enq) => enq.id !== id && enq.referenceNumber !== id);
     setEnquiries(updated);
     localStorage.setItem('giniben_enquiries', JSON.stringify(updated));
-    await deleteEnquiryFromApi(id);
+    await deleteEnquiryFromApi(id, refNum);
   };
 
   const handleAddProject = (newProj: ProjectItem) => {

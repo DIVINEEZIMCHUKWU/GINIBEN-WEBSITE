@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Send, Phone, MessageSquare, Facebook, Linkedin, MapPin, Mail, CheckCircle2, AlertCircle, Copy, Check, ExternalLink } from 'lucide-react';
 import { CompanyConfig, ConsultationEnquiry } from '../types';
+import { submitEnquiryToApi } from '../services/apiService';
 
 interface ContactSectionProps {
   company: CompanyConfig;
@@ -76,21 +77,50 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     };
 
     try {
-      // Record enquiry in MySQL database and dispatch email notifications
+      // 1. Submit to cPanel MySQL backend API & trigger PHP Exim mail delivery
       try {
-        await fetch('/api/enquiries.php', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(newEnquiry)
-        });
+        await submitEnquiryToApi(newEnquiry);
       } catch (err) {
-        console.warn('Backend sync warning:', err);
+        console.warn('Backend database sync notification:', err);
       }
 
-      // Synchronize in app state and persistent store
+      // 2. Non-blocking browser-side FormSubmit dual relay directly to Dr. Ben and Team
+      // This guarantees delivery into Yahoo Mail and Gmail inboxes even if shared cPanel IP is filtered
+      try {
+        const formSubmitPayload = {
+          _subject: `[Consultation Request] [${generatedRef}] ${formData.serviceOfInterest} - ${formData.fullName.trim()}`,
+          _replyto: formData.email.trim(),
+          _template: 'table',
+          _captcha: 'false',
+          'Reference Code': generatedRef,
+          'Client Full Name': formData.fullName.trim(),
+          'Company / Entity': formData.company.trim() || 'Not specified',
+          'Email Address': formData.email.trim(),
+          'Phone / WhatsApp': formData.phone.trim() || 'Not provided',
+          'Practice Area': formData.serviceOfInterest,
+          'Site Location': formData.projectLocation.trim() || 'Not specified',
+          'Subject': formData.subject.trim() || `Consultation: ${formData.serviceOfInterest}`,
+          'Client Message': formData.message.trim(),
+          'Submitted At': new Date().toUTCString()
+        };
+
+        Promise.allSettled([
+          fetch('https://formsubmit.co/ajax/benukwuteyinor@yahoomail.com', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(formSubmitPayload)
+          }),
+          fetch('https://formsubmit.co/ajax/gpgl.geoservices@gmail.com', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(formSubmitPayload)
+          })
+        ]).catch(() => {});
+      } catch {
+        // non-blocking
+      }
+
+      // 3. Synchronize in app state and persistent store
       onNewEnquiryCreated(newEnquiry);
       setSubmissionSuccess(generatedRef);
       setFormData({
