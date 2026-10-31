@@ -3,8 +3,8 @@
  * GiniBen & Partners GEOSERVICES LTD (ginibengeoservices.com)
  * Consultation Enquiry API Endpoint (GET, POST, PUT, DELETE)
  * 
- * Captures all website consultation enquiries into MySQL database
- * and guarantees immediate email alert delivery across all 3 mailboxes:
+ * Captures website consultation enquiries in MySQL and attempts notification
+ * delivery to all configured mailboxes:
  * 1) info@ginibengeoservices.com
  * 2) benukwuteyinor@yahoomail.com
  * 3) gpgl.geoservices@gmail.com
@@ -200,16 +200,28 @@ if ($method === 'GET') {
     // 2) benukwuteyinor@yahoomail.com
     // 3) gpgl.geoservices@gmail.com
     // ========================================================================
-    $destinations = [
-        'info@ginibengeoservices.com',
-        'benukwuteyinor@yahoomail.com',
-        'gpgl.geoservices@gmail.com'
-    ];
+    $destinations = array_values(array_unique([
+        ADMIN_NOTIFICATION_EMAIL,
+        ADMIN_FORWARD_EMAIL_1,
+        ADMIN_FORWARD_EMAIL_2
+    ]));
 
     $emailSubject = "[Consultation Request] [{$refNumber}] {$serviceOfInterest} - {$fullName}";
     
     $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
     $waLink = !empty($cleanPhone) ? "https://wa.me/{$cleanPhone}" : "";
+    $escapeHtml = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    $refNumberHtml = $escapeHtml($refNumber);
+    $fullNameHtml = $escapeHtml($fullName);
+    $companyHtml = $escapeHtml($company ?: 'Not specified');
+    $emailHtml = $escapeHtml($email);
+    $phoneHtml = $escapeHtml($phone ?: 'Not provided');
+    $serviceHtml = $escapeHtml($serviceOfInterest);
+    $projectLocationHtml = $escapeHtml($projectLocation ?: 'Not specified');
+    $subjectHtml = $escapeHtml($subject);
+    $messageHtml = $escapeHtml($message);
+    $replySubject = rawurlencode("Re: [{$refNumber}] {$serviceOfInterest}");
+    $safeWaLink = $escapeHtml($waLink);
 
     $plainBody = "========================================================\n"
                . "GINIBEN & PARTNERS GEOSERVICES LTD - CONSULTATION ALERT\n"
@@ -235,7 +247,7 @@ if ($method === 'GET') {
 <head>
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>New Consultation Enquiry - {$refNumber}</title>
+  <title>New Consultation Enquiry - {$refNumberHtml}</title>
 </head>
 <body style='margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; background-color: #f4efe9; color: #1c1917;'>
   <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: #f4efe9; padding: 24px 12px;'>
@@ -263,7 +275,7 @@ if ($method === 'GET') {
                   </td>
                   <td align='right' style='vertical-align: top;'>
                     <span style='display: inline-block; background-color: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.35); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-family: monospace; font-weight: 700; color: #ffffff;'>
-                      {$refNumber}
+                      {$refNumberHtml}
                     </span>
                   </td>
                 </tr>
@@ -301,33 +313,33 @@ if ($method === 'GET') {
               <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='border-collapse: separate; border-spacing: 0; border: 1px solid #e7e0d5; border-radius: 10px; overflow: hidden; margin-bottom: 24px;'>
                 <tr style='background-color: #faf7f2;'>
                   <td style='padding: 10px 14px; font-size: 12px; font-weight: 600; color: #78716c; width: 140px; border-bottom: 1px solid #e7e0d5;'>Client Full Name</td>
-                  <td style='padding: 10px 14px; font-size: 14px; font-weight: 700; color: #1c1917; border-bottom: 1px solid #e7e0d5;'>{$fullName}</td>
+                  <td style='padding: 10px 14px; font-size: 14px; font-weight: 700; color: #1c1917; border-bottom: 1px solid #e7e0d5;'>{$fullNameHtml}</td>
                 </tr>
                 <tr>
                   <td style='padding: 10px 14px; font-size: 12px; font-weight: 600; color: #78716c; border-bottom: 1px solid #e7e0d5;'>Company / Entity</td>
-                  <td style='padding: 10px 14px; font-size: 13px; color: #292524; border-bottom: 1px solid #e7e0d5;'>" . ($company ?: '<span style=\"color:#a8a29e;\">Not specified</span>') . "</td>
+                  <td style='padding: 10px 14px; font-size: 13px; color: #292524; border-bottom: 1px solid #e7e0d5;'>{$companyHtml}</td>
                 </tr>
                 <tr style='background-color: #faf7f2;'>
                   <td style='padding: 10px 14px; font-size: 12px; font-weight: 600; color: #78716c; border-bottom: 1px solid #e7e0d5;'>Corporate Email</td>
                   <td style='padding: 10px 14px; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e7e0d5;'>
-                    <a href='mailto:{$email}?subject=Re: [{$refNumber}] {$serviceOfInterest}' style='color: #16a34a; text-decoration: none;'>{$email}</a>
+                    <a href='mailto:{$emailHtml}?subject={$replySubject}' style='color: #16a34a; text-decoration: none;'>{$emailHtml}</a>
                   </td>
                 </tr>
                 <tr>
                   <td style='padding: 10px 14px; font-size: 12px; font-weight: 600; color: #78716c; border-bottom: 1px solid #e7e0d5;'>Phone / WhatsApp</td>
-                  <td style='padding: 10px 14px; font-size: 13px; color: #292524; border-bottom: 1px solid #e7e0d5;'>" . ($phone ?: '<span style=\"color:#a8a29e;\">Not provided</span>') . "</td>
+                  <td style='padding: 10px 14px; font-size: 13px; color: #292524; border-bottom: 1px solid #e7e0d5;'>{$phoneHtml}</td>
                 </tr>
                 <tr style='background-color: #faf7f2;'>
                   <td style='padding: 10px 14px; font-size: 12px; font-weight: 600; color: #78716c; border-bottom: 1px solid #e7e0d5;'>Practice Area / Service</td>
                   <td style='padding: 10px 14px; font-size: 13px; font-weight: 700; color: #166534; border-bottom: 1px solid #e7e0d5;'>
                     <span style='background-color: #dcfce7; padding: 2px 8px; border-radius: 6px; border: 1px solid #bbf7d0;'>
-                      {$serviceOfInterest}
+                      {$serviceHtml}
                     </span>
                   </td>
                 </tr>
                 <tr>
                   <td style='padding: 10px 14px; font-size: 12px; font-weight: 600; color: #78716c;'>Site / Concession Location</td>
-                  <td style='padding: 10px 14px; font-size: 13px; color: #292524;'>" . ($projectLocation ?: '<span style=\"color:#a8a29e;\">Not specified</span>') . "</td>
+                  <td style='padding: 10px 14px; font-size: 13px; color: #292524;'>{$projectLocationHtml}</td>
                 </tr>
               </table>
 
@@ -338,9 +350,9 @@ if ($method === 'GET') {
               
               <div style='background-color: #faf7f2; border: 1px solid #e7e0d5; border-left: 4px solid #16a34a; border-radius: 8px; padding: 18px 20px; margin-bottom: 24px;'>
                 <div style='font-size: 13px; font-weight: 700; color: #1c1917; margin-bottom: 8px;'>
-                  Subject: {$subject}
+                  Subject: {$subjectHtml}
                 </div>
-                <div style='font-size: 14px; line-height: 1.6; color: #292524; white-space: pre-wrap;'>{$message}</div>
+                <div style='font-size: 14px; line-height: 1.6; color: #292524; white-space: pre-wrap;'>{$messageHtml}</div>
               </div>
 
               <!-- Quick Action Buttons -->
@@ -350,12 +362,12 @@ if ($method === 'GET') {
                     <table role='presentation' cellspacing='0' cellpadding='0' border='0'>
                       <tr>
                         <td style='padding-right: 12px;'>
-                          <a href='mailto:{$email}?subject=Re: [{$refNumber}] {$serviceOfInterest} - GiniBen Geoservices' style='display: inline-block; background-color: #16a34a; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 11px 22px; border-radius: 8px;'>
-                            Reply to {$fullName}
+                          <a href='mailto:{$emailHtml}?subject={$replySubject}' style='display: inline-block; background-color: #16a34a; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 11px 22px; border-radius: 8px;'>
+                            Reply to {$fullNameHtml}
                           </a>
                         </td>" . (!empty($waLink) ? "
                         <td style='padding-right: 12px;'>
-                          <a href='{$waLink}' target='_blank' style='display: inline-block; background-color: #25D366; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 11px 20px; border-radius: 8px;'>
+                          <a href='{$safeWaLink}' target='_blank' style='display: inline-block; background-color: #25D366; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 11px 20px; border-radius: 8px;'>
                             WhatsApp Chat
                           </a>
                         </td>" : "") . "
@@ -400,15 +412,16 @@ if ($method === 'GET') {
 </html>";
 
     // Clean Linux Exim headers (use \n, not \r\n, to prevent header mangling in Exim)
-    $headers = "From: GiniBen Geoservices <info@ginibengeoservices.com>\n"
+    $senderEmail = ADMIN_NOTIFICATION_EMAIL;
+    $headers = "From: GiniBen Geoservices <{$senderEmail}>\n"
              . "Reply-To: {$fullName} <{$email}>\n"
              . "MIME-Version: 1.0\n"
              . "Content-Type: text/html; charset=UTF-8\n"
              . "Content-Transfer-Encoding: 8bit\n"
              . "X-Mailer: PHP/" . phpversion();
 
-    $envelopeSender = '-f info@ginibengeoservices.com';
-    $anyMailSent = false;
+    $envelopeSender = "-f {$senderEmail}";
+    $notificationResults = array_fill_keys($destinations, false);
 
     // 1. Direct Server PHP mail() dispatch to all 3 mailboxes
     foreach ($destinations as $dest) {
@@ -416,43 +429,64 @@ if ($method === 'GET') {
         if (!$mailSent) {
             $mailSent = @mail($dest, $emailSubject, $htmlBody, $headers);
         }
-        if ($mailSent) $anyMailSent = true;
+
+        if (!$mailSent && function_exists('curl_init')) {
+            try {
+                $relayPayload = json_encode([
+                    '_subject' => $emailSubject,
+                    '_replyto' => $email,
+                    '_template' => 'table',
+                    'Reference Code' => $refNumber,
+                    'Client Full Name' => $fullName,
+                    'Company / Organization' => $company ?: 'Not specified',
+                    'Corporate Email' => $email,
+                    'Phone / WhatsApp' => $phone ?: 'Not provided',
+                    'Practice Area' => $serviceOfInterest,
+                    'Concession / Site Location' => $projectLocation ?: 'Not specified',
+                    'Subject' => $subject,
+                    'Client Statement / Message' => $message,
+                    'Submission Timestamp' => date('Y-m-d H:i:s') . ' UTC'
+                ]);
+                $ch = curl_init('https://formsubmit.co/ajax/' . rawurlencode($dest));
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $relayPayload);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'Content-Type: application/json',
+                    'Accept: application/json'
+                ]);
+                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+                $relayResponseBody = curl_exec($ch);
+                $relayHttpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $relayError = curl_error($ch);
+                curl_close($ch);
+
+                $relayResponse = is_string($relayResponseBody) ? json_decode($relayResponseBody, true) : null;
+                $mailSent = $relayHttpStatus >= 200
+                    && $relayHttpStatus < 300
+                    && is_array($relayResponse)
+                    && filter_var($relayResponse['success'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+                if (!$mailSent && $relayError !== '') {
+                    error_log("Enquiry email relay failed for {$dest}: {$relayError}");
+                }
+            } catch (Throwable $relayErr) {
+                error_log("Enquiry email relay failed for {$dest}: " . $relayErr->getMessage());
+            }
+        }
+
+        $notificationResults[$dest] = $mailSent;
+        if (!$mailSent) {
+            error_log("Enquiry notification could not be queued for recipient {$dest} by PHP mail() or relay.");
+        }
     }
 
-    // 2. Guaranteed Server-to-Server Relay via FormSubmit directly to each email destination
-    $relayPayload = json_encode([
-        '_subject' => "Consultation Request: [{$refNumber}] {$serviceOfInterest} - {$fullName}",
-        '_replyto' => $email,
-        '_template' => 'table',
-        'Reference Code' => $refNumber,
-        'Client Full Name' => $fullName,
-        'Company / Organization' => $company ?: 'Not specified',
-        'Corporate Email' => $email,
-        'Phone / WhatsApp' => $phone ?: 'Not provided',
-        'Practice Area' => $serviceOfInterest,
-        'Concession / Site Location' => $projectLocation ?: 'Not specified',
-        'Subject' => $subject,
-        'Client Statement / Message' => $message,
-        'Submission Timestamp' => date('Y-m-d H:i:s') . ' UTC'
-    ]);
-
-    foreach ($destinations as $destEmail) {
-        try {
-            $ch = curl_init('https://formsubmit.co/ajax/' . urlencode($destEmail));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $relayPayload);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Accept: application/json'
-            ]);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            @curl_exec($ch);
-            curl_close($ch);
-        } catch (Throwable $relayErr) {
-            // Silently continue if gateway unavailable
-        }
+    $allAlertsSent = !in_array(false, $notificationResults, true);
+    if (!$allAlertsSent) {
+        error_log('One or more enquiry notification emails could not be queued. Verify cPanel mail routing and FormSubmit recipient activation.');
     }
 
     if ($dbSaved) {
@@ -460,7 +494,10 @@ if ($method === 'GET') {
             'success' => true,
             'id' => $id,
             'referenceNumber' => $refNumber,
-            'message' => 'Consultation enquiry recorded successfully and dispatch alerts sent.'
+            'emailNotificationsSent' => $allAlertsSent,
+            'message' => $allAlertsSent
+                ? 'Consultation enquiry recorded successfully and email alerts were queued.'
+                : 'Consultation enquiry recorded, but one or more email alerts could not be queued.'
         ], 201);
     } else {
         // Still return reference number for client, but indicate warning
@@ -469,7 +506,10 @@ if ($method === 'GET') {
             'id' => $id,
             'referenceNumber' => $refNumber,
             'db_error' => $dbError,
-            'message' => 'Enquiry captured and email alerts dispatched.'
+            'emailNotificationsSent' => $allAlertsSent,
+            'message' => $allAlertsSent
+                ? 'Enquiry captured and email alerts were queued.'
+                : 'Enquiry captured, but one or more email alerts could not be queued.'
         ], 200);
     }
 

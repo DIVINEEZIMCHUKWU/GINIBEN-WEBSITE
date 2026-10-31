@@ -29,6 +29,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [emailDeliveryWarning, setEmailDeliveryWarning] = useState(false);
   const [copiedRef, setCopiedRef] = useState(false);
 
   const servicesList = [
@@ -76,7 +77,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     };
 
     try {
-      // 1. Primary Record: Insert into Truehost cPanel MySQL database & dispatch server-side emails
+      // The API records the enquiry and sends email notifications to the configured recipients.
       try {
         const res = await fetch('/api/enquiries.php', {
           method: 'POST',
@@ -86,46 +87,17 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
           },
           body: JSON.stringify(newEnquiry)
         });
+        const responseData = await res.json();
         if (!res.ok) {
           console.warn('API returned non-200 status:', res.status);
+          setEmailDeliveryWarning(true);
+        } else {
+          setEmailDeliveryWarning(responseData?.emailNotificationsSent !== true);
         }
       } catch (err) {
         console.warn('Primary database sync network warning:', err);
+        setEmailDeliveryWarning(true);
       }
-
-      // 2. Secondary Guaranteed Delivery: Dispatch directly to designated client mailboxes in parallel
-      const formSubmitData = {
-        _subject: `New Technical Consultation: ${formData.serviceOfInterest} [${generatedRef}] - ${formData.fullName.trim()}`,
-        _template: 'table',
-        'Reference Number': generatedRef,
-        'Full Name': formData.fullName.trim(),
-        'Company': formData.company.trim() || 'Not specified',
-        'Client Email': formData.email.trim(),
-        'Phone / WhatsApp': formData.phone.trim() || 'Not specified',
-        'Service Required': formData.serviceOfInterest,
-        'Project Location': formData.projectLocation.trim() || 'Not specified',
-        'Subject': formData.subject.trim() || `Consultation: ${formData.serviceOfInterest}`,
-        'Technical Message': formData.message.trim()
-      };
-
-      const mailTargets = [
-        'gpgl.geoservices@gmail.com',
-        'benukwuteyinor@yahoomail.com',
-        'info@ginibengeoservices.com'
-      ];
-
-      mailTargets.forEach((targetEmail) => {
-        fetch(`https://formsubmit.co/ajax/${targetEmail}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(formSubmitData)
-        }).catch(() => {
-          // Fallback silently if offline or blocked
-        });
-      });
 
       // Synchronize in app state and persistent store
       onNewEnquiryCreated(newEnquiry);
@@ -330,6 +302,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 <p className="text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
                   Thank you. Your project specifications have been securely recorded. Our Lead Consultant, <strong className="text-stone-900 font-bold">Dr. Benjamin Ukwuteyinor</strong>, will evaluate your scope.
                 </p>
+
+                {emailDeliveryWarning && (
+                  <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-3 max-w-md mx-auto">
+                    Your enquiry is recorded, but email alert delivery could not be confirmed. For urgent matters, contact us directly using the details below.
+                  </p>
+                )}
 
                 <div className="p-4 rounded-xl bg-white border border-[#c2a67e]/35 max-w-xs mx-auto flex items-center justify-between shadow-sm">
                   <div className="text-left">

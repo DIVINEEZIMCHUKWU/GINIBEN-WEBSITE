@@ -56,15 +56,26 @@ Save the file.
 
 ### Step 3: How Consultation Enquiries & Email Alerts Work
 
+The email destinations are configured in the live `.env` file, not in this guide or the compiled frontend. Create or update `/home/CPANEL_USER/.env` (outside `public_html`) with these notification settings:
+
+```env
+ADMIN_NOTIFICATION_EMAIL="info@ginibengeoservices.com"
+ADMIN_FORWARD_EMAIL_1="benukwuteyinor@yahoomail.com"
+ADMIN_FORWARD_EMAIL_2="gpgl.geoservices@gmail.com"
+```
+
+The same values are shown in the repository's `.env.example`. The `public/api/config.php` API loader reads the live `.env`, and `public/api/enquiries.php` uses these settings for notification delivery. Do not upload `.env.example` as the live `.env`; keep the live file private and retain the correct MySQL credentials there.
+
 When a client books a consultation or submits an inquiry on the website:
 1. **Database Capture**:
    - The inquiry is written to the `enquiries` MySQL database table on Truehost with a unique reference number (e.g., `GB-2026-4821`).
 2. **Email Alerts to 3 Addresses**:
-   - Immediate HTML & plain-text notification emails are dispatched simultaneously to:
+   - Professionally formatted HTML notification emails are queued for:
      - `info@ginibengeoservices.com`
-     - `benukwutevinor@yahoo.com`
-     - `gpg1.geoservices@gmail.com`
-   - FormSubmit also dispatches a backup notification copy to these emails.
+     - `benukwuteyinor@yahoomail.com`
+     - `gpgl.geoservices@gmail.com`
+   - If the hosting server rejects a message, the API attempts its FormSubmit relay. The submission response and server error log indicate when delivery could not be queued.
+   - For the relay to work, each destination must be activated with FormSubmit. A successful queue response does not guarantee inbox delivery; check spam/junk and confirm cPanel email routing or SMTP configuration with Truehost.
 3. **Admin Dashboard Synchronization**:
    - Whenever any administrator accesses `/admin` (or `#admin`) from **any device** (smartphone, laptop, tablet, desktop) with password `Giniben123`:
      - The Admin Console fetches the live records from the MySQL database table.

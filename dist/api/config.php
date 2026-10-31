@@ -17,10 +17,9 @@ header('X-XSS-Protection: 1; mode=block');
 // Function to load .env file if it exists
 function load_env_file(): void {
     $possible_paths = [
+        dirname(__DIR__, 2) . '/.env',
         __DIR__ . '/.env',
-        __DIR__ . '/../.env',
-        __DIR__ . '/../../.env',
-        dirname(__DIR__, 2) . '/.env'
+        __DIR__ . '/../.env'
     ];
 
     foreach ($possible_paths as $env_file) {
@@ -55,6 +54,23 @@ define('DB_NAME', getenv('DB_NAME') ?: 'xjtqwpkd_ginibeng_geoservices');
 define('DB_USER', getenv('DB_USER') ?: 'xjtqwpkd_ginibeng_dbuser');
 define('DB_PASS', getenv('DB_PASS') ?: 'Giniben@2026$');
 define('DB_CHARSET', getenv('DB_CHARSET') ?: 'utf8mb4');
+
+// Notification recipients are configurable in the live .env file.
+function get_notification_email(string $key, string $default): string {
+    $value = getenv($key);
+    if ($value === false || $value === '') {
+        return $default;
+    }
+    if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+        error_log("Invalid {$key} value in .env; using the configured default recipient.");
+        return $default;
+    }
+    return $value;
+}
+
+define('ADMIN_NOTIFICATION_EMAIL', get_notification_email('ADMIN_NOTIFICATION_EMAIL', 'info@ginibengeoservices.com'));
+define('ADMIN_FORWARD_EMAIL_1', get_notification_email('ADMIN_FORWARD_EMAIL_1', 'benukwuteyinor@yahoomail.com'));
+define('ADMIN_FORWARD_EMAIL_2', get_notification_email('ADMIN_FORWARD_EMAIL_2', 'gpgl.geoservices@gmail.com'));
 
 // Allowed Origins (CORS)
 $allowed_origins = [
