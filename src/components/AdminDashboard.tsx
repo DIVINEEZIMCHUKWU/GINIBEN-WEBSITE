@@ -1408,6 +1408,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2 self-start sm:self-auto">
+                    <a
+                      href="/api/diagnostics.php"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 rounded-xl border border-stone-400/30 text-stone-300 hover:text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                      title="Open real-time server database and email diagnostics"
+                    >
+                      <Database className="w-3.5 h-3.5 text-[#16a34a]" />
+                      <span>Diagnostics</span>
+                    </a>
+
                     {onRefreshEnquiries && (
                       <button
                         type="button"

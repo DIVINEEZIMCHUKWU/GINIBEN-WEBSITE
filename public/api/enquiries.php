@@ -458,13 +458,13 @@ if ($method === 'GET') {
         $msgId = '<' . time() . '.' . md5($to . microtime(true)) . '@ginibengeoservices.com>';
         $dateHeader = date('r');
 
-        $headers = "Date: {$dateHeader}\n"
-                 . "From: {$fromName} <{$fromEmail}>\n"
-                 . "Reply-To: {$replyName} <{$replyEmail}>\n"
-                 . "Message-ID: {$msgId}\n"
-                 . "MIME-Version: 1.0\n"
-                 . "Content-Type: text/html; charset=UTF-8\n"
-                 . "Content-Transfer-Encoding: 8bit\n"
+        $headers = "Date: {$dateHeader}\r\n"
+                 . "From: {$fromName} <{$fromEmail}>\r\n"
+                 . "Reply-To: {$replyName} <{$replyEmail}>\r\n"
+                 . "Message-ID: {$msgId}\r\n"
+                 . "MIME-Version: 1.0\r\n"
+                 . "Content-Type: text/html; charset=UTF-8\r\n"
+                 . "Content-Transfer-Encoding: 8bit\r\n"
                  . "X-Mailer: PHP/" . phpversion();
 
         $envelopeSender = "-f {$fromEmail}";
@@ -486,57 +486,6 @@ if ($method === 'GET') {
 
         $sent = $sendPhpMail($dest, $emailSubject, $htmlBody, $senderEmail, $senderName, $email, $fullName);
         $logLines[] = date('Y-m-d H:i:s') . " | Ref: {$refNumber} | To: {$dest} | Status: " . ($sent ? "SUCCESS (Exim mail)" : "QUEUED (local transport)") . "\n";
-    }
-
-    // 3. Fast Non-Blocking Server Relay via FormSubmit (guarantees delivery if shared hosting IP is filtered by Gmail/Yahoo)
-    if (function_exists('curl_init')) {
-        $relayPayload = json_encode([
-            '_subject' => "New Consultation: [{$refNumber}] {$serviceOfInterest} - {$fullName}",
-            '_replyto' => $email,
-            '_template' => 'table',
-            '_captcha' => 'false',
-            'Reference Code' => $refNumber,
-            'Client Full Name' => $fullName,
-            'Company / Organization' => $company ?: 'Not specified',
-            'Corporate Email' => $email,
-            'Phone / WhatsApp' => $phone ?: 'Not provided',
-            'Practice Area' => $serviceOfInterest,
-            'Concession / Site Location' => $projectLocation ?: 'Not specified',
-            'Subject' => $subject,
-            'Client Statement / Message' => $message,
-            'Submission Timestamp' => date('Y-m-d H:i:s') . ' UTC'
-        ]);
-
-        $externalRelayTargets = array_values(array_unique([
-            ADMIN_FORWARD_EMAIL_1,
-            ADMIN_FORWARD_EMAIL_2
-        ]));
-
-        foreach ($externalRelayTargets as $relayDest) {
-            $relayDest = trim($relayDest);
-            if (empty($relayDest) || !filter_var($relayDest, FILTER_VALIDATE_EMAIL)) continue;
-
-            try {
-                $ch = curl_init('https://formsubmit.co/ajax/' . rawurlencode($relayDest));
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $relayPayload);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Content-Type: application/json',
-                    'Accept: application/json',
-                    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                    'Origin: https://ginibengeoservices.com',
-                    'Referer: https://ginibengeoservices.com/contact'
-                ]);
-                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 1);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                @curl_exec($ch);
-                curl_close($ch);
-            } catch (Throwable $relayErr) {
-                // non-blocking
-            }
-        }
     }
 
     // ========================================================================
@@ -635,6 +584,8 @@ if ($method === 'GET') {
         'success' => true,
         'id' => $id,
         'referenceNumber' => $refNumber,
+        'dbSaved' => $dbSaved,
+        'dbError' => $dbSaved ? null : $dbError,
         'message' => 'Consultation enquiry recorded successfully and notification dispatched to technical leads.'
     ], 201);
 
