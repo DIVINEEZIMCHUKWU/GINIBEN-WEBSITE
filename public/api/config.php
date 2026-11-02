@@ -101,6 +101,6 @@ set_exception_handler(function(Throwable $e) {
     error_log('[GiniBen API Error]: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
     send_json([
         'success' => false,
-        'message' => 'An internal server error occurred. Please contact the administrator.'
+        'message' => 'API Error: ' . $e->getMessage() . ' in ' . basename($e->getFile()) . ':' . $e->getLine()
     ], 500);
 });

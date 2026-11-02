@@ -28,13 +28,26 @@ if (isset($_POST['send_test'])) {
              . "Content-Transfer-Encoding: 8bit\r\n"
              . "X-Mailer: PHP/" . phpversion();
 
-    $sent = @mail($testTo, $subject, $body, $headers, "-f info@ginibengeoservices.com");
-    if (!$sent) {
-        $sent = @mail($testTo, $subject, $body, $headers);
+    $sent = false;
+    $mailError = '';
+
+    if (!function_exists('mail')) {
+        $mailError = 'The mail() function is disabled in php.ini on this server.';
+    } else {
+        try {
+            $sent = @mail($testTo, $subject, $body, $headers, "-f info@ginibengeoservices.com");
+            if (!$sent) {
+                $sent = @mail($testTo, $subject, $body, $headers);
+            }
+        } catch (Throwable $e) {
+            $mailError = $e->getMessage();
+        }
     }
+
     $testResult = [
         'email' => $testTo,
-        'sent' => (bool)$sent
+        'sent' => (bool)$sent,
+        'error' => $mailError
     ];
 }
 
