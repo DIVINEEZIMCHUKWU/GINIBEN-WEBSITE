@@ -175,16 +175,20 @@ export async function getEnquiriesFromApi(): Promise<ConsultationEnquiry[] | nul
   }
 }
 
-export async function submitEnquiryToApi(enquiry: ConsultationEnquiry): Promise<boolean> {
+export async function submitEnquiryToApi(enquiry: ConsultationEnquiry): Promise<{ success: boolean; message?: string }> {
   try {
     const res = await apiFetch('/enquiries.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(enquiry)
     });
-    return Boolean(res?.success);
-  } catch {
-    return false;
+    if (res?.success) {
+      return { success: true, message: res.message };
+    }
+    return { success: false, message: res?.message || 'Server did not acknowledge storage.' };
+  } catch (err: any) {
+    console.error('API submitEnquiry error:', err);
+    return { success: false, message: err?.message || 'Network connection failed.' };
   }
 }
 

@@ -33,7 +33,14 @@ ServerSignature Off
     RewriteEngine On
     RewriteBase /
 
-    # Allow direct access to existing files and directories (assets, images, api)
+    # CRITICAL: Completely bypass rewriting for /api/ directory and all PHP files
+    # Guarantees that cPanel executes PHP scripts and NEVER routes them to index.html
+    RewriteRule ^api/ - [L]
+    RewriteCond %{REQUEST_URI} ^/api/ [NC,OR]
+    RewriteCond %{REQUEST_URI} \.php$ [NC]
+    RewriteRule ^ - [L]
+
+    # Allow direct access to existing files and directories (assets, images, icons)
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]

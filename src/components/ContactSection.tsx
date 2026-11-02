@@ -78,9 +78,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
     try {
       // 1. Submit to cPanel MySQL backend API & trigger PHP Exim mail delivery
-      const isSaved = await submitEnquiryToApi(newEnquiry);
-      if (!isSaved) {
-        throw new Error('Database server did not record the enquiry.');
+      const result = await submitEnquiryToApi(newEnquiry);
+      if (!result.success) {
+        throw new Error(result.message || 'Database server did not record the enquiry.');
       }
 
       // 2. Synchronize in app state and persistent store only on verified storage
@@ -96,8 +96,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         subject: '',
         message: ''
       });
-    } catch {
-      setErrorMessage('Unable to connect to database server. Please contact us directly via WhatsApp (+234 803 625 1405) or Telephone.');
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Unable to connect to database server. Please contact us directly via WhatsApp (+234 803 625 1405) or Telephone.');
     } finally {
       setIsSubmitting(false);
     }
