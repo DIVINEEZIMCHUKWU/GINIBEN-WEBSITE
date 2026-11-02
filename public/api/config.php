@@ -72,25 +72,12 @@ define('ADMIN_NOTIFICATION_EMAIL', get_notification_email('ADMIN_NOTIFICATION_EM
 define('ADMIN_FORWARD_EMAIL_1', get_notification_email('ADMIN_FORWARD_EMAIL_1', 'benukwuteyinor@yahoomail.com'));
 define('ADMIN_FORWARD_EMAIL_2', get_notification_email('ADMIN_FORWARD_EMAIL_2', 'gpgl.geoservices@gmail.com'));
 
-// Allowed Origins (CORS)
-$allowed_origins = [
-    'https://ginibengeoservices.com',
-    'https://www.ginibengeoservices.com',
-    'http://localhost:3000',
-    'http://localhost:5173'
-];
-
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (in_array($origin, $allowed_origins, true) || empty($origin)) {
-    if (!empty($origin)) {
-        header("Access-Control-Allow-Origin: $origin");
-    } else {
-        header("Access-Control-Allow-Origin: *");
-    }
-    header('Access-Control-Allow-Credentials: true');
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token');
-}
+// Universal CORS Headers for all client devices (Desktop, Mobile, Subdomains)
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '*';
+header("Access-Control-Allow-Origin: $origin");
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token');
 
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {

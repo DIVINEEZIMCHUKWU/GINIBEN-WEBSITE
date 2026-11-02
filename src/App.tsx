@@ -227,7 +227,10 @@ export default function App() {
       if (tm && tm.length > 0) setTeam(tm);
     });
     getEnquiriesFromApi().then((enqs) => {
-      if (enqs) setEnquiries(enqs);
+      if (enqs && Array.isArray(enqs)) {
+        setEnquiries(enqs);
+        localStorage.setItem('giniben_enquiries', JSON.stringify(enqs));
+      }
     });
     getSettingsFromApi().then((sets) => {
       if (sets && typeof sets === 'object') {

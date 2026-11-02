@@ -12,12 +12,11 @@
 
 require_once __DIR__ . '/db.php';
 
-$pdo = Database::tryGetConnection();
+$pdo = Database::getConnection();
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Self-healing table check if database is reachable
-if ($pdo !== null) {
-    try {
+// Self-healing table check
+try {
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS `enquiries` (
               `id` VARCHAR(64) NOT NULL,
@@ -44,12 +43,8 @@ if ($pdo !== null) {
     } catch (Throwable $e) {
         error_log("Enquiries table check warning: " . $e->getMessage());
     }
-}
 
 if ($method === 'GET') {
-    if ($pdo === null) {
-        send_json(['success' => true, 'data' => [], 'warning' => 'Database offline']);
-    }
     // 1. Fetch enquiries for Admin Console
     try {
         $stmt = $pdo->query("SELECT * FROM `enquiries` ORDER BY `created_at` DESC LIMIT 300");
@@ -153,77 +148,80 @@ if ($method === 'GET') {
     $dbSaved = false;
     $dbError = '';
 
-    if ($pdo !== null) {
-        try {
-            $stmt = $pdo->prepare("
-                INSERT INTO `enquiries` (
-                    `id`, `reference_number`, `full_name`, `company`, `email`, `phone`, 
-                    `service_of_interest`, `project_location`, `subject`, `message`, 
-                    `status`, `ip_address`, `user_agent`, `created_at`
-                ) VALUES (
-                    :id, :ref, :name, :company, :email, :phone, 
-                    :service, :location, :subject, :msg, 
-                    :status, :ip, :ua, NOW()
-                )
-            ");
+    // 1. Mandatory MySQL Database Storage
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO `enquiries` (
+                `id`, `reference_number`, `full_name`, `company`, `email`, `phone`, 
+                `service_of_interest`, `project_location`, `subject`, `message`, 
+                `status`, `ip_address`, `user_agent`, `created_at`
+            ) VALUES (
+                :id, :ref, :name, :company, :email, :phone, 
+                :service, :location, :subject, :msg, 
+                :status, :ip, :ua, NOW()
+            )
+        ");
 
-            $dbSaved = $stmt->execute([
-                ':id'       => $id,
-                ':ref'      => $refNumber,
-                ':name'     => $fullName,
-                ':company'  => $company,
-                ':email'    => $email,
-                ':phone'    => $phone,
-                ':service'  => $serviceOfInterest,
-                ':location' => $projectLocation,
-                ':subject'  => $subject,
-                ':msg'      => $message,
-                ':status'   => $status,
-                ':ip'       => $ip,
-                ':ua'       => $userAgent
-            ]);
-        } catch (Throwable $e) {
-            $dbError = $e->getMessage();
-            error_log("Database insert error in enquiries.php: " . $dbError);
+        $dbSaved = $stmt->execute([
+            ':id'       => $id,
+            ':ref'      => $refNumber,
+            ':name'     => $fullName,
+            ':company'  => $company,
+            ':email'    => $email,
+            ':phone'    => $phone,
+            ':service'  => $serviceOfInterest,
+            ':location' => $projectLocation,
+            ':subject'  => $subject,
+            ':msg'      => $message,
+            ':status'   => $status,
+            ':ip'       => $ip,
+            ':ua'       => $userAgent
+        ]);
+    } catch (Throwable $e) {
+        $dbError = $e->getMessage();
+        error_log("Database insert error in enquiries.php: " . $dbError);
 
-            // If duplicate reference, retry with timestamp-based reference
-            if (strpos($dbError, 'reference_number') !== false || strpos($dbError, 'Duplicate') !== false) {
-                try {
-                    $refNumber = 'GB-' . date('Y') . '-' . rand(10000, 99999);
-                    $stmt = $pdo->prepare("
-                        INSERT INTO `enquiries` (
-                            `id`, `reference_number`, `full_name`, `company`, `email`, `phone`, 
-                            `service_of_interest`, `project_location`, `subject`, `message`, 
-                            `status`, `ip_address`, `user_agent`, `created_at`
-                        ) VALUES (
-                            :id, :ref, :name, :company, :email, :phone, 
-                            :service, :location, :subject, :msg, 
-                            :status, :ip, :ua, NOW()
-                        )
-                    ");
-                    $dbSaved = $stmt->execute([
-                        ':id'       => $id . '-' . rand(10, 99),
-                        ':ref'      => $refNumber,
-                        ':name'     => $fullName,
-                        ':company'  => $company,
-                        ':email'    => $email,
-                        ':phone'    => $phone,
-                        ':service'  => $serviceOfInterest,
-                        ':location' => $projectLocation,
-                        ':subject'  => $subject,
-                        ':msg'      => $message,
-                        ':status'   => $status,
-                        ':ip'       => $ip,
-                        ':ua'       => $userAgent
-                    ]);
-                } catch (Throwable $e2) {
-                    $dbError = $e2->getMessage();
-                }
+        // If duplicate reference, retry with unique timestamp-based reference
+        if (strpos($dbError, 'reference_number') !== false || strpos($dbError, 'Duplicate') !== false) {
+            try {
+                $refNumber = 'GB-' . date('Y') . '-' . rand(10000, 99999);
+                $stmt = $pdo->prepare("
+                    INSERT INTO `enquiries` (
+                        `id`, `reference_number`, `full_name`, `company`, `email`, `phone`, 
+                        `service_of_interest`, `project_location`, `subject`, `message`, 
+                        `status`, `ip_address`, `user_agent`, `created_at`
+                    ) VALUES (
+                        :id, :ref, :name, :company, :email, :phone, 
+                        :service, :location, :subject, :msg, 
+                        :status, :ip, :ua, NOW()
+                    )
+                ");
+                $dbSaved = $stmt->execute([
+                    ':id'       => $id . '-' . rand(10, 99),
+                    ':ref'      => $refNumber,
+                    ':name'     => $fullName,
+                    ':company'  => $company,
+                    ':email'    => $email,
+                    ':phone'    => $phone,
+                    ':service'  => $serviceOfInterest,
+                    ':location' => $projectLocation,
+                    ':subject'  => $subject,
+                    ':msg'      => $message,
+                    ':status'   => $status,
+                    ':ip'       => $ip,
+                    ':ua'       => $userAgent
+                ]);
+            } catch (Throwable $e2) {
+                $dbError = $e2->getMessage();
             }
         }
-    } else {
-        $dbError = 'Database instance not connected. Please verify MySQL user privileges in cPanel.';
-        error_log($dbError);
+    }
+
+    if (!$dbSaved) {
+        send_json([
+            'success' => false,
+            'message' => 'Failed to record consultation enquiry in database: ' . ($dbError ?: 'Database execution error')
+        ], 500);
     }
 
     // ========================================================================
