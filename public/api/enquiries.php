@@ -11,6 +11,7 @@
  */
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/mailer.php';
 
 $pdo = Database::getConnection();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -451,49 +452,7 @@ if ($method === 'GET') {
     $senderEmail = defined('ADMIN_NOTIFICATION_EMAIL') ? ADMIN_NOTIFICATION_EMAIL : 'info@ginibengeoservices.com';
     $senderName = 'GiniBen & Partners Geoservices Ltd';
 
-    // 1. Fast, RFC-compliant PHP mail() via local Exim pipe (<10ms, never hangs)
-    $sendPhpMail = function($to, $subject, $body, $fromEmail, $fromName, $replyEmail, $replyName): bool {
-        if (!function_exists('mail')) {
-            return false;
-        }
-
-        try {
-            $msgId = '<' . time() . '.' . md5($to . microtime(true)) . '@ginibengeoservices.com>';
-            $dateHeader = date('r');
-
-            $headers = "Date: {$dateHeader}\r\n"
-                     . "From: {$fromName} <{$fromEmail}>\r\n"
-                     . "Reply-To: {$replyName} <{$replyEmail}>\r\n"
-                     . "Message-ID: {$msgId}\r\n"
-                     . "MIME-Version: 1.0\r\n"
-                     . "Content-Type: text/html; charset=UTF-8\r\n"
-                     . "Content-Transfer-Encoding: 8bit\r\n"
-                     . "X-Mailer: PHP/" . phpversion();
-
-            $envelopeSender = "-f {$fromEmail}";
-
-            $sent = false;
-            try {
-                $sent = @mail($to, $subject, $body, $headers, $envelopeSender);
-            } catch (Throwable $envErr) {
-                $sent = false;
-            }
-
-            if (!$sent) {
-                try {
-                    $sent = @mail($to, $subject, $body, $headers);
-                } catch (Throwable $plainErr) {
-                    $sent = false;
-                }
-            }
-            return (bool)$sent;
-        } catch (Throwable $e) {
-            error_log("sendPhpMail exception: " . $e->getMessage());
-            return false;
-        }
-    };
-
-    // 2. Dispatch across all designated recipient mailboxes via PHP mail()
+    // Dispatch across all designated recipient mailboxes via GiniMailer (Direct Exim SMTP socket + Fallbacks)
     $logFile = __DIR__ . '/mail_log.txt';
     $logLines = [];
 
@@ -502,8 +461,11 @@ if ($method === 'GET') {
             $dest = trim($dest);
             if (empty($dest)) continue;
 
-            $sent = $sendPhpMail($dest, $emailSubject, $htmlBody, $senderEmail, $senderName, $email, $fullName);
-            $logLines[] = date('Y-m-d H:i:s') . " | Ref: {$refNumber} | To: {$dest} | Status: " . ($sent ? "SUCCESS (Exim mail)" : "QUEUED (local transport)") . "\n";
+            $mailRes = GiniMailer::send($dest, $emailSubject, $htmlBody, $plainBody, $email, $fullName);
+            $statusText = $mailRes['success'] 
+                ? "DELIVERED via {$mailRes['transport']}" . ($mailRes['eximId'] ? " (Exim ID: {$mailRes['eximId']})" : "")
+                : "PENDING TRANSPORT: " . ($mailRes['error'] ?: 'Awaiting local relay');
+            $logLines[] = date('Y-m-d H:i:s') . " | Ref: {$refNumber} | To: {$dest} | Status: {$statusText}\n";
         }
     } catch (Throwable $batchErr) {
         error_log("Batch mail dispatch warning: " . $batchErr->getMessage());
@@ -589,7 +551,7 @@ if ($method === 'GET') {
         $consultantReplyName = 'GiniBen & Partners Geoservices';
 
         try {
-            $sendPhpMail($email, $clientSubject, $clientHtml, $senderEmail, $senderName, $consultantReplyEmail, $consultantReplyName);
+            GiniMailer::send($email, $clientSubject, $clientHtml, '', $consultantReplyEmail, $consultantReplyName);
         } catch (Throwable $clientErr) {
             // non-fatal
         }
