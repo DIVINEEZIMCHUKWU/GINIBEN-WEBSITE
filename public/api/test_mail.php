@@ -15,7 +15,7 @@ $destinations = [
     'info@ginibengeoservices.com'
 ];
 
-$testSubject = "[GiniBen Mail Test] Operational Diagnostics - " . date('Y-m-d H:i:s');
+$testSubject = "GiniBen Geoservices System Verification: Operational Diagnostics - " . date('Y-m-d H:i:s');
 $testBody = "<h1>GiniBen & Partners Geoservices Ltd</h1>"
           . "<p>This is a live diagnostic verification message dispatched from your server.</p>"
           . "<p><strong>Timestamp:</strong> " . date('r') . "</p>"
@@ -31,8 +31,7 @@ foreach ($destinations as $dest) {
              . "Message-ID: {$msgId}\n"
              . "MIME-Version: 1.0\n"
              . "Content-Type: text/html; charset=UTF-8\n"
-             . "Content-Transfer-Encoding: 8bit\n"
-             . "X-Mailer: PHP/" . phpversion();
+             . "Content-Transfer-Encoding: 8bit";
 
     $envelope = "-f info@ginibengeoservices.com";
     $sent = @mail($dest, $testSubject, $testBody, $headers, $envelope);

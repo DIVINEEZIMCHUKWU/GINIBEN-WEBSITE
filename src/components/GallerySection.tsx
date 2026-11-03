@@ -401,7 +401,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
               >
                 {/* Ambient blur backdrop for portrait photos on laptop screens */}
                 <div
-                  className="absolute inset-0 bg-cover bg-center filter blur-xl opacity-40 scale-110 pointer-events-none"
+                  className="ambient-backdrop absolute inset-0 bg-cover bg-center filter blur-xl opacity-40 scale-110 pointer-events-none transition-all"
                   style={{ backgroundImage: `url(${image.url})` }}
                 />
 
@@ -414,7 +414,19 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
                   }`}
                   referrerPolicy="no-referrer"
                   onError={(e) => {
-                    e.currentTarget.style.display = 'none';
+                    const target = e.currentTarget;
+                    const parent = target.parentElement;
+                    if (parent) {
+                      const backdrop = parent.querySelector('.ambient-backdrop') as HTMLElement | null;
+                      if (backdrop) {
+                        backdrop.style.backgroundImage = 'none';
+                        backdrop.style.backgroundColor = '#1c1917';
+                      }
+                    }
+                    if (!target.src.includes('logo.jpg')) {
+                      target.src = '/logo.jpg';
+                      target.className = 'w-full h-full object-contain p-6 bg-stone-900 relative z-10';
+                    }
                   }}
                 />
 

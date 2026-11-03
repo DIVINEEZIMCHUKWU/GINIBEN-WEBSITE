@@ -66,9 +66,23 @@ if ($method === 'GET') {
     }
 
 } elseif ($method === 'POST') {
-    // 2. Add or Update Image
     $rawInput = file_get_contents('php://input');
     $data = json_decode($rawInput, true);
+
+    // Support deletion via POST for environments where DELETE verb is blocked by proxy
+    if ((isset($data['action']) && $data['action'] === 'delete') || (isset($_GET['action']) && $_GET['action'] === 'delete')) {
+        $id = $data['id'] ?? ($_GET['id'] ?? '');
+        if (empty($id)) {
+            send_json(['success' => false, 'message' => 'Image ID is required for deletion.'], 400);
+        }
+        try {
+            $stmt = $pdo->prepare("DELETE FROM `gallery_images` WHERE `id` = :id");
+            $stmt->execute([':id' => $id]);
+            send_json(['success' => true, 'message' => 'Image deleted successfully from database.']);
+        } catch (Exception $e) {
+            send_json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 
     if (!is_array($data) || empty($data['title']) || empty($data['url'])) {
         send_json(['success' => false, 'message' => 'Image title and URL are required.'], 400);

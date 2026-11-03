@@ -237,7 +237,16 @@ if ($method === 'GET') {
         ADMIN_FORWARD_EMAIL_2
     ]));
 
-    $emailSubject = "[Consultation Request] [{$refNumber}] {$serviceOfInterest} - {$fullName}";
+    // Format full name to proper Title Case to avoid spam-filter ALL-CAPS penalties
+    $formattedName = ucwords(mb_strtolower(trim($fullName), 'UTF-8'));
+    if (empty($formattedName)) {
+        $formattedName = trim($fullName) ?: 'Valued Client';
+    }
+
+    // Professional, global executive header title/caption:
+    // Captures immediate attention, maintains global corporate elegance,
+    // and completely prevents SpamAssassin trigger rules (no excess brackets, no all-caps).
+    $emailSubject = "New Technical Consultation: {$serviceOfInterest} - {$formattedName} (Ref: {$refNumber})";
     
     $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
     $waLink = !empty($cleanPhone) ? "https://wa.me/{$cleanPhone}" : "";
@@ -251,7 +260,7 @@ if ($method === 'GET') {
     $projectLocationHtml = $escapeHtml($projectLocation ?: 'Not specified');
     $subjectHtml = $escapeHtml($subject);
     $messageHtml = $escapeHtml($message);
-    $replySubject = rawurlencode("Re: [{$refNumber}] {$serviceOfInterest}");
+    $replySubject = rawurlencode("Re: New Technical Consultation: {$serviceOfInterest} - {$formattedName} (Ref: {$refNumber})");
     $safeWaLink = $escapeHtml($waLink);
 
     $plainBody = "========================================================\n"
@@ -475,7 +484,7 @@ if ($method === 'GET') {
     // CLIENT AUTO-ACKNOWLEDGMENT RECEIPT (Enables seamless 2-way replies)
     // ========================================================================
     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $clientSubject = "Consultation Request Received: [{$refNumber}] {$serviceOfInterest} - GiniBen Geoservices";
+        $clientSubject = "Consultation Received: {$serviceOfInterest} - GiniBen Geoservices (Ref: {$refNumber})";
         $clientHtml = "<!DOCTYPE html>
 <html lang='en'>
 <head>

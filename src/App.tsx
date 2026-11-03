@@ -38,13 +38,46 @@ import {
   getSettingsFromApi, saveSettingsToApi
 } from './services/apiService';
 
-const DELETED_IMAGE_TOKENS = ['ccsDQjRW', 'VYCKFqT7', 'ksFt40BR', 'img-22', 'img-23', 'img-24'];
-const sanitizeImages = (imgs: MediaItem[]): MediaItem[] => {
+const DELETED_IMAGE_TOKENS = [
+  'FHJSFJHDFJ',
+  'HJDHJFVJHRF',
+  'img-1793604140555',
+  '8f9db24f',
+  'img-user-02',
+  'ccsDQjRW',
+  'VYCKFqT7',
+  'ksFt40BR',
+  'img-22',
+  'img-23',
+  'img-24'
+];
+
+export const sanitizeImages = (imgs: MediaItem[]): MediaItem[] => {
   if (!Array.isArray(imgs)) return [];
-  return imgs.filter((img) => !DELETED_IMAGE_TOKENS.some((tok) => img.id === tok || img.url?.includes(tok)));
+  return imgs.filter((img) => {
+    if (!img) return false;
+    const title = (img.title || '').toUpperCase();
+    const caption = (img.caption || '').toUpperCase();
+    const id = img.id || '';
+    const url = img.url || '';
+    
+    // Explicitly reject ghost test items
+    if (title.includes('FHJSFJHDFJ') || caption.includes('HJDHJFVJHRF')) return false;
+    
+    // Reject deleted tokens
+    if (DELETED_IMAGE_TOKENS.some((tok) => id === tok || id.includes(tok) || url.includes(tok))) {
+      return false;
+    }
+    return true;
+  });
 };
 
-const GALLERY_STORAGE_KEY = 'giniben_gallery_images_v12';
+const GALLERY_STORAGE_KEY = 'giniben_gallery_images_v15';
+
+// Clear legacy cached storage keys to evict any ghost test image from visitor browsers
+['giniben_gallery_images', 'giniben_gallery_images_v2', 'giniben_gallery_images_v3', 'giniben_gallery_images_v10', 'giniben_gallery_images_v11', 'giniben_gallery_images_v12', 'giniben_gallery_images_v13', 'giniben_gallery_images_v14'].forEach((k) => {
+  try { localStorage.removeItem(k); } catch {}
+});
 
 export default function App() {
   // State initialization with persistence fallback
@@ -54,18 +87,17 @@ export default function App() {
   });
 
   const [galleryImages, setGalleryImages] = useState<MediaItem[]>(() => {
-    const saved = localStorage.getItem(GALLERY_STORAGE_KEY);
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem(GALLERY_STORAGE_KEY);
+      if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          const clean = sanitizeImages(parsed);
+          if (clean.length > 0) return clean;
         }
-      } catch (e) {
-        // fallback
       }
-    }
-    return INITIAL_GALLERY_IMAGES;
+    } catch (e) {}
+    return sanitizeImages(INITIAL_GALLERY_IMAGES);
   });
 
   const [projects, setProjects] = useState<ProjectItem[]>(() => {
@@ -172,6 +204,14 @@ export default function App() {
     if (window.location.hash.toLowerCase().includes('admin')) {
       window.history.pushState(null, '', '/');
     }
+    // Instantly sync images from MySQL database upon returning from Admin
+    getImagesFromApi().then((imgs) => {
+      if (imgs && Array.isArray(imgs) && imgs.length > 0) {
+        const clean = sanitizeImages(imgs);
+        setGalleryImages(clean);
+        localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(clean));
+      }
+    });
   };
 
   const handleGoToHomepageFromAdmin = () => {
@@ -179,6 +219,14 @@ export default function App() {
     if (window.location.pathname.toLowerCase().includes('admin')) {
       window.history.pushState(null, '', '/');
     }
+    // Instantly sync images from MySQL database upon returning from Admin
+    getImagesFromApi().then((imgs) => {
+      if (imgs && Array.isArray(imgs) && imgs.length > 0) {
+        const clean = sanitizeImages(imgs);
+        setGalleryImages(clean);
+        localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(clean));
+      }
+    });
     setCurrentPage('home');
     window.location.hash = 'home';
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -216,8 +264,9 @@ export default function App() {
   useEffect(() => {
     getImagesFromApi().then((imgs) => {
       if (imgs && Array.isArray(imgs) && imgs.length > 0) {
-        setGalleryImages(imgs);
-        localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(imgs));
+        const clean = sanitizeImages(imgs);
+        setGalleryImages(clean);
+        localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(clean));
       }
     });
     getVideosFromApi().then((vids) => {
@@ -239,6 +288,43 @@ export default function App() {
     });
   }, []);
 
+  // Multi-device and cross-tab auto-sync: keeps website images strictly identical to MySQL database
+  useEffect(() => {
+    const syncDatabaseImages = () => {
+      getImagesFromApi().then((imgs) => {
+        if (imgs && Array.isArray(imgs) && imgs.length > 0) {
+          const clean = sanitizeImages(imgs);
+          setGalleryImages(clean);
+          localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(clean));
+        }
+      });
+    };
+
+    // Sync on page navigation
+    syncDatabaseImages();
+
+    // Sync when user refocuses tab
+    const handleFocus = () => syncDatabaseImages();
+    // Sync when another tab modifies storage
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === GALLERY_STORAGE_KEY && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) {
+            setGalleryImages(sanitizeImages(parsed));
+          }
+        } catch {}
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [currentPage]);
+
   // Re-fetch latest database records whenever Admin Console is open (with 8s auto-poll)
   useEffect(() => {
     if (!isAdminOpen) return;
@@ -252,8 +338,9 @@ export default function App() {
       });
       getImagesFromApi().then((imgs) => {
         if (imgs && Array.isArray(imgs) && imgs.length > 0) {
-          setGalleryImages(imgs);
-          localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(imgs));
+          const clean = sanitizeImages(imgs);
+          setGalleryImages(clean);
+          localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(clean));
         }
       });
       getVideosFromApi().then((vids) => {
@@ -340,11 +427,17 @@ export default function App() {
     saveImageToApi(updatedImg);
   };
 
-  const handleDeleteGalleryImage = (id: string) => {
-    const updated = galleryImages.filter((img) => img.id !== id);
+  const handleDeleteGalleryImage = async (id: string) => {
+    const updated = sanitizeImages(galleryImages.filter((img) => img.id !== id));
     setGalleryImages(updated);
     localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(updated));
-    deleteImageFromApi(id);
+    await deleteImageFromApi(id);
+    const fresh = await getImagesFromApi();
+    if (fresh && Array.isArray(fresh) && fresh.length > 0) {
+      const cleanFresh = sanitizeImages(fresh);
+      setGalleryImages(cleanFresh);
+      localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(cleanFresh));
+    }
   };
 
   const handleAddVideo = (newVid: ProjectVideo) => {
@@ -561,7 +654,7 @@ export default function App() {
                     >
                       {/* Ambient blur backdrop */}
                       <div 
-                        className="absolute inset-0 bg-cover bg-center filter blur-xl opacity-35 scale-110 pointer-events-none"
+                        className="ambient-backdrop absolute inset-0 bg-cover bg-center filter blur-xl opacity-35 scale-110 pointer-events-none transition-all"
                         style={{ backgroundImage: `url(${img.url})` }}
                       />
 
@@ -572,7 +665,19 @@ export default function App() {
                         className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-105"
                         referrerPolicy="no-referrer"
                         onError={(e) => {
-                          e.currentTarget.style.display = 'none';
+                          const target = e.currentTarget;
+                          const parent = target.parentElement;
+                          if (parent) {
+                            const backdrop = parent.querySelector('.ambient-backdrop') as HTMLElement | null;
+                            if (backdrop) {
+                              backdrop.style.backgroundImage = 'none';
+                              backdrop.style.backgroundColor = '#1c1917';
+                            }
+                          }
+                          if (!target.src.includes('logo.jpg')) {
+                            target.src = '/logo.jpg';
+                            target.className = 'w-full h-full object-contain p-5 bg-stone-900 relative z-10';
+                          }
                         }}
                       />
 

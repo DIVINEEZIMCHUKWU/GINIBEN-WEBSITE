@@ -52,8 +52,9 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ team }) => {
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     const target = e.currentTarget;
-                    if (target.src !== 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg') {
-                      target.src = 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg';
+                    if (!target.src.includes('logo.jpg')) {
+                      target.src = '/logo.jpg';
+                      target.className = 'w-full h-full object-contain p-4 bg-stone-900';
                     }
                   }}
                 />
@@ -115,8 +116,9 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ team }) => {
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     const target = e.currentTarget;
-                    if (target.src !== 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg') {
-                      target.src = 'https://i.ibb.co/dwYLLnSP/IMG-20261030-WA0002.jpg';
+                    if (!target.src.includes('logo.jpg')) {
+                      target.src = '/logo.jpg';
+                      target.className = 'w-full h-full object-contain p-2 bg-stone-900';
                     }
                   }}
                 />

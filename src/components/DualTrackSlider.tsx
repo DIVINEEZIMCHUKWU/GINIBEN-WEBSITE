@@ -68,7 +68,11 @@ export const DualTrackSlider: React.FC<DualTrackSliderProps> = ({
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
-                  e.currentTarget.style.display = 'none';
+                  const target = e.currentTarget;
+                  if (!target.src.includes('logo.jpg')) {
+                    target.src = '/logo.jpg';
+                    target.className = 'w-full h-full object-contain p-4 bg-stone-900';
+                  }
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent opacity-75 group-hover:opacity-90 transition-opacity" />

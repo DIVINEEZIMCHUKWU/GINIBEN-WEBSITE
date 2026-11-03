@@ -76,6 +76,16 @@ export async function deleteImageFromApi(id: string): Promise<boolean> {
     const res = await apiFetch(`/images.php?id=${encodeURIComponent(id)}`, {
       method: 'DELETE'
     });
+    if (res?.success) return true;
+  } catch {}
+
+  // Fallback to POST delete for proxies restricting DELETE HTTP verb
+  try {
+    const res = await apiFetch('/images.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', id })
+    });
     return Boolean(res?.success);
   } catch {
     return false;
