@@ -203,6 +203,20 @@ export const INITIAL_GALLERY_IMAGES: MediaItem[] = [
     "showOnGallery": true
   },
   {
+    "id": "img-user-02",
+    "url": "https://i.ibb.co/qYFRNWwV/IMG-20261030-WA0003.jpg",
+    "title": "Structural Strike & Dip Measurement with Clar Compass",
+    "caption": "Precise bedding and foliation plane measurements recorded for 3D structural model reconstruction.",
+    "category": "GEOLOGICAL MAPPING & EXPLORATION",
+    "alt": "Close-up of geological compass placed on planar foliation surface",
+    "isHero": false,
+    "order": 2,
+    "location": "Field Transect Corridor",
+    "showOnHomepage": false,
+    "showOnProjects": true,
+    "showOnGallery": true
+  },
+  {
     "id": "img-user-03",
     "url": "https://i.ibb.co/qLRqgd28/IMG-20261030-WA0004.jpg",
     "title": "Mineralized Quartz Vein Fracture Analysis in Crystalline Bedrock",

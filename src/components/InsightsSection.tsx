@@ -48,13 +48,6 @@ export const InsightsSection: React.FC<InsightsSectionProps> = ({ articles }) =>
                   alt={article.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.src.includes('logo.jpg')) {
-                      target.src = '/logo.jpg';
-                      target.className = 'w-full h-full object-contain p-4 bg-stone-900';
-                    }
-                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1a1612] via-transparent to-transparent" />
                 

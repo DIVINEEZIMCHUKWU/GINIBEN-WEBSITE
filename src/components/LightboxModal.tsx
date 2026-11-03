@@ -228,13 +228,6 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
                 fillMode === 'fill' ? 'object-cover' : 'object-contain'
               }`}
               referrerPolicy="no-referrer"
-              onError={(e) => {
-                const target = e.currentTarget;
-                if (!target.src.includes('logo.jpg')) {
-                  target.src = '/logo.jpg';
-                  target.className = 'w-full h-full object-contain p-8 bg-stone-900';
-                }
-              }}
             />
           </div>
         </div>

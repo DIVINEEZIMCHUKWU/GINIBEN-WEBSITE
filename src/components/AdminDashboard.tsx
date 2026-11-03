@@ -1148,13 +1148,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             alt={img.alt || img.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                             referrerPolicy="no-referrer"
-                            onError={(e) => {
-                              const target = e.currentTarget;
-                              if (!target.src.includes('logo.jpg')) {
-                                target.src = '/logo.jpg';
-                                target.className = 'w-full h-full object-contain p-4 bg-stone-900';
-                              }
-                            }}
                           />
                           <div className="absolute top-1.5 left-1.5 flex flex-wrap gap-1">
                             {img.showOnHomepage !== false && (

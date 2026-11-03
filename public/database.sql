@@ -179,6 +179,18 @@ INSERT INTO `gallery_images` (`id`, `title`, `url`, `caption`, `category`, `alt`
   0, 1, 1
 );
 INSERT INTO `gallery_images` (`id`, `title`, `url`, `caption`, `category`, `alt`, `is_hero`, `sort_order`, `location`, `show_on_homepage`, `show_on_projects`, `show_on_gallery`) VALUES (
+  'img-user-02',
+  'Structural Strike & Dip Measurement with Clar Compass',
+  'https://i.ibb.co/qYFRNWwV/IMG-20261030-WA0003.jpg',
+  'Precise bedding and foliation plane measurements recorded for 3D structural model reconstruction.',
+  'GEOLOGICAL MAPPING & EXPLORATION',
+  'Close-up of geological compass placed on planar foliation surface',
+  0,
+  2,
+  'Field Transect Corridor',
+  0, 1, 1
+);
+INSERT INTO `gallery_images` (`id`, `title`, `url`, `caption`, `category`, `alt`, `is_hero`, `sort_order`, `location`, `show_on_homepage`, `show_on_projects`, `show_on_gallery`) VALUES (
   'img-user-03',
   'Mineralized Quartz Vein Fracture Analysis in Crystalline Bedrock',
   'https://i.ibb.co/qLRqgd28/IMG-20261030-WA0004.jpg',

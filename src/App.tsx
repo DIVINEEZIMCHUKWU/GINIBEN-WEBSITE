@@ -43,7 +43,10 @@ const DELETED_IMAGE_TOKENS = [
   'HJDHJFVJHRF',
   'img-1793604140555',
   '8f9db24f',
-  'img-user-02',
+  'kklkllklklkl',
+  'hjhjhjhjjhjh',
+  'img-1793687783257',
+  'eec5b29c',
   'ccsDQjRW',
   'VYCKFqT7',
   'ksFt40BR',
@@ -52,10 +55,35 @@ const DELETED_IMAGE_TOKENS = [
   'img-24'
 ];
 
+const DELETED_IDS_STORAGE_KEY = 'giniben_deleted_ids_v2';
+export const getStoredDeletedIds = (): Set<string> => {
+  try {
+    const saved = localStorage.getItem(DELETED_IDS_STORAGE_KEY);
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  } catch {
+    return new Set();
+  }
+};
+export const storeDeletedId = (id: string) => {
+  try {
+    const ids = getStoredDeletedIds();
+    ids.add(id);
+    localStorage.setItem(DELETED_IDS_STORAGE_KEY, JSON.stringify(Array.from(ids)));
+  } catch {}
+};
+export const unstoreDeletedId = (id: string) => {
+  try {
+    const ids = getStoredDeletedIds();
+    ids.delete(id);
+    localStorage.setItem(DELETED_IDS_STORAGE_KEY, JSON.stringify(Array.from(ids)));
+  } catch {}
+};
+
 export const sanitizeImages = (imgs: MediaItem[]): MediaItem[] => {
   if (!Array.isArray(imgs)) return [];
+  const dynamicDeleted = getStoredDeletedIds();
   return imgs.filter((img) => {
-    if (!img) return false;
+    if (!img || !img.id) return false;
     const title = (img.title || '').toUpperCase();
     const caption = (img.caption || '').toUpperCase();
     const id = img.id || '';
@@ -63,7 +91,11 @@ export const sanitizeImages = (imgs: MediaItem[]): MediaItem[] => {
     
     // Explicitly reject ghost test items
     if (title.includes('FHJSFJHDFJ') || caption.includes('HJDHJFVJHRF')) return false;
+    if (title.includes('KKLKLLKLKLKL') || caption.includes('HJHJHJHJJHJH')) return false;
     
+    // Reject dynamically deleted IDs
+    if (dynamicDeleted.has(id)) return false;
+
     // Reject deleted tokens
     if (DELETED_IMAGE_TOKENS.some((tok) => id === tok || id.includes(tok) || url.includes(tok))) {
       return false;
@@ -72,10 +104,10 @@ export const sanitizeImages = (imgs: MediaItem[]): MediaItem[] => {
   });
 };
 
-const GALLERY_STORAGE_KEY = 'giniben_gallery_images_v15';
+const GALLERY_STORAGE_KEY = 'giniben_gallery_images_v17';
 
 // Clear legacy cached storage keys to evict any ghost test image from visitor browsers
-['giniben_gallery_images', 'giniben_gallery_images_v2', 'giniben_gallery_images_v3', 'giniben_gallery_images_v10', 'giniben_gallery_images_v11', 'giniben_gallery_images_v12', 'giniben_gallery_images_v13', 'giniben_gallery_images_v14'].forEach((k) => {
+['giniben_gallery_images', 'giniben_gallery_images_v2', 'giniben_gallery_images_v3', 'giniben_gallery_images_v10', 'giniben_gallery_images_v11', 'giniben_gallery_images_v12', 'giniben_gallery_images_v13', 'giniben_gallery_images_v14', 'giniben_gallery_images_v15', 'giniben_gallery_images_v16'].forEach((k) => {
   try { localStorage.removeItem(k); } catch {}
 });
 
@@ -414,13 +446,15 @@ export default function App() {
   };
 
   const handleAddGalleryImage = (newImg: MediaItem) => {
-    const updated = [newImg, ...galleryImages];
+    unstoreDeletedId(newImg.id);
+    const updated = [newImg, ...galleryImages.filter((i) => i.id !== newImg.id)];
     setGalleryImages(updated);
     localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(updated));
     saveImageToApi(newImg);
   };
 
   const handleUpdateGalleryImage = (updatedImg: MediaItem) => {
+    unstoreDeletedId(updatedImg.id);
     const updated = galleryImages.map((img) => img.id === updatedImg.id ? updatedImg : img);
     setGalleryImages(updated);
     localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(updated));
@@ -428,13 +462,21 @@ export default function App() {
   };
 
   const handleDeleteGalleryImage = async (id: string) => {
-    const updated = sanitizeImages(galleryImages.filter((img) => img.id !== id));
+    // 1. Permanently register as deleted in persistent storage
+    storeDeletedId(id);
+
+    // 2. Immediately filter from active state across all pages
+    const updated = galleryImages.filter((img) => img.id !== id);
     setGalleryImages(updated);
     localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(updated));
+
+    // 3. Delete from MySQL database table via API
     await deleteImageFromApi(id);
+
+    // 4. Refresh from API with strict exclusion of deleted items
     const fresh = await getImagesFromApi();
-    if (fresh && Array.isArray(fresh) && fresh.length > 0) {
-      const cleanFresh = sanitizeImages(fresh);
+    if (fresh && Array.isArray(fresh)) {
+      const cleanFresh = sanitizeImages(fresh.filter((img) => img.id !== id));
       setGalleryImages(cleanFresh);
       localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(cleanFresh));
     }
@@ -654,7 +696,7 @@ export default function App() {
                     >
                       {/* Ambient blur backdrop */}
                       <div 
-                        className="ambient-backdrop absolute inset-0 bg-cover bg-center filter blur-xl opacity-35 scale-110 pointer-events-none transition-all"
+                        className="absolute inset-0 bg-cover bg-center filter blur-xl opacity-35 scale-110 pointer-events-none"
                         style={{ backgroundImage: `url(${img.url})` }}
                       />
 
@@ -664,21 +706,6 @@ export default function App() {
                         loading="lazy"
                         className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-105"
                         referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          const target = e.currentTarget;
-                          const parent = target.parentElement;
-                          if (parent) {
-                            const backdrop = parent.querySelector('.ambient-backdrop') as HTMLElement | null;
-                            if (backdrop) {
-                              backdrop.style.backgroundImage = 'none';
-                              backdrop.style.backgroundColor = '#1c1917';
-                            }
-                          }
-                          if (!target.src.includes('logo.jpg')) {
-                            target.src = '/logo.jpg';
-                            target.className = 'w-full h-full object-contain p-5 bg-stone-900 relative z-10';
-                          }
-                        }}
                       />
 
                       {/* Dark Gradient Overlay */}

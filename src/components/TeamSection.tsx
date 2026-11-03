@@ -50,13 +50,6 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ team }) => {
                   alt={member.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.src.includes('logo.jpg')) {
-                      target.src = '/logo.jpg';
-                      target.className = 'w-full h-full object-contain p-4 bg-stone-900';
-                    }
-                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
                 
@@ -114,13 +107,6 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ team }) => {
                   alt={activeMemberModal.name}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.src.includes('logo.jpg')) {
-                      target.src = '/logo.jpg';
-                      target.className = 'w-full h-full object-contain p-2 bg-stone-900';
-                    }
-                  }}
                 />
               </div>
               <div>
